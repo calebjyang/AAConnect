@@ -1,3 +1,31 @@
+# AAConnect
+
+**AAConnect** is a modern PWA for AACF chapters, centralizing event discovery, RSVP, and carpool coordination. Built with Next.js, Firebase, and Tailwind CSS, it streamlines community logistics and fosters connection.
+
+---
+
+## 🚦 Project Status & Progress Board
+
+- **See our [MVP Progress Board](https://github.com/users/calebjyang/projects/1/views/7) for real-time status and upcoming features.**
+
+### Latest Status Update (July 2024)
+
+- ✅ **Project Setup:** Next.js, TypeScript, Tailwind, Firebase, CI/CD
+- ✅ **Authentication:** Google OAuth via Firebase Auth
+- ✅ **Event Calendar:** `/events` route, event list UI (chronological)
+- ✅ **Event Details:** Detail sheet/page for each event
+- ✅ **Admin Dashboard:** `/admin` route, protected access
+- ✅ **Carpool Algorithm:** Rider/driver assignment logic (v1)
+- ⏳ **Up Next:**
+  - Calendar Toggle (list/calendar views)
+  - Admin CRUD for events
+  - Carpool Admin UI (drag-and-drop, overflow handling)
+  - Social Media Links page
+  - Testing & QA (unit, integration, E2E, accessibility)
+  - Performance polish (FCP < 1s, PWA install/offline)
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
