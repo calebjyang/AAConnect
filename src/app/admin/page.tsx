@@ -76,7 +76,7 @@ function EventForm() {
         return;
       }
       // Build eventData with only non-empty fields
-      const eventData: Record<string, any> = {
+      const eventData: EventData = {
         title,
         date: Timestamp.fromDate(new Date(date)),
         location,
@@ -92,8 +92,12 @@ function EventForm() {
       setDescription("");
       setRsvpUrl("");
       setRidesUrl("");
-    } catch (err: any) {
-      setError("Failed to create event. " + (err?.message || ""));
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError("Failed to create event. " + err.message);
+      } else {
+        setError("Failed to create event.");
+      }
     } finally {
       setLoading(false);
     }
@@ -135,7 +139,7 @@ function EventForm() {
 }
 
 function EventList() {
-  const [events, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -146,10 +150,14 @@ function EventList() {
     try {
       const q = query(collection(db, "events"), orderBy("date", "asc"));
       const querySnapshot = await getDocs(q);
-      const data = querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+      const data: Event[] = querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...(docSnap.data() as Partial<EventData>) }));
       setEvents(data);
-    } catch (err: any) {
-      setError("Failed to load events. " + (err?.message || ""));
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError("Failed to load events. " + err.message);
+      } else {
+        setError("Failed to load events.");
+      }
     } finally {
       setLoading(false);
     }
@@ -163,8 +171,12 @@ function EventList() {
     try {
       await deleteDoc(doc(db, "events", id));
       setEvents(events => events.filter(e => e.id !== id));
-    } catch (err: any) {
-      setError("Failed to delete event. " + (err?.message || ""));
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError("Failed to delete event. " + err.message);
+      } else {
+        setError("Failed to delete event.");
+      }
     } finally {
       setDeletingId(null);
     }
@@ -179,8 +191,15 @@ function EventList() {
       {events.map(event => (
         <li key={event.id} className="bg-white rounded-lg shadow p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between border border-gray-100">
           <div>
-            <div className="font-bold text-indigo-700">{event.title}</div>
-            <div className="text-gray-500 text-sm">{event.date && event.date.seconds ? new Date(event.date.seconds * 1000).toLocaleString() : ""} &middot; {event.location}</div>
+            <div className="font-bold text-indigo-700">{event.title ?? "(No title)"}</div>
+            <div className="text-gray-500 text-sm">
+              {(() => {
+                if (event.date && typeof event.date === 'object' && 'seconds' in event.date && typeof event.date.seconds === 'number') {
+                  return new Date(event.date.seconds * 1000).toLocaleString();
+                }
+                return "";
+              })()} &middot; {event.location ?? "(No location)"}
+            </div>
             {event.description && <div className="text-gray-700 text-sm mt-1">{event.description}</div>}
           </div>
           <button
@@ -233,8 +252,12 @@ function AftereventWeekConfig() {
           setQuarter("");
           setWeek("");
         }
-      } catch (err: any) {
-        setError("Failed to load afterevent week. " + (err?.message || ""));
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError("Failed to load afterevent week. " + err.message);
+        } else {
+          setError("Failed to load afterevent week.");
+        }
       } finally {
         setLoading(false);
       }
@@ -254,8 +277,12 @@ function AftereventWeekConfig() {
       await setDoc(docRef, { currentWeek: combinedWeek });
       setCurrentWeek(combinedWeek);
       setSuccess("Afterevent week updated!");
-    } catch (err: any) {
-      setError("Failed to update afterevent week. " + (err?.message || ""));
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError("Failed to update afterevent week. " + err.message);
+      } else {
+        setError("Failed to update afterevent week.");
+      }
     } finally {
       setSaving(false);
     }
@@ -307,4 +334,23 @@ function AftereventWeekConfig() {
       )}
     </div>
   );
+}
+
+// Define EventData and Event types
+interface EventData {
+  title: string;
+  date: Timestamp;
+  location: string;
+  description?: string;
+  rsvpUrl?: string;
+  ridesUrl?: string;
+}
+interface Event {
+  id: string;
+  title?: string;
+  date?: Timestamp | { seconds: number };
+  location?: string;
+  description?: string;
+  rsvpUrl?: string;
+  ridesUrl?: string;
 }

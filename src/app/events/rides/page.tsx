@@ -3,6 +3,16 @@ import { useState, useEffect } from "react";
 import { addDoc, collection, doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
+// Define RideSignup type
+interface RideSignup {
+  name: string;
+  phone: string;
+  canDrive: string;
+  location: string;
+  submittedAt: string;
+  capacity?: string;
+}
+
 export default function RidesFormPage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -40,8 +50,12 @@ export default function RidesFormPage() {
         } else {
           setAftereventWeek(null);
         }
-      } catch (err: any) {
-        setWeekError("Failed to load afterevent week. " + (err?.message || ""));
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setWeekError("Failed to load afterevent week. " + err.message);
+        } else {
+          setWeekError("Failed to load afterevent week.");
+        }
       } finally {
         setWeekLoading(false);
       }
@@ -61,7 +75,7 @@ export default function RidesFormPage() {
       return;
     }
     try {
-      const data: Record<string, any> = {
+      const data: RideSignup = {
         name,
         phone,
         canDrive,
@@ -77,8 +91,12 @@ export default function RidesFormPage() {
       setCapacity("");
       setLocation("");
       setOtherLocation("");
-    } catch (err: any) {
-      setError("Failed to submit. " + (err?.message || ""));
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError("Failed to submit. " + err.message);
+      } else {
+        setError("Failed to submit.");
+      }
     } finally {
       setLoading(false);
     }
