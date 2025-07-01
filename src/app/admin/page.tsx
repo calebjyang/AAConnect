@@ -387,7 +387,7 @@ function RidesAdmin() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedWeek, setSelectedWeek] = useState<string>("");
-  const [assignments, setAssignments] = useState<any>(null);
+  const [assignments, setAssignments] = useState<CarpoolAssignment[]>([]);
   const [showAssignments, setShowAssignments] = useState(false);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
@@ -627,7 +627,7 @@ function RidesAdmin() {
           
           {/* Assignments List */}
           <div className="space-y-4">
-            {assignments.assignments.map((assignment: any, index: number) => (
+            {assignments.map((assignment: CarpoolAssignment, index: number) => (
               <div key={index} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-semibold text-gray-800">
@@ -644,7 +644,7 @@ function RidesAdmin() {
                   <div>
                     <div className="text-sm font-medium text-gray-700 mb-1">Passengers:</div>
                     <ul className="space-y-1">
-                      {assignment.riders.map((rider: any, riderIndex: number) => (
+                      {assignment.riders.map((rider: RideSignup, riderIndex: number) => (
                         <li key={riderIndex} className="text-sm text-gray-600 flex items-center gap-2">
                           <span>👤 {rider.name}</span>
                           <span className="text-gray-400">•</span>
@@ -666,7 +666,7 @@ function RidesAdmin() {
               <div className="border border-red-200 rounded-lg p-4 bg-red-50">
                 <h4 className="font-semibold text-red-800 mb-2">❌ Unassigned Riders ({assignments.unassignedRiders.length})</h4>
                 <ul className="space-y-1">
-                  {assignments.unassignedRiders.map((rider: any, index: number) => (
+                  {assignments.unassignedRiders.map((rider: RideSignup, index: number) => (
                     <li key={index} className="text-sm text-red-700 flex items-center gap-2">
                       <span>👤 {rider.name}</span>
                       <span className="text-red-400">•</span>
