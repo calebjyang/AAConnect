@@ -2,7 +2,7 @@
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { addDoc, collection, Timestamp, getDocs, query, orderBy, deleteDoc, doc } from "firebase/firestore";
+import { addDoc, collection, Timestamp, getDocs, query, orderBy, deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 export default function AdminPage() {
@@ -23,6 +23,9 @@ export default function AdminPage() {
         </header>
         {/* Main Content */}
         <main className="max-w-4xl mx-auto py-8 px-4">
+          <section className="mb-10">
+            <AftereventWeekConfig />
+          </section>
           {/* Events Section */}
           <section id="events" className="mb-12">
             <h2 className="text-xl font-semibold mb-2">Event Management</h2>
@@ -190,5 +193,118 @@ function EventList() {
         </li>
       ))}
     </ul>
+  );
+}
+
+function AftereventWeekConfig() {
+  const quarters = ["Fall", "Winter", "Spring"];
+  const weeks = Array.from({ length: 10 }, (_, i) => (i + 1).toString());
+  const [quarter, setQuarter] = useState("");
+  const [week, setWeek] = useState("");
+  const [currentWeek, setCurrentWeek] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  // Parse 'Fall Week 5' into {quarter: 'Fall', week: '5'}
+  function parseCurrentWeek(str: string) {
+    if (!str) return { quarter: "", week: "" };
+    const match = str.match(/^(Fall|Winter|Spring) Week (\d{1,2})$/);
+    if (match) return { quarter: match[1], week: match[2] };
+    return { quarter: "", week: "" };
+  }
+
+  useEffect(() => {
+    async function fetchWeek() {
+      setLoading(true);
+      setError("");
+      try {
+        const docRef = doc(db, "config", "afterevent");
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setCurrentWeek(data.currentWeek || "");
+          const parsed = parseCurrentWeek(data.currentWeek || "");
+          setQuarter(parsed.quarter);
+          setWeek(parsed.week);
+        } else {
+          setCurrentWeek("");
+          setQuarter("");
+          setWeek("");
+        }
+      } catch (err: any) {
+        setError("Failed to load afterevent week. " + (err?.message || ""));
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchWeek();
+  }, []);
+
+  const combinedWeek = quarter && week ? `${quarter} Week ${week}` : "";
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    setSuccess("");
+    try {
+      const docRef = doc(db, "config", "afterevent");
+      await setDoc(docRef, { currentWeek: combinedWeek });
+      setCurrentWeek(combinedWeek);
+      setSuccess("Afterevent week updated!");
+    } catch (err: any) {
+      setError("Failed to update afterevent week. " + (err?.message || ""));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="bg-white rounded-xl shadow p-6 border border-gray-100 flex flex-col gap-4 max-w-xl">
+      <h2 className="text-lg font-bold text-indigo-700 mb-1">Current Afterevent Week</h2>
+      {loading ? (
+        <div className="text-gray-500">Loading...</div>
+      ) : (
+        <>
+          <div className="text-gray-800 text-base mb-2">
+            <span className="font-semibold">Current week:</span> {currentWeek ? <span className="text-indigo-700 font-bold">{currentWeek}</span> : <span className="text-gray-400">(not set)</span>}
+          </div>
+          <form onSubmit={handleSave} className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <select
+              className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition w-full sm:w-auto"
+              value={quarter}
+              onChange={e => setQuarter(e.target.value)}
+              required
+            >
+              <option value="" disabled>Select quarter</option>
+              {quarters.map(q => <option key={q} value={q}>{q}</option>)}
+            </select>
+            <select
+              className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition w-full sm:w-auto"
+              value={week}
+              onChange={e => setWeek(e.target.value)}
+              required
+            >
+              <option value="" disabled>Select week</option>
+              {weeks.map(w => <option key={w} value={w}>{w}</option>)}
+            </select>
+            <button
+              type="submit"
+              className="mt-2 sm:mt-0 py-2 px-4 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow transition disabled:opacity-60 disabled:cursor-not-allowed"
+              disabled={saving || !quarter || !week}
+            >
+              {saving ? "Saving..." : "Update Week"}
+            </button>
+          </form>
+          <div className="text-sm text-gray-600 mt-1">
+            <span className="font-medium">Preview:</span> {combinedWeek || <span className="text-gray-400">Select quarter and week</span>}
+          </div>
+          {error && <div className="text-red-600 font-medium text-sm mt-1">{error}</div>}
+          {success && <div className="text-green-600 font-medium text-sm mt-1">{success}</div>}
+        </>
+      )}
+    </div>
   );
 }
