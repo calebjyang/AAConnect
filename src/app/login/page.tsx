@@ -1,8 +1,30 @@
 "use client";
 import Image from "next/image";
 import { signInWithGoogle } from "@/lib/auth"; // Make sure you have this function in your auth lib
+import { useAuth } from "@/lib/useAuth";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function LoginPage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  const [checkingAdmin, setCheckingAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!loading && user && user.email) {
+      setCheckingAdmin(true);
+      getDoc(doc(db, "admins", user.email)).then((docSnap) => {
+        if (docSnap.exists()) {
+          router.replace("/admin");
+        } else {
+          router.replace("/");
+        }
+      }).finally(() => setCheckingAdmin(false));
+    }
+  }, [user, loading, router]);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-100">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 flex flex-col items-center">

@@ -10,6 +10,7 @@ interface RideSignup {
   canDrive: string;
   location: string;
   submittedAt: string;
+  aftereventWeek: string;
   capacity?: string;
 }
 
@@ -74,6 +75,11 @@ export default function RidesFormPage() {
       setLoading(false);
       return;
     }
+    if (!aftereventWeek) {
+      setError("Afterevent week is not set. Please try again later or contact an admin.");
+      setLoading(false);
+      return;
+    }
     try {
       const data: RideSignup = {
         name,
@@ -81,6 +87,7 @@ export default function RidesFormPage() {
         canDrive,
         location: finalLocation,
         submittedAt: new Date().toISOString(),
+        aftereventWeek,
       };
       if (canDrive === "Yes" && capacity) data.capacity = capacity;
       await addDoc(collection(db, "rides"), data);

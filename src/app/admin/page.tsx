@@ -4,8 +4,20 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { addDoc, collection, Timestamp, getDocs, query, orderBy, deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { assignCarpools, getAssignmentStats, exportAssignmentsCSV, type RideSignup } from "@/lib/carpoolAlgorithm";
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
 
 export default function AdminPage() {
+  const router = useRouter();
+
+  function handleLogout() {
+    signOut(auth).then(() => {
+      router.replace("/login");
+    });
+  }
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50">
@@ -15,16 +27,30 @@ export default function AdminPage() {
             <Image src="/logo.png" alt="Logo" width={40} height={40} className="rounded-full bg-white p-1 shadow" />
             <span className="font-extrabold text-2xl text-white tracking-tight drop-shadow">Admin Dashboard</span>
           </div>
-          <nav className="flex gap-8">
+          <nav className="flex gap-8 items-center">
             <a href="#events" className="text-white/90 hover:text-yellow-200 font-semibold text-lg transition">Events</a>
+            <a href="#rides" className="text-white/90 hover:text-yellow-200 font-semibold text-lg transition">Rides</a>
             <a href="#users" className="text-white/90 hover:text-yellow-200 font-semibold text-lg transition">Users</a>
             <a href="#analytics" className="text-white/90 hover:text-yellow-200 font-semibold text-lg transition">Analytics</a>
+            <button
+              onClick={handleLogout}
+              className="ml-6 px-4 py-2 rounded-md bg-white text-indigo-700 font-semibold shadow hover:bg-indigo-50 transition border border-indigo-200"
+            >
+              Log Out
+            </button>
           </nav>
         </header>
         {/* Main Content */}
         <main className="max-w-4xl mx-auto py-8 px-4">
           <section className="mb-10">
             <AftereventWeekConfig />
+          </section>
+          {/* Rides Section */}
+          <section id="rides" className="mb-12">
+            <h2 className="text-xl sm:text-2xl font-bold text-indigo-700 mb-2 flex items-center gap-2">
+              <span>Rides Management</span>
+            </h2>
+            <RidesAdmin />
           </section>
           {/* Events Section */}
           <section id="events" className="mb-12">
@@ -225,6 +251,7 @@ function AftereventWeekConfig() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Parse 'Fall Week 5' into {quarter: 'Fall', week: '5'}
   function parseCurrentWeek(str: string) {
@@ -353,4 +380,319 @@ interface Event {
   description?: string;
   rsvpUrl?: string;
   ridesUrl?: string;
+}
+
+function RidesAdmin() {
+  const [signups, setSignups] = useState<RideSignupAdmin[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [selectedWeek, setSelectedWeek] = useState<string>("");
+  const [assignments, setAssignments] = useState<any>(null);
+  const [showAssignments, setShowAssignments] = useState(false);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  // Helper to parse and sort afterevent weeks
+  function parseWeekLabel(label: string): { quarter: number; week: number } {
+    // Expects format 'Fall Week 5', 'Winter Week 10', etc
+    const match = label.match(/^(Fall|Winter|Spring) Week (\d{1,2})$/);
+    if (!match) return { quarter: -1, week: -1 };
+    const quarterOrder: Record<string, number> = { Fall: 0, Winter: 1, Spring: 2 };
+    return { quarter: quarterOrder[match[1]], week: parseInt(match[2], 10) };
+  }
+
+  useEffect(() => {
+    async function fetchSignups() {
+      setLoading(true);
+      setError("");
+      try {
+        const querySnapshot = await getDocs(collection(db, "rides"));
+        const data: RideSignupAdmin[] = querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...(docSnap.data() as Omit<RideSignupAdmin, "id">) }));
+        setSignups(data);
+        // Set default week to most recent by quarter/week order
+        const weeks = Array.from(new Set(data.map(s => s.aftereventWeek).filter(Boolean)));
+        if (weeks.length > 0) {
+          const sorted = weeks.slice().sort((a, b) => {
+            const pa = parseWeekLabel(a);
+            const pb = parseWeekLabel(b);
+            if (pa.quarter !== pb.quarter) return pa.quarter - pb.quarter;
+            return pa.week - pb.week;
+          });
+          setSelectedWeek(sorted[sorted.length - 1]);
+        }
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError("Failed to load ride signups. " + err.message);
+        } else {
+          setError("Failed to load ride signups.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchSignups();
+  }, []);
+
+  // Get unique afterevent weeks for filter dropdown
+  const weeks = Array.from(new Set(signups.map(s => s.aftereventWeek).filter(Boolean)));
+  // Sort weeks by actual quarter/week order for dropdown
+  const sortedWeeks = weeks.slice().sort((a, b) => {
+    const pa = parseWeekLabel(a);
+    const pb = parseWeekLabel(b);
+    if (pa.quarter !== pb.quarter) return pa.quarter - pb.quarter;
+    return pa.week - pb.week;
+  });
+  const filtered = selectedWeek ? signups.filter(s => s.aftereventWeek === selectedWeek) : signups;
+  const filteredSorted = filtered.slice().sort((a: RideSignupAdmin, b: RideSignupAdmin) => {
+    const tA = new Date(a.submittedAt).getTime();
+    const tB = new Date(b.submittedAt).getTime();
+    return sortOrder === 'asc' ? tA - tB : tB - tA;
+  });
+
+  function exportCSV() {
+    const headers = ["Name", "Phone", "Can Drive", "Capacity", "Location", "Afterevent Week", "Submitted At"];
+    const rows = filtered.map(s => [s.name, s.phone, s.canDrive, s.capacity ?? "", s.location, s.aftereventWeek, s.submittedAt]);
+    const csv = [headers, ...rows].map(r => r.map(x => `"${(x ?? "").toString().replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `rides-${selectedWeek || "all"}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function testAssignment() {
+    if (!selectedWeek) {
+      alert("Please select a week first!");
+      return;
+    }
+    
+    // Convert RideSignupAdmin to RideSignup format
+    const rideSignups: RideSignup[] = filtered.map(s => ({
+      id: s.id,
+      name: s.name,
+      phone: s.phone,
+      canDrive: s.canDrive,
+      location: s.location,
+      aftereventWeek: s.aftereventWeek,
+      submittedAt: s.submittedAt,
+      capacity: s.capacity
+    }));
+    
+    const result = assignCarpools(rideSignups, selectedWeek);
+    setAssignments(result);
+    setShowAssignments(true);
+  }
+
+  function exportAssignments() {
+    if (!assignments) return;
+    
+    const csv = exportAssignmentsCSV(assignments);
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `carpool-assignments-${selectedWeek}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <div className="bg-white rounded-xl shadow p-6 border border-gray-100 flex flex-col gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
+        <label className="font-semibold text-gray-700">Filter by week:</label>
+        <select
+          className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition w-full sm:w-auto"
+          value={selectedWeek}
+          onChange={e => setSelectedWeek(e.target.value)}
+        >
+          <option value="">All weeks</option>
+          {sortedWeeks.map(week => (
+            <option key={week} value={week}>{week}</option>
+          ))}
+        </select>
+        <button
+          className="py-2 px-4 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold shadow transition"
+          onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+        >
+          Sort: {sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}
+        </button>
+        <button
+          className="py-2 px-4 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow transition disabled:opacity-60 disabled:cursor-not-allowed"
+          onClick={exportCSV}
+          disabled={filtered.length === 0}
+        >
+          Export CSV
+        </button>
+        <button
+          className="py-2 px-4 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow transition disabled:opacity-60 disabled:cursor-not-allowed"
+          onClick={testAssignment}
+          disabled={!selectedWeek || filtered.length === 0}
+        >
+          Test Assignment
+        </button>
+      </div>
+      {loading ? (
+        <div className="text-gray-500">Loading ride signups...</div>
+      ) : error ? (
+        <div className="text-red-600 font-medium">{error}</div>
+      ) : filtered.length === 0 ? (
+        <div className="text-gray-500">No ride signups found.</div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full border text-sm">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="px-3 py-2 border text-gray-800 font-bold">Name</th>
+                <th className="px-3 py-2 border text-gray-800 font-bold">Phone</th>
+                <th className="px-3 py-2 border text-gray-800 font-bold">Can Drive</th>
+                <th className="px-3 py-2 border text-gray-800 font-bold">Capacity</th>
+                <th className="px-3 py-2 border text-gray-800 font-bold">Location</th>
+                <th className="px-3 py-2 border text-gray-800 font-bold">Afterevent Week</th>
+                <th className="px-3 py-2 border text-gray-800 font-bold flex items-center gap-1">
+                  Submitted At
+                  <button
+                    type="button"
+                    className="ml-1 p-1 rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    style={{ fontSize: '0.9em', lineHeight: 1 }}
+                    aria-label={sortOrder === 'asc' ? 'Sort newest first' : 'Sort oldest first'}
+                    onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                  >
+                    {sortOrder === 'asc' ? '▲' : '▼'}
+                  </button>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredSorted.map(s => (
+                <tr key={s.id}>
+                  <td className="px-3 py-2 border text-gray-700">{s.name}</td>
+                  <td className="px-3 py-2 border text-gray-700">{s.phone}</td>
+                  <td className="px-3 py-2 border text-gray-700">{s.canDrive}</td>
+                  <td className="px-3 py-2 border text-gray-700">{s.capacity ?? ""}</td>
+                  <td className="px-3 py-2 border text-gray-700">{s.location}</td>
+                  <td className="px-3 py-2 border text-gray-700">{s.aftereventWeek}</td>
+                  <td className="px-3 py-2 border text-gray-700">{s.submittedAt ? new Date(s.submittedAt).toLocaleString() : ""}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      
+      {/* Assignment Results */}
+      {showAssignments && assignments && (
+        <div className="mt-8 bg-white rounded-xl shadow p-6 border border-gray-100">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-indigo-700">Carpool Assignments</h3>
+            <button
+              className="py-2 px-4 rounded-md bg-green-600 hover:bg-green-700 text-white font-semibold shadow transition"
+              onClick={exportAssignments}
+            >
+              Export Assignments
+            </button>
+          </div>
+          
+          {/* Stats */}
+          {(() => {
+            const stats = getAssignmentStats(assignments);
+            return (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-indigo-600">{stats.totalPeople}</div>
+                  <div className="text-sm text-gray-600">Total People</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">{stats.assignedPeople}</div>
+                  <div className="text-sm text-gray-600">Assigned</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-red-600">{stats.unassignedPeople}</div>
+                  <div className="text-sm text-gray-600">Unassigned</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">{stats.assignmentRate}%</div>
+                  <div className="text-sm text-gray-600">Success Rate</div>
+                </div>
+              </div>
+            );
+          })()}
+          
+          {/* Overflow Message */}
+          {assignments.overflowMessage && (
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="text-yellow-800 font-medium">{assignments.overflowMessage}</div>
+            </div>
+          )}
+          
+          {/* Assignments List */}
+          <div className="space-y-4">
+            {assignments.assignments.map((assignment: any, index: number) => (
+              <div key={index} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-semibold text-gray-800">
+                    🚗 {assignment.driver.name} ({assignment.driver.location})
+                  </h4>
+                  <span className="text-sm text-gray-600">
+                    {assignment.usedCapacity}/{assignment.totalCapacity} spots
+                  </span>
+                </div>
+                <div className="text-sm text-gray-600 mb-2">
+                  📞 {assignment.driver.phone}
+                </div>
+                {assignment.riders.length > 0 ? (
+                  <div>
+                    <div className="text-sm font-medium text-gray-700 mb-1">Passengers:</div>
+                    <ul className="space-y-1">
+                      {assignment.riders.map((rider: any, riderIndex: number) => (
+                        <li key={riderIndex} className="text-sm text-gray-600 flex items-center gap-2">
+                          <span>👤 {rider.name}</span>
+                          <span className="text-gray-400">•</span>
+                          <span>{rider.location}</span>
+                          <span className="text-gray-400">•</span>
+                          <span>📞 {rider.phone}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500 italic">No passengers assigned</div>
+                )}
+              </div>
+            ))}
+            
+            {/* Unassigned Riders */}
+            {assignments.unassignedRiders.length > 0 && (
+              <div className="border border-red-200 rounded-lg p-4 bg-red-50">
+                <h4 className="font-semibold text-red-800 mb-2">❌ Unassigned Riders ({assignments.unassignedRiders.length})</h4>
+                <ul className="space-y-1">
+                  {assignments.unassignedRiders.map((rider: any, index: number) => (
+                    <li key={index} className="text-sm text-red-700 flex items-center gap-2">
+                      <span>👤 {rider.name}</span>
+                      <span className="text-red-400">•</span>
+                      <span>{rider.location}</span>
+                      <span className="text-red-400">•</span>
+                      <span>📞 {rider.phone}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// RideSignupAdmin type for admin view
+interface RideSignupAdmin {
+  id: string;
+  name: string;
+  phone: string;
+  canDrive: string;
+  location: string;
+  aftereventWeek: string;
+  submittedAt: string;
+  capacity?: string;
 }
