@@ -8,7 +8,7 @@
 
 - **See our [MVP Progress Board](https://github.com/users/calebjyang/projects/1/views/7) for real-time status and upcoming features.**
 
-### Latest Status Update (July 2024)
+### Latest Status Update (July 1, 2025)
 
 - ✅ **Project Setup:** Next.js, TypeScript, Tailwind, Firebase, CI/CD
 - ✅ **Authentication:** Google OAuth via Firebase Auth
