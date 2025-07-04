@@ -1,14 +1,34 @@
-
 # 📘 AAConnect – Product Requirements Document (PRD)
 
-**Version:** 1.1  
-**Last Updated:** July 2, 2025
+**Version:** 1.2  
+**Last Updated:** January 2025
 
 ---
 
 ## 🔍 Overview
 
-AAConnect is a mobile-first PWA for Asian American Christian Fellowship chapters that centralizes event access, afterevent ride coordination, and apartment availability for spontaneous hangouts. It’s designed to reduce planning friction and foster deeper in-community connection.
+AAConnect is a mobile-first PWA for Asian American Christian Fellowship chapters that centralizes event access, afterevent ride coordination, and apartment availability for spontaneous hangouts. It's designed to reduce planning friction and foster deeper in-community connection.
+
+---
+
+## 🏠 Landing Page (v1) - COMPLETED ✅
+
+The landing page serves as the primary entry point for AAConnect, providing users with immediate access to key features and community information.
+
+### Features Implemented:
+- **Hero Section**: Welcoming headline with "Welcome to AAConnect 👋" and dual call-to-action buttons
+- **Social Media Integration**: Direct links to Instagram, Facebook, Discord, and Linktree
+- **Email Subscription**: Community newsletter signup form
+- **Quick Actions**: Three main action cards (Events Calendar, Rides, Community)
+- **Upcoming Events**: Dynamic display of upcoming events from Firebase
+- **Responsive Design**: Mobile-first approach optimized for PWA installation
+- **Accessibility**: WCAG 2.2 AA compliant with proper ARIA labels and semantic HTML
+
+### Design Principles:
+- Clean, centered card layout for focus
+- Consistent color scheme using AACF brand colors
+- Clear visual hierarchy and intuitive navigation
+- Fast loading with optimized performance
 
 ---
 
@@ -41,16 +61,16 @@ AAConnect is a mobile-first PWA for Asian American Christian Fellowship chapters
 - Output is shown in-app (CSV export optional in future)
 
 ### 🏠 Apartment Availability Wall
-- Admins seed apartment names (e.g. “Treehouse”, “The Fridge”)
+- Admins seed apartment names (e.g. "Treehouse", "The Fridge")
 - Members can join one apartment
 - Apartment members can post open time slots:
   - Time window (e.g. 2–4pm)
-  - Short description (“extra pizza and Smash!”)
+  - Short description ("extra pizza and Smash!")
 - Global dashboard shows open/upcoming availability across all apartments
 - Admins can manage apartment assignments and remove members
 
 ### 🔗 Social Media Links
-- Links out to AACF’s Instagram, Facebook, YouTube, etc.
+- Links out to AACF's Instagram, Facebook, YouTube, etc.
 
 ### 🔐 Authentication
 - Login required via Google OAuth
@@ -67,16 +87,16 @@ AAConnect is a mobile-first PWA for Asian American Christian Fellowship chapters
 ## ✅ User Stories
 
 ### Member
-- “I want to know when and where our next event is.”
-- “I need a ride to an afterevent.”
-- “I want to see which apartments are open to hang.”
-- “I want to let people know our apartment is open for visitors.”
+- "I want to know when and where our next event is."
+- "I need a ride to an afterevent."
+- "I want to see which apartments are open to hang."
+- "I want to let people know our apartment is open for visitors."
 
 ### Admin
-- “I want to create and edit upcoming events.”
-- “I want to generate and adjust carpool groupings.”
-- “I want to manage apartment membership.”
-- “I want to keep the hangout wall clean and up-to-date.”
+- "I want to create and edit upcoming events."
+- "I want to generate and adjust carpool groupings."
+- "I want to manage apartment membership."
+- "I want to keep the hangout wall clean and up-to-date."
 
 ---
 

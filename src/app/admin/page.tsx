@@ -22,7 +22,7 @@ export default function AdminPage() {
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50">
         {/* Topbar */}
-        <header className="flex items-center justify-between px-8 py-4 bg-gradient-to-r from-indigo-600 to-blue-500 shadow-md sticky top-0 z-20">
+        <header className="flex items-center justify-between px-8 py-4 bg-gradient-to-r from-aacf-blue to-blue-500 shadow-md sticky top-0 z-20">
           <div className="flex items-center gap-3">
             <Image src="/logo.png" alt="Logo" width={40} height={40} className="rounded-full bg-white p-1 shadow" />
             <span className="font-extrabold text-2xl text-white tracking-tight drop-shadow">Admin Dashboard</span>
@@ -34,7 +34,7 @@ export default function AdminPage() {
             <a href="#analytics" className="text-white/90 hover:text-yellow-200 font-semibold text-lg transition">Analytics</a>
             <button
               onClick={handleLogout}
-              className="ml-6 px-4 py-2 rounded-md bg-white text-indigo-700 font-semibold shadow hover:bg-indigo-50 transition border border-indigo-200"
+              className="ml-6 px-4 py-2 rounded-md bg-white text-aacf-blue font-semibold shadow hover:bg-blue-50 transition border border-aacf-blue/20"
             >
               Log Out
             </button>
@@ -47,7 +47,7 @@ export default function AdminPage() {
           </section>
           {/* Rides Section */}
           <section id="rides" className="mb-12">
-            <h2 className="text-xl sm:text-2xl font-bold text-indigo-700 mb-2 flex items-center gap-2">
+            <h2 className="text-xl sm:text-2xl font-bold text-aacf-blue mb-2 flex items-center gap-2">
               <span>Rides Management</span>
             </h2>
             <RidesAdmin />
@@ -60,14 +60,14 @@ export default function AdminPage() {
           </section>
           {/* Users Section */}
           <section id="users" className="mb-12">
-            <h2 className="text-xl sm:text-2xl font-bold text-indigo-700 mb-2 flex items-center gap-2">
+            <h2 className="text-xl sm:text-2xl font-bold text-aacf-blue mb-2 flex items-center gap-2">
               <span>User Management</span>
             </h2>
             <div className="bg-white rounded-lg shadow p-6 text-gray-500">User management tools coming soon...</div>
           </section>
           {/* Analytics Section */}
           <section id="analytics">
-            <h2 className="text-xl sm:text-2xl font-bold text-indigo-700 mb-2 flex items-center gap-2">
+            <h2 className="text-xl sm:text-2xl font-bold text-aacf-blue mb-2 flex items-center gap-2">
               <span>Analytics</span>
             </h2>
             <div className="bg-white rounded-lg shadow p-6 text-gray-500">Analytics dashboard coming soon...</div>
@@ -133,33 +133,33 @@ function EventForm() {
     <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-8 flex flex-col gap-6 max-w-xl border border-gray-100">
       <div className="flex flex-col gap-1">
         <label className="block font-semibold text-gray-800 mb-1" htmlFor="event-title">Title<span className="text-red-500 ml-1">*</span></label>
-        <input id="event-title" type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition" value={title} onChange={e => setTitle(e.target.value)} required />
+        <input id="event-title" type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-aacf-blue focus:border-aacf-blue transition" value={title} onChange={e => setTitle(e.target.value)} required />
       </div>
       <div className="flex flex-col gap-1">
         <label className="block font-semibold text-gray-800 mb-1" htmlFor="event-date">Date & Time<span className="text-red-500 ml-1">*</span></label>
-        <input id="event-date" type="datetime-local" className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition" value={date} onChange={e => setDate(e.target.value)} required />
+        <input id="event-date" type="datetime-local" className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-aacf-blue focus:border-aacf-blue transition" value={date} onChange={e => setDate(e.target.value)} required />
       </div>
       <div className="flex flex-col gap-1">
         <label className="block font-semibold text-gray-800 mb-1" htmlFor="event-location">Location<span className="text-red-500 ml-1">*</span></label>
-        <input id="event-location" type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition" value={location} onChange={e => setLocation(e.target.value)} required />
+        <input id="event-location" type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-aacf-blue focus:border-aacf-blue transition" value={location} onChange={e => setLocation(e.target.value)} required />
       </div>
       <div className="flex flex-col gap-1">
         <label className="block font-semibold text-gray-800 mb-1" htmlFor="event-description">Description</label>
-        <textarea id="event-description" className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 min-h-[60px] focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition" value={description} onChange={e => setDescription(e.target.value)} />
+        <textarea id="event-description" className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 min-h-[60px] focus:outline-none focus:ring-2 focus:ring-aacf-blue focus:border-aacf-blue transition" value={description} onChange={e => setDescription(e.target.value)} />
       </div>
       <div className="flex flex-col gap-1">
         <label className="block font-semibold text-gray-800 mb-1" htmlFor="event-rsvp">RSVP URL <span className='text-gray-500 font-normal'>(optional)</span></label>
-        <input id="event-rsvp" type="url" className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition" value={rsvpUrl} onChange={e => setRsvpUrl(e.target.value)} placeholder="https://..." />
+        <input id="event-rsvp" type="url" className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-aacf-blue focus:border-aacf-blue transition" value={rsvpUrl} onChange={e => setRsvpUrl(e.target.value)} placeholder="https://..." />
         <span className="text-xs text-gray-400">Leave blank if no RSVP is needed</span>
       </div>
       <div className="flex flex-col gap-1">
         <label className="block font-semibold text-gray-800 mb-1" htmlFor="event-rides">Rides Form URL <span className='text-gray-500 font-normal'>(optional)</span></label>
-        <input id="event-rides" type="url" className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition" value={ridesUrl} onChange={e => setRidesUrl(e.target.value)} placeholder="https://..." />
+        <input id="event-rides" type="url" className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-aacf-blue focus:border-aacf-blue transition" value={ridesUrl} onChange={e => setRidesUrl(e.target.value)} placeholder="https://..." />
         <span className="text-xs text-gray-400">Leave blank if no rides form is needed</span>
       </div>
       {error && <div className="text-red-600 font-medium text-sm">{error}</div>}
       {success && <div className="text-green-600 font-medium text-sm">{success}</div>}
-      <button type="submit" className="mt-2 py-2 px-4 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow transition disabled:opacity-60 disabled:cursor-not-allowed" disabled={loading}>{loading ? "Creating..." : "Create Event"}</button>
+      <button type="submit" className="mt-2 py-2 px-4 rounded-md bg-aacf-blue hover:bg-aacf-blue-700 text-white font-semibold shadow transition disabled:opacity-60 disabled:cursor-not-allowed" disabled={loading}>{loading ? "Creating..." : "Create Event"}</button>
     </form>
   );
 }
@@ -217,7 +217,7 @@ function EventList() {
       {events.map(event => (
         <li key={event.id} className="bg-white rounded-lg shadow p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between border border-gray-100">
           <div>
-            <div className="font-bold text-indigo-700">{event.title ?? "(No title)"}</div>
+            <div className="font-bold text-aacf-blue">{event.title ?? "(No title)"}</div>
             <div className="text-gray-500 text-sm">
               {(() => {
                 if (event.date && typeof event.date === 'object' && 'seconds' in event.date && typeof event.date.seconds === 'number') {
@@ -317,17 +317,17 @@ function AftereventWeekConfig() {
 
   return (
     <div className="bg-white rounded-xl shadow p-6 border border-gray-100 flex flex-col gap-4 max-w-xl">
-      <h2 className="text-lg font-bold text-indigo-700 mb-1">Current Afterevent Week</h2>
+      <h2 className="text-lg font-bold text-aacf-blue mb-1">Current Afterevent Week</h2>
       {loading ? (
         <div className="text-gray-500">Loading...</div>
       ) : (
         <>
           <div className="text-gray-800 text-base mb-2">
-            <span className="font-semibold">Current week:</span> {currentWeek ? <span className="text-indigo-700 font-bold">{currentWeek}</span> : <span className="text-gray-400">(not set)</span>}
+            <span className="font-semibold">Current week:</span> {currentWeek ? <span className="text-aacf-blue font-bold">{currentWeek}</span> : <span className="text-gray-400">(not set)</span>}
           </div>
           <form onSubmit={handleSave} className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <select
-              className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition w-full sm:w-auto"
+              className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-aacf-blue focus:border-aacf-blue transition w-full sm:w-auto"
               value={quarter}
               onChange={e => setQuarter(e.target.value)}
               required
@@ -336,7 +336,7 @@ function AftereventWeekConfig() {
               {quarters.map(q => <option key={q} value={q}>{q}</option>)}
             </select>
             <select
-              className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition w-full sm:w-auto"
+              className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-aacf-blue focus:border-aacf-blue transition w-full sm:w-auto"
               value={week}
               onChange={e => setWeek(e.target.value)}
               required
@@ -346,7 +346,7 @@ function AftereventWeekConfig() {
             </select>
             <button
               type="submit"
-              className="mt-2 sm:mt-0 py-2 px-4 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow transition disabled:opacity-60 disabled:cursor-not-allowed"
+              className="mt-2 sm:mt-0 py-2 px-4 rounded-md bg-aacf-blue hover:bg-aacf-blue-700 text-white font-semibold shadow transition disabled:opacity-60 disabled:cursor-not-allowed"
               disabled={saving || !quarter || !week}
             >
               {saving ? "Saving..." : "Update Week"}
@@ -502,7 +502,7 @@ function RidesAdmin() {
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
         <label className="font-semibold text-gray-700">Filter by week:</label>
         <select
-          className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition w-full sm:w-auto"
+          className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-aacf-blue focus:border-aacf-blue transition w-full sm:w-auto"
           value={selectedWeek}
           onChange={e => setSelectedWeek(e.target.value)}
         >
@@ -518,7 +518,7 @@ function RidesAdmin() {
           Sort: {sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}
         </button>
         <button
-          className="py-2 px-4 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow transition disabled:opacity-60 disabled:cursor-not-allowed"
+          className="py-2 px-4 rounded-md bg-aacf-blue hover:bg-aacf-blue-700 text-white font-semibold shadow transition disabled:opacity-60 disabled:cursor-not-allowed"
           onClick={exportCSV}
           disabled={filtered.length === 0}
         >
@@ -553,7 +553,7 @@ function RidesAdmin() {
                   Submitted At
                   <button
                     type="button"
-                    className="ml-1 p-1 rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    className="ml-1 p-1 rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-aacf-blue"
                     style={{ fontSize: '0.9em', lineHeight: 1 }}
                     aria-label={sortOrder === 'asc' ? 'Sort newest first' : 'Sort oldest first'}
                     onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
@@ -584,7 +584,7 @@ function RidesAdmin() {
       {showAssignments && assignments && (
         <div className="mt-8 bg-white rounded-xl shadow p-6 border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-indigo-700">Carpool Assignments</h3>
+            <h3 className="text-lg font-bold text-aacf-blue">Carpool Assignments</h3>
             <button
               className="py-2 px-4 rounded-md bg-green-600 hover:bg-green-700 text-white font-semibold shadow transition"
               onClick={exportAssignments}
@@ -599,7 +599,7 @@ function RidesAdmin() {
             return (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-indigo-600">{stats.totalPeople}</div>
+                  <div className="text-2xl font-bold text-aacf-blue">{stats.totalPeople}</div>
                   <div className="text-sm text-gray-600">Total People</div>
                 </div>
                 <div className="text-center">
