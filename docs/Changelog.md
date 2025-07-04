@@ -1,5 +1,16 @@
 # 🕘 Changelog
 
+## v1.0.3 – January 2025
+- **Google OAuth Authentication System** 🔐
+  - Enhanced Firebase Auth integration with Google OAuth
+  - Improved error handling and user feedback
+  - Admin role verification with Firestore integration
+  - User profile component with sign out functionality
+  - Protected routes for both regular users and admins
+  - Loading states and better UX throughout auth flow
+  - AdminRoute component for admin-only page protection
+  - AuthTest component for debugging authentication
+
 ## v1.0.2 – January 2025
 - **Landing Page (v1) Completed** ✨
   - Hero section with "Welcome to AAConnect 👋" headline

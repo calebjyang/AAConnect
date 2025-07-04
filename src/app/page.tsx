@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/lib/useAuth";
+import UserProfile from "@/components/UserProfile";
 
 type Event = {
   id: string;
@@ -17,7 +18,7 @@ type Event = {
 };
 
 export default function Home() {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
 
@@ -73,12 +74,7 @@ export default function Home() {
               {!loading && (
                 <>
                   {user ? (
-                    <Link
-                      href="/admin"
-                      className="px-4 py-2 bg-aacf-blue text-white rounded-lg font-semibold hover:bg-blue-800 transition shadow-sm"
-                    >
-                      Admin Dashboard
-                    </Link>
+                    <UserProfile />
                   ) : (
                     <Link
                       href="/login"

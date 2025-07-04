@@ -1,25 +1,24 @@
 "use client";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import AdminRoute from "@/components/AdminRoute";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { addDoc, collection, Timestamp, getDocs, query, orderBy, deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { assignCarpools, getAssignmentStats, exportAssignmentsCSV, type RideSignup } from "@/lib/carpoolAlgorithm";
-import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { signOutUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 export default function AdminPage() {
   const router = useRouter();
 
   function handleLogout() {
-    signOut(auth).then(() => {
+    signOutUser().then(() => {
       router.replace("/login");
     });
   }
 
   return (
-    <ProtectedRoute>
+    <AdminRoute>
       <div className="min-h-screen bg-gray-50">
         {/* Topbar */}
         <header className="flex items-center justify-between px-8 py-4 bg-gradient-to-r from-aacf-blue to-blue-500 shadow-md sticky top-0 z-20">
@@ -74,7 +73,7 @@ export default function AdminPage() {
           </section>
         </main>
       </div>
-    </ProtectedRoute>
+    </AdminRoute>
   );
 }
 
