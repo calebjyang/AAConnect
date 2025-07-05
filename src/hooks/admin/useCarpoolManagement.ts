@@ -48,7 +48,7 @@ export function useCarpoolManagement() {
     try {
       setLoading(true);
       setError(null);
-      const querySnapshot = await getDocs(collection(db, 'rideSignups'));
+      const querySnapshot = await getDocs(collection(db, 'rides'));
       const signupsData: RideSignupAdmin[] = [];
       querySnapshot.forEach((doc) => {
         signupsData.push({ id: doc.id, ...doc.data() } as RideSignupAdmin);
