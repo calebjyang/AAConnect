@@ -16,6 +16,43 @@ export interface RideSignupAdmin {
   capacity?: string;
 }
 
+/**
+ * Custom hook for managing carpool signups and assignments
+ * 
+ * This hook provides comprehensive functionality for:
+ * - Fetching and managing ride signups from Firestore
+ * - Filtering signups by afterevent week
+ * - Generating carpool assignments using the algorithm
+ * - Drag-and-drop editing of assignments
+ * - Exporting data to CSV format
+ * 
+ * @returns {Object} Object containing state and functions for carpool management
+ * @returns {RideSignupAdmin[]} returns.signups - All ride signups
+ * @returns {boolean} returns.loading - Loading state for async operations
+ * @returns {string|null} returns.error - Error message if any
+ * @returns {string} returns.selectedWeek - Currently selected afterevent week
+ * @returns {Function} returns.setSelectedWeek - Function to update selected week
+ * @returns {string[]} returns.weeks - Available afterevent weeks
+ * @returns {RideSignupAdmin[]} returns.filteredSignups - Signups filtered by selected week
+ * @returns {Function} returns.exportCSV - Function to export signups to CSV
+ * @returns {AssignmentResult|null} returns.assignments - Current carpool assignments
+ * @returns {boolean} returns.showAssignments - Whether to show assignments view
+ * @returns {Function} returns.setShowAssignments - Function to toggle assignments view
+ * @returns {AssignmentResult|null} returns.editingAssignments - Assignments being edited
+ * @returns {boolean} returns.isEditing - Whether in edit mode
+ * @returns {boolean} returns.saving - Whether assignments are being saved
+ * @returns {string|null} returns.activeId - ID of currently dragged item
+ * @returns {any} returns.sensors - DnD sensors configuration
+ * @returns {Function} returns.testAssignment - Function to generate assignments
+ * @returns {Function} returns.startEditing - Function to start editing mode
+ * @returns {Function} returns.cancelEditing - Function to cancel editing
+ * @returns {Function} returns.saveAssignments - Function to save assignments
+ * @returns {Function} returns.handleDragStart - DnD drag start handler
+ * @returns {Function} returns.handleDragEnd - DnD drag end handler
+ * @returns {Function} returns.exportAssignments - Function to export assignments to CSV
+ * @returns {Function} returns.getAssignmentStats - Function to get assignment statistics
+ * @returns {Function} returns.fetchSignups - Function to refresh signups
+ */
 export function useCarpoolManagement() {
   const [signups, setSignups] = useState<RideSignupAdmin[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +73,18 @@ export function useCarpoolManagement() {
     })
   );
 
-  // Helper to parse and sort afterevent weeks
+  /**
+   * Parses an afterevent week label into quarter and week numbers
+   * 
+   * @param {string} label - Week label in format "Fall Week 1", "Winter Week 2", etc.
+   * @returns {Object} Object containing quarter and week numbers
+   * @returns {number} returns.quarter - Quarter number (0=Fall, 1=Winter, 2=Spring)
+   * @returns {number} returns.week - Week number within the quarter
+   * 
+   * @example
+   * parseWeekLabel("Fall Week 3") // Returns { quarter: 0, week: 3 }
+   * parseWeekLabel("Winter Week 1") // Returns { quarter: 1, week: 1 }
+   */
   function parseWeekLabel(label: string): { quarter: number; week: number } {
     const match = label.match(/^(Fall|Winter|Spring) Week (\d{1,2})$/);
     if (!match) return { quarter: -1, week: -1 };
@@ -44,6 +92,18 @@ export function useCarpoolManagement() {
     return { quarter: quarterOrder[match[1]], week: parseInt(match[2], 10) };
   }
 
+  /**
+   * Fetches all ride signups from Firestore and sets the default selected week
+   * 
+   * This function:
+   * - Retrieves all documents from the 'rideSignups' collection
+   * - Converts Firestore documents to RideSignupAdmin objects
+   * - Automatically selects the most recent week as default
+   * - Handles errors gracefully with user-friendly messages
+   * 
+   * @async
+   * @throws {Error} When Firestore query fails
+   */
   const fetchSignups = useCallback(async () => {
     try {
       setLoading(true);
@@ -87,7 +147,18 @@ export function useCarpoolManagement() {
   });
   const filtered = selectedWeek ? signups.filter(s => s.aftereventWeek === selectedWeek) : signups;
 
-  // Export CSV
+  /**
+   * Exports filtered signups to CSV format and triggers download
+   * 
+   * Creates a CSV file with headers and signup data, then automatically
+   * downloads it with a filename based on the selected week.
+   * 
+   * @param {RideSignupAdmin[]} filtered - Signups to export (filtered by week)
+   * @param {string} selectedWeek - Currently selected week for filename
+   * 
+   * @example
+   * exportCSV() // Downloads "rides-Fall Week 1.csv"
+   */
   const exportCSV = useCallback(() => {
     const headers = ["Name", "Phone", "Can Drive", "Capacity", "Location", "Afterevent Week", "Submitted At"];
     const rows = filtered.map(s => [s.name, s.phone, s.canDrive, s.capacity ?? "", s.location, s.aftereventWeek, s.submittedAt]);
@@ -101,7 +172,18 @@ export function useCarpoolManagement() {
     URL.revokeObjectURL(url);
   }, [filtered, selectedWeek]);
 
-  // Assignment logic
+  /**
+   * Generates carpool assignments for the selected week using the algorithm
+   * 
+   * This function:
+   * - Validates that a week is selected
+   * - Converts RideSignupAdmin objects to RideSignup format
+   * - Calls the carpool assignment algorithm
+   * - Updates state with the assignment results
+   * - Shows the assignments view
+   * 
+   * @throws {Error} When no week is selected (shows alert)
+   */
   const testAssignment = useCallback(() => {
     if (!selectedWeek) {
       alert("Please select a week first!");
@@ -124,17 +206,31 @@ export function useCarpoolManagement() {
     setIsEditing(false);
   }, [filtered, selectedWeek]);
 
+  /**
+   * Starts editing mode by creating a deep copy of current assignments
+   * 
+   * This allows users to modify assignments without affecting the original
+   * until they explicitly save changes.
+   */
   const startEditing = useCallback(() => {
     if (!assignments) return;
     setEditingAssignments(JSON.parse(JSON.stringify(assignments)));
     setIsEditing(true);
   }, [assignments]);
 
+  /**
+   * Cancels editing mode and reverts to original assignments
+   */
   const cancelEditing = useCallback(() => {
     setEditingAssignments(assignments);
     setIsEditing(false);
   }, [assignments]);
 
+  /**
+   * Saves the edited assignments (currently simulated with timeout)
+   * 
+   * TODO: Implement actual database persistence
+   */
   const saveAssignments = useCallback(() => {
     if (!editingAssignments) return;
     setSaving(true);
@@ -146,11 +242,27 @@ export function useCarpoolManagement() {
     }, 1000);
   }, [editingAssignments]);
 
-  // Drag and drop handlers
+  /**
+   * Handles drag start events for DnD functionality
+   * 
+   * @param {any} event - Drag start event from @dnd-kit
+   */
   const handleDragStart = useCallback((event: any) => {
     setActiveId(event.active.id as string);
   }, []);
 
+  /**
+   * Handles drag end events for DnD functionality
+   * 
+   * This complex function manages the logic for moving riders between cars
+   * and the unassigned list during drag-and-drop operations. It:
+   * - Identifies the source and destination of the dragged item
+   * - Validates capacity constraints
+   * - Updates assignment state accordingly
+   * - Handles edge cases like dropping on invalid targets
+   * 
+   * @param {DragEndEvent} event - Drag end event from @dnd-kit
+   */
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     setActiveId(null);
     if (!editingAssignments) return;
@@ -162,6 +274,8 @@ export function useCarpoolManagement() {
     let destCarIndex: number | null = null;
     let rider: RideSignup | null = null;
     const newAssignments = { ...editingAssignments };
+    
+    // Find and remove rider from source location
     for (let i = 0; i < newAssignments.assignments.length; i++) {
       const idx = newAssignments.assignments[i].riders.findIndex(r => r.id === activeId);
       if (idx !== -1) {
@@ -180,6 +294,8 @@ export function useCarpoolManagement() {
       }
     }
     if (!rider) return;
+    
+    // Add rider to destination location
     if (overId === 'unassigned') {
       newAssignments.unassignedRiders.push(rider);
     } else if (overId.startsWith('car-')) {
@@ -194,6 +310,7 @@ export function useCarpoolManagement() {
         }
       }
     } else {
+      // Handle dropping on another rider
       for (let i = 0; i < newAssignments.assignments.length; i++) {
         if (newAssignments.assignments[i].riders.some(r => r.id === overId)) {
           destCarIndex = i;
@@ -212,6 +329,7 @@ export function useCarpoolManagement() {
       } else if (droppedInUnassigned) {
         newAssignments.unassignedRiders.push(rider);
       } else {
+        // Fallback: return to source or unassigned
         if (sourceCarIndex !== null) {
           newAssignments.assignments[sourceCarIndex].riders.push(rider);
           newAssignments.assignments[sourceCarIndex].usedCapacity++;
@@ -223,7 +341,12 @@ export function useCarpoolManagement() {
     setEditingAssignments(newAssignments);
   }, [editingAssignments]);
 
-  // Export assignments CSV
+  /**
+   * Exports current assignments to CSV format and triggers download
+   * 
+   * Uses the exportAssignmentsCSV utility function to generate
+   * a properly formatted CSV with assignment data.
+   */
   const exportAssignments = useCallback(() => {
     if (!assignments) return;
     const csv = exportAssignmentsCSV(assignments);

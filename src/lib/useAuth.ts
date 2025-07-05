@@ -9,6 +9,46 @@ interface AuthState {
   error: string | null;
 }
 
+/**
+ * Custom hook for managing Firebase authentication state
+ * 
+ * This hook provides comprehensive authentication functionality including:
+ * - Real-time authentication state monitoring
+ * - Automatic admin status verification
+ * - Loading states for async operations
+ * - Error handling for auth failures
+ * - Secure admin verification via API route
+ * 
+ * The hook automatically:
+ * - Listens for Firebase auth state changes
+ * - Verifies admin status when user logs in
+ * - Handles authentication errors gracefully
+ * - Provides loading states during verification
+ * 
+ * @returns {AuthState} Object containing authentication state and user info
+ * @returns {User|null} returns.user - Firebase user object or null if not authenticated
+ * @returns {boolean} returns.loading - Whether auth state is being determined
+ * @returns {boolean} returns.isAdmin - Whether the current user has admin privileges
+ * @returns {string|null} returns.error - Error message if authentication failed
+ * 
+ * @example
+ * ```tsx
+ * function MyComponent() {
+ *   const { user, loading, isAdmin, error } = useAuth();
+ *   
+ *   if (loading) return <div>Loading...</div>;
+ *   if (error) return <div>Error: {error}</div>;
+ *   if (!user) return <div>Please log in</div>;
+ *   
+ *   return (
+ *     <div>
+ *       Welcome, {user.email}!
+ *       {isAdmin && <AdminPanel />}
+ *     </div>
+ *   );
+ * }
+ * ```
+ */
 export function useAuth() {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
@@ -18,6 +58,15 @@ export function useAuth() {
   });
 
   useEffect(() => {
+    /**
+     * Firebase auth state change listener
+     * 
+     * This function is called whenever the Firebase authentication state changes.
+     * It handles both login and logout events, and performs admin verification
+     * for authenticated users.
+     * 
+     * @param {User|null} firebaseUser - Firebase user object or null
+     */
     const unsubscribe = onAuthStateChanged(
       auth, 
       async (firebaseUser) => {

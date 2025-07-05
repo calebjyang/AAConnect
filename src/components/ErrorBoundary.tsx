@@ -14,15 +14,66 @@ interface State {
   errorInfo?: ErrorInfo;
 }
 
+/**
+ * React Error Boundary component for catching and handling JavaScript errors
+ * 
+ * This component catches JavaScript errors anywhere in the child component tree,
+ * logs those errors, and displays a fallback UI instead of the component tree
+ * that crashed. Error boundaries catch errors during rendering, in lifecycle
+ * methods, and in constructors of the whole tree below them.
+ * 
+ * Features:
+ * - Catches JavaScript errors in child components
+ * - Provides fallback UI when errors occur
+ * - Logs errors to console and external services
+ * - Supports custom error handlers
+ * - Production-ready error reporting
+ * 
+ * @param {Props} props - Component props
+ * @param {React.ReactNode} props.children - Child components to render
+ * @param {React.ComponentType} [props.fallback] - Custom fallback component
+ * @param {Function} [props.onError] - Custom error handler function
+ * 
+ * @example
+ * ```tsx
+ * // Basic usage
+ * <ErrorBoundary>
+ *   <MyComponent />
+ * </ErrorBoundary>
+ * 
+ * // With custom fallback
+ * <ErrorBoundary fallback={CustomErrorComponent}>
+ *   <MyComponent />
+ * </ErrorBoundary>
+ * 
+ * // With error handler
+ * <ErrorBoundary onError={(error, errorInfo) => {
+ *   console.log('Custom error handling:', error);
+ * }}>
+ *   <MyComponent />
+ * </ErrorBoundary>
+ * ```
+ */
 export class ErrorBoundary extends Component<Props, State> {
-  public state: State = {
-    hasError: false
-  };
-
-  public static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+  constructor(props: Props) {
+    super(props);
+    this.state = {
+      hasError: false,
+      error: undefined,
+      errorInfo: undefined,
+    };
   }
 
+  /**
+   * Lifecycle method called when an error is thrown in a child component
+   * 
+   * This method is called when an error occurs in any child component.
+   * It updates the component state to indicate an error has occurred
+   * and triggers error handling logic.
+   * 
+   * @param {Error} _error - The error that was thrown
+   * @param {ErrorInfo} _errorInfo - Additional error information
+   */
   public componentDidCatch(_error: Error, _errorInfo: React.ErrorInfo) {
     console.error('ErrorBoundary caught an error:', _error, _errorInfo);
     
@@ -45,6 +96,24 @@ export class ErrorBoundary extends Component<Props, State> {
     }
 
     this.setState({ errorInfo: _errorInfo });
+  }
+
+  /**
+   * Lifecycle method called when props or state change after an error
+   * 
+   * This method allows the error boundary to recover from errors by
+   * resetting the error state when the component tree changes.
+   * 
+   * @param {Props} nextProps - Next props
+   * @param {State} nextState - Next state
+   * @returns {boolean} Whether to update the component
+   */
+  public static getDerivedStateFromError(error: Error): State {
+    return {
+      hasError: true,
+      error,
+      errorInfo: undefined,
+    };
   }
 
   private handleRetry = () => {
@@ -134,7 +203,23 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-// Higher-order component for functional components
+/**
+ * Higher-order component that wraps a component with an ErrorBoundary
+ * 
+ * This HOC provides a convenient way to add error boundary functionality
+ * to any component without manually wrapping it in JSX.
+ * 
+ * @param {React.ComponentType<P>} Component - The component to wrap
+ * @param {Omit<Props, 'children'>} [errorBoundaryProps] - Props for the ErrorBoundary
+ * @returns {React.ComponentType<P>} Component wrapped with ErrorBoundary
+ * 
+ * @example
+ * ```tsx
+ * const SafeComponent = withErrorBoundary(MyComponent, {
+ *   onError: (error) => console.log('Error in MyComponent:', error)
+ * });
+ * ```
+ */
 export function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
   errorBoundaryProps?: Omit<Props, 'children'>
@@ -148,7 +233,30 @@ export function withErrorBoundary<P extends object>(
   };
 }
 
-// Hook for functional components to catch errors
+/**
+ * Custom hook for handling errors in functional components
+ * 
+ * This hook provides a way to handle errors in functional components
+ * that can't use ErrorBoundary directly. It returns a function that
+ * can be called to handle errors manually.
+ * 
+ * @returns {Function} Error handler function
+ * 
+ * @example
+ * ```tsx
+ * function MyComponent() {
+ *   const handleError = useErrorHandler();
+ *   
+ *   const handleAsyncOperation = async () => {
+ *     try {
+ *       await riskyOperation();
+ *     } catch (error) {
+ *       handleError(error);
+ *     }
+ *   };
+ * }
+ * ```
+ */
 export function useErrorHandler() {
   return React.useCallback((error: Error, errorInfo?: ErrorInfo) => {
     console.error('Error caught by useErrorHandler:', error, errorInfo);

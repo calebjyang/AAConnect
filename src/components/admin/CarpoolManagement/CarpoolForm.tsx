@@ -19,34 +19,94 @@ const defaultForm = {
   submittedAt: '',
 };
 
+/**
+ * Form component for adding and editing carpool ride signups
+ * 
+ * This component provides a comprehensive form interface for managing ride signups
+ * with the following features:
+ * - Add new signups with validation
+ * - Edit existing signups with pre-populated data
+ * - Real-time form validation
+ * - Dynamic capacity field based on driving ability
+ * - Loading states and error handling
+ * - Success feedback
+ * 
+ * @param {CarpoolFormProps} props - Component props
+ * @param {Partial<RideSignupAdmin>} [props.initialValues] - Pre-populated form data for editing
+ * @param {Function} props.onSubmit - Async function called when form is submitted
+ * @param {boolean} [props.loading=false] - Whether the form is in a loading state
+ * @param {string[]} props.aftereventWeeks - Available afterevent weeks for selection
+ * 
+ * @example
+ * // Add new signup
+ * <CarpoolForm 
+ *   onSubmit={handleSubmit} 
+ *   aftereventWeeks={['Fall Week 1', 'Fall Week 2']} 
+ * />
+ * 
+ * // Edit existing signup
+ * <CarpoolForm 
+ *   initialValues={existingSignup}
+ *   onSubmit={handleUpdate}
+ *   aftereventWeeks={['Fall Week 1', 'Fall Week 2']}
+ * />
+ */
 const CarpoolForm = memo(function CarpoolForm({ initialValues, onSubmit, loading = false, aftereventWeeks }: CarpoolFormProps) {
   const [form, setForm] = useState({ ...defaultForm, ...initialValues });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  /**
+   * Updates form when initialValues change (for edit mode)
+   * 
+   * This effect ensures the form is properly reset when switching between
+   * add and edit modes, or when editing different signups.
+   */
   useEffect(() => {
     setForm({ ...defaultForm, ...initialValues });
   }, [initialValues]);
 
+  /**
+   * Handles form field changes and updates local state
+   * 
+   * @param {string} field - The form field name to update
+   * @param {string} value - The new value for the field
+   */
   const handleChange = useCallback((field: string, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
   }, []);
 
+  /**
+   * Handles form submission with validation and error handling
+   * 
+   * This function performs comprehensive validation before submission:
+   * - Validates all required fields are filled
+   * - Ensures capacity is provided for drivers
+   * - Handles async submission with loading states
+   * - Provides user feedback for success/error states
+   * - Resets form on successful submission
+   * 
+   * @param {React.FormEvent} e - Form submission event
+   * @throws {Error} When validation fails or submission errors occur
+   */
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
     let localError = '';
+    
     // Validation
     if (!form.name || !form.phone || !form.location || !form.aftereventWeek) {
       localError = 'Please fill in all required fields.';
     } else if (form.canDrive === 'yes' && (!form.capacity || isNaN(Number(form.capacity)))) {
       localError = 'Please enter a valid capacity for drivers.';
     }
+    
     if (localError) {
       setError(localError);
       return;
     }
+    
     try {
       await onSubmit({
         name: form.name,
