@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "./firebase";
+import { onAuthStateChanged, User, getIdToken } from "firebase/auth";
+import { auth } from "./firebase";
 
 interface AuthState {
   user: User | null;
@@ -23,11 +22,22 @@ export function useAuth() {
       auth, 
       async (firebaseUser) => {
         if (firebaseUser) {
-          // Check if user is admin
+          // Check if user is admin using secure API route
           let isAdmin = false;
           try {
-            const adminDoc = await getDoc(doc(db, "admins", firebaseUser.email || ""));
-            isAdmin = adminDoc.exists();
+            const idToken = await getIdToken(firebaseUser);
+            const response = await fetch('/api/admin/verify', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ idToken }),
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              isAdmin = data.isAdmin;
+            }
           } catch (error) {
             console.error("Error checking admin status:", error);
           }
