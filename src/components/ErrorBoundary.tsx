@@ -23,28 +23,28 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+  public componentDidCatch(_error: Error, _errorInfo: React.ErrorInfo) {
+    console.error('ErrorBoundary caught an error:', _error, _errorInfo);
     
     // Call custom error handler if provided
     if (this.props.onError) {
-      this.props.onError(error, errorInfo);
+      this.props.onError(_error, _errorInfo);
     }
 
     // Log to external service in production
     if (process.env.NODE_ENV === 'production') {
       // TODO: Send to error reporting service (Sentry, LogRocket, etc.)
       console.error('Production error:', {
-        message: error.message,
-        stack: error.stack,
-        componentStack: errorInfo.componentStack,
+        message: _error.message,
+        stack: _error.stack,
+        componentStack: _errorInfo.componentStack,
         timestamp: new Date().toISOString(),
         userAgent: navigator.userAgent,
         url: window.location.href,
       });
     }
 
-    this.setState({ errorInfo });
+    this.setState({ errorInfo: _errorInfo });
   }
 
   private handleRetry = () => {

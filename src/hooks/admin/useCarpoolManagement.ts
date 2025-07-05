@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { assignCarpools, getAssignmentStats, exportAssignmentsCSV, type RideSignup, type CarpoolAssignment, type AssignmentResult } from '@/lib/carpoolAlgorithm';
+import { assignCarpools, getAssignmentStats, exportAssignmentsCSV, type RideSignup, type AssignmentResult } from '@/lib/carpoolAlgorithm';
 import { PointerSensor, KeyboardSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 
@@ -19,7 +19,7 @@ export interface RideSignupAdmin {
 export function useCarpoolManagement() {
   const [signups, setSignups] = useState<RideSignupAdmin[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [selectedWeek, setSelectedWeek] = useState<string>("");
   const [assignments, setAssignments] = useState<AssignmentResult | null>(null);
   const [showAssignments, setShowAssignments] = useState(false);
@@ -44,16 +44,18 @@ export function useCarpoolManagement() {
     return { quarter: quarterOrder[match[1]], week: parseInt(match[2], 10) };
   }
 
-  // Fetch signups
-  const fetchSignups = async () => {
-    setLoading(true);
-    setError("");
+  const fetchSignups = useCallback(async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, "rides"));
-      const data: RideSignupAdmin[] = querySnapshot.docs.map(docSnap => ({ id: docSnap.id, ...(docSnap.data() as Omit<RideSignupAdmin, "id">) }));
-      setSignups(data);
+      setLoading(true);
+      setError(null);
+      const querySnapshot = await getDocs(collection(db, 'rideSignups'));
+      const signupsData: RideSignupAdmin[] = [];
+      querySnapshot.forEach((doc) => {
+        signupsData.push({ id: doc.id, ...doc.data() } as RideSignupAdmin);
+      });
+      setSignups(signupsData);
       // Set default week to most recent by quarter/week order
-      const weeks = Array.from(new Set(data.map(s => s.aftereventWeek).filter(Boolean)));
+      const weeks = Array.from(new Set(signupsData.map(s => s.aftereventWeek).filter(Boolean)));
       if (weeks.length > 0) {
         const sorted = weeks.slice().sort((a, b) => {
           const pa = parseWeekLabel(a);
@@ -63,17 +65,16 @@ export function useCarpoolManagement() {
         });
         setSelectedWeek(sorted[sorted.length - 1]);
       }
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError("Failed to load ride signups. " + err.message);
-      } else {
-        setError("Failed to load ride signups.");
-      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch signups');
     } finally {
       setLoading(false);
     }
-  };
-  useEffect(() => { fetchSignups(); }, []);
+  }, []);
+
+  useEffect(() => {
+    fetchSignups();
+  }, [fetchSignups]);
 
   // Get unique afterevent weeks for filter dropdown
   const weeks = Array.from(new Set(signups.map(s => s.aftereventWeek).filter(Boolean)));

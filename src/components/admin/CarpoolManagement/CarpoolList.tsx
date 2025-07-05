@@ -40,10 +40,12 @@ export default function CarpoolList({
   onEditSignup,
   onDeleteSignup,
 }: CarpoolListProps) {
-  // Choose which assignments to display
-  const currentAssignments = isEditing ? editingAssignments : assignments;
+  // Get stats for display
+  const stats = assignments ? getAssignmentStats(assignments) : null;
+  const currentAssignments = isEditing && editingAssignments ? editingAssignments : assignments;
+
+  // Early return if no assignments
   if (!currentAssignments) return null;
-  const stats = getAssignmentStats(currentAssignments);
 
   // Find the active rider for DragOverlay
   let activeRider: RideSignup | undefined;

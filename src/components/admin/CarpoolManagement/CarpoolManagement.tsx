@@ -40,6 +40,7 @@ export default function CarpoolManagement() {
   const [showForm, setShowForm] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [editingSignup, setEditingSignup] = useState<RideSignupAdmin | null>(null);
+  const [_showAssignments, _setShowAssignments] = useState(false);
 
   // Add Signup handler
   async function handleAddSignup(values: Omit<RideSignupAdmin, 'id'>) {

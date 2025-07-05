@@ -7,8 +7,8 @@ import { db } from "@/lib/firebase";
 import { assignCarpools, getAssignmentStats, exportAssignmentsCSV, type RideSignup, type CarpoolAssignment, type AssignmentResult } from "@/lib/carpoolAlgorithm";
 import { signOutUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
-import { EventManagement } from "@/components/admin/EventManagement";
-import CarpoolManagement from "@/components/admin/CarpoolManagement/CarpoolManagement";
+import CarpoolManagement from '@/components/admin/CarpoolManagement/CarpoolManagement';
+import { EventManagement } from '@/components/admin/EventManagement';
 import {
   DndContext,
   closestCenter,
