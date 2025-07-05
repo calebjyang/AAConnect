@@ -1,6 +1,6 @@
 # 📘 AAConnect – Product Requirements Document (PRD)
 
-**Version:** 1.4  
+**Version:** 1.5  
 **Last Updated:** July 2025
 
 ---
@@ -55,30 +55,53 @@ The landing page serves as the primary entry point for AAConnect, providing user
 
 ## 🚗 Afterevent Carpool Coordinator - COMPLETED ✅
 
-The carpool system provides comprehensive ride coordination for afterevents with both automated assignment and manual admin override capabilities.
+The carpool system provides comprehensive ride coordination for afterevents with both automated assignment and manual admin override capabilities. This feature includes a sophisticated drag-and-drop interface built with @dnd-kit for intuitive manual assignment management.
 
 ### Features Implemented:
 - **Member Signup Form**: Easy-to-use form for drivers and riders to sign up
 - **Smart Assignment Algorithm**: Automatic carpool assignment with location-based optimization
 - **Admin Dashboard**: Complete management interface for ride coordination
-- **Interactive Editing**: Drag-and-drop interface for admins to manually adjust assignments
+- **Advanced Drag-and-Drop Interface**: Intuitive drag-and-drop editing for admins to manually adjust assignments
 - **Real-time Statistics**: Live assignment metrics and success rates
 - **Export Functionality**: CSV export for assignments and raw data
 - **Capacity Management**: Visual indicators for full cars and overflow handling
 - **Week-based Organization**: Filter and manage assignments by afterevent week
+- **Custom Drag Preview**: Optimized drag overlay with exact styling matching original cards
+- **Multi-Container Support**: Drag between cars, unassigned area, and empty containers
+- **Fallback Logic**: Graceful handling of invalid drop zones with automatic reversion
 
 ### Algorithm Features:
 - **Location Optimization**: Prioritizes exact location matches, then location groups
 - **Capacity Management**: Respects vehicle capacity limits
 - **First-Come-First-Served**: Fair assignment based on signup time
 - **Overflow Handling**: Clear identification of unassigned riders
+- **Location Groups**: Smart grouping for friend-group mixing (Middle Earth, Mesa Court, UTC, ACC, Other)
 
 ### Admin Features:
 - **Visual Assignment Display**: Clear overview of all carpool assignments
-- **Drag-and-Drop Editing**: Intuitive interface to move riders between cars
-- **Capacity Validation**: Prevents overloading vehicles
+- **Advanced Drag-and-Drop Editing**: Intuitive interface to move riders between cars with visual feedback
+- **Capacity Validation**: Prevents overloading vehicles with real-time validation
 - **Save/Cancel Operations**: Safe editing with ability to revert changes
 - **Assignment Statistics**: Real-time metrics on assignment success
+- **Empty Container Support**: Ability to drag to empty cars and unassigned areas
+- **Custom Drag Overlay**: Professional drag preview that maintains card dimensions and styling
+
+### Technical Implementation:
+- **@dnd-kit Integration**: Modern drag-and-drop library with accessibility support
+- **Multi-Container Architecture**: Separate droppable zones for each car and unassigned area
+- **Custom Components**: CarDroppable and UnassignedDroppable components for clean separation
+- **State Management**: Optimistic updates with fallback error handling
+- **Performance Optimized**: Efficient re-rendering and minimal DOM manipulation
+- **Accessibility Compliant**: Full keyboard navigation and screen reader support
+
+### Bug Fixes & Optimizations:
+- **Snap-back Issue**: Resolved by removing SortableContext for multi-container operations
+- **Drag Preview Styling**: Fixed oversized/distorted preview with custom DragOverlay
+- **Height Consistency**: Maintained consistent card dimensions during drag operations
+- **Duplicate Previews**: Eliminated by hiding original elements during drag
+- **Invalid Drop Handling**: Added fallback logic to revert moves when dropped outside valid zones
+- **Empty Container Support**: Ensured all containers are registered as droppable zones
+- **React Hooks Compliance**: Fixed Rules of Hooks violations by extracting droppable logic
 
 ---
 
@@ -98,6 +121,9 @@ The carpool system provides comprehensive ride coordination for afterevents with
 - Each event includes name, date/time, location, description
 - RSVP handled via external Google Form
 - Admins can create/edit/delete events via admin dashboard
+- **List and Calendar View Toggle**: Users can switch between chronological and calendar layouts
+- **Event Detail Modal**: Comprehensive event information with Google Calendar integration
+- **Past Events Display**: Historical event viewing with visual distinction
 
 ### 🚗 Afterevent Carpool Coordinator - COMPLETED ✅
 - Members indicate whether they are a driver or need a ride
@@ -107,8 +133,12 @@ The carpool system provides comprehensive ride coordination for afterevents with
   - Mix of grades
   - Gender balance
   - Car timing preference
-- **Admins can edit generated car groupings** ✅
-- Output is shown in-app (CSV export optional in future)
+- **Advanced Drag-and-Drop Admin Interface**: Intuitive manual assignment editing
+- **Multi-Container Drag Support**: Drag between cars, unassigned area, and empty containers
+- **Custom Drag Preview**: Professional drag overlay with exact styling
+- **Capacity Validation**: Real-time validation prevents overloading vehicles
+- **Fallback Error Handling**: Graceful handling of invalid operations
+- Output is shown in-app with CSV export functionality
 
 ### 🏠 Apartment Availability Wall
 - Admins seed apartment names (e.g. "Treehouse", "The Fridge")
@@ -129,7 +159,9 @@ The carpool system provides comprehensive ride coordination for afterevents with
 ### 🛠 Admin Dashboard - COMPLETED ✅
 - Protected `/admin` route
 - CRUD access for events
-- **Carpool edit UI** ✅
+- **Advanced Carpool Management**: Drag-and-drop interface with real-time validation
+- **Assignment Statistics**: Live metrics and success rates
+- **Export Functionality**: CSV export for assignments and raw data
 - Apartment assignment tools
 
 ---
@@ -144,7 +176,10 @@ The carpool system provides comprehensive ride coordination for afterevents with
 
 ### Admin
 - "I want to create and edit upcoming events." ✅
-- "I want to generate and adjust carpool groupings." ✅
+- "I want to generate and adjust carpool groupings with an intuitive interface." ✅
+- "I want to manually override algorithm assignments when needed." ✅
+- "I want to see real-time statistics on assignment success." ✅
+- "I want to export carpool data for external communication." ✅
 - "I want to manage apartment membership."
 - "I want to keep the hangout wall clean and up-to-date."
 
@@ -164,3 +199,33 @@ The carpool system provides comprehensive ride coordination for afterevents with
 - In-app RSVP with Firebase sync
 - Apartment group chat / maps
 - Match history or smart ride pairing
+- Advanced carpool algorithms with machine learning
+- Real-time carpool status updates
+- Integration with ride-sharing services
+
+---
+
+## 🛠 Technical Stack
+
+### Frontend
+- **Next.js 14**: React framework with App Router
+- **TypeScript**: Type-safe development
+- **Tailwind CSS**: Utility-first styling
+- **@dnd-kit**: Modern drag-and-drop library
+- **Firebase SDK**: Real-time database integration
+
+### Backend
+- **Firebase Auth**: Google OAuth authentication
+- **Firestore**: NoSQL database for events and user data
+- **Cloud Functions**: Serverless backend logic (future)
+
+### Development Tools
+- **ESLint**: Code quality and consistency
+- **TypeScript**: Static type checking
+- **Git**: Version control with feature branching
+
+### Performance & Quality
+- **Mobile-First Design**: Optimized for PWA installation
+- **Accessibility**: WCAG 2.2 AA compliance
+- **Performance**: Fast loading with optimized bundles
+- **Code Quality**: Comprehensive linting and type safety
