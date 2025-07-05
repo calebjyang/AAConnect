@@ -39,7 +39,7 @@ export function useAuth() {
               isAdmin = data.isAdmin;
             }
           } catch (error) {
-            console.error("Error checking admin status:", error);
+            console.error("Error checking admin status:", error instanceof Error ? error.message : 'Unknown error');
           }
 
           setAuthState({

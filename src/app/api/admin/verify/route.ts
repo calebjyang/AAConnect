@@ -26,7 +26,8 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Admin verification error:', error);
+    // Log error for debugging but don't expose sensitive details
+    console.error('Admin verification failed:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json({ error: 'Authentication failed' }, { status: 401 });
   }
 } 
