@@ -8,21 +8,23 @@
 
 - **See our [MVP Progress Board](https://github.com/users/calebjyang/projects/1/views/7) for real-time status and upcoming features.**
 
-### Latest Status Update (July 1, 2025)
+### Latest Status Update (July 4, 2025)
 
 - ✅ **Project Setup:** Next.js, TypeScript, Tailwind, Firebase, CI/CD
-- ✅ **Authentication:** Google OAuth via Firebase Auth
-- ✅ **Event Calendar:** `/events` route, event list UI (chronological)
-- ✅ **Event Details:** Detail sheet/page for each event
-- ✅ **Admin Dashboard:** `/admin` route, protected access
-- ✅ **Carpool Algorithm:** Rider/driver assignment logic (v1)
+- ✅ **Authentication:** Google OAuth via Firebase Auth with admin role management
+- ✅ **Landing Page:** Complete PWA-ready homepage with social links and email signup
+- ✅ **Event Calendar:** `/events` route with list/calendar view toggle
+- ✅ **Event Details:** Comprehensive modal with Google Calendar integration
+- ✅ **Admin Dashboard:** `/admin` route with protected access and event management
+- ✅ **Carpool Algorithm:** Advanced assignment logic with location-based optimization
+- ✅ **Carpool Admin UI:** Sophisticated drag-and-drop interface with @dnd-kit
+- ✅ **Code Quality:** ESLint compliance and TypeScript type safety
 - ⏳ **Up Next:**
-  - Calendar Toggle (list/calendar views)
-  - Admin CRUD for events
-  - Carpool Admin UI (drag-and-drop, overflow handling)
-  - Social Media Links page
-  - Testing & QA (unit, integration, E2E, accessibility)
-  - Performance polish (FCP < 1s, PWA install/offline)
+  - Apartment Availability Wall feature
+  - Performance optimization (FCP < 1s)
+  - Accessibility audit (WCAG 2.2 AA)
+  - Cross-device testing and PWA validation
+  - Production deployment setup
 
 ---
 
