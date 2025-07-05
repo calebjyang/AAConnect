@@ -59,7 +59,7 @@ export function assignCarpools(signups: RideSignup[], week: string): AssignmentR
   // Separate drivers and riders
   const drivers = weekSignups.filter(s => s.canDrive === "Yes" && s.capacity);
   const riders = weekSignups.filter(s => s.canDrive === "No");
-  const selfDrivers = weekSignups.filter(s => s.canDrive === "Self");
+  const _selfDrivers = weekSignups.filter(s => s.canDrive === "Self");
   
   // Sort drivers by capacity (descending) to prioritize larger vehicles
   drivers.sort((a, b) => {
