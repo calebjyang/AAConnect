@@ -227,10 +227,11 @@ function CalendarView({ events }: { events: Event[] }) {
   );
 }
 
-function ListView({ events, onEventClick }: { events: Event[]; onEventClick: (event: Event) => void }) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function ListView({ events, onEventClick }: { events: Event[]; onEventClick: () => void }) {
   const now = new Date();
-  const upcomingEvents = events.filter(event => new Date(event.date.seconds * 1000) >= now);
-  const pastEvents = events.filter(event => new Date(event.date.seconds * 1000) < now);
+  const upcomingEvents = events.filter(e => new Date(e.date.seconds * 1000) >= now);
+  const pastEvents = events.filter(e => new Date(e.date.seconds * 1000) < now);
 
   return (
     <div className="space-y-6">
@@ -239,7 +240,7 @@ function ListView({ events, onEventClick }: { events: Event[]; onEventClick: (ev
           <h3 className="text-xl font-semibold text-gray-800 mb-4">Upcoming Events</h3>
           <div className="space-y-4">
             {upcomingEvents.map(event => (
-              <EventCard key={event.id} event={event} onClick={() => onEventClick(event)} />
+              <EventCard key={event.id} event={event} onClick={() => onEventClick()} />
             ))}
           </div>
         </div>
@@ -250,7 +251,7 @@ function ListView({ events, onEventClick }: { events: Event[]; onEventClick: (ev
           <h3 className="text-xl font-semibold text-gray-800 mb-4">Past Events</h3>
           <div className="space-y-4">
             {pastEvents.map(event => (
-              <EventCard key={event.id} event={event} onClick={() => onEventClick(event)} isPast />
+              <EventCard key={event.id} event={event} onClick={() => onEventClick()} isPast />
             ))}
           </div>
         </div>
@@ -447,7 +448,7 @@ export default function EventsPage() {
         ) : (
           <div>
             {viewMode === 'list' ? (
-              <ListView events={events} onEventClick={setSelectedEvent} />
+              <ListView events={events} onEventClick={() => setSelectedEvent(null)} />
             ) : (
               <CalendarView events={events} />
             )}

@@ -58,7 +58,7 @@ export function assignCarpools(signups: RideSignup[], week: string): AssignmentR
   
   // Separate drivers and riders
   const drivers = weekSignups.filter(s => s.canDrive === "Yes" && s.capacity);
-  let riders = weekSignups.filter(s => s.canDrive === "No"); // make this mutable
+  const allRiders = weekSignups.filter(s => s.canDrive === "No");
   // const _selfDrivers = weekSignups.filter(s => s.canDrive === "Self");
   
   // Sort drivers by capacity (descending) to prioritize larger vehicles
@@ -69,10 +69,13 @@ export function assignCarpools(signups: RideSignup[], week: string): AssignmentR
   });
   
   // Sort riders by submission time (first come, first served)
-  riders.sort((a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
+  allRiders.sort((a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
   
   const assignments: CarpoolAssignment[] = [];
   const unassignedRiders: RideSignup[] = [];
+  
+  // Create a mutable copy of riders for assignment processing
+  const availableRiders = [...allRiders];
   
   // Create assignments for each driver
   for (const driver of drivers) {
@@ -88,42 +91,42 @@ export function assignCarpools(signups: RideSignup[], week: string): AssignmentR
     };
     
     // First pass: Try to match by exact location
-    for (let i = 0; i < riders.length; ) {
+    for (let i = 0; i < availableRiders.length; ) {
       if (assignment.usedCapacity >= assignment.totalCapacity) break;
-      const rider = riders[i];
+      const rider = availableRiders[i];
       if (rider.location === driver.location) {
         assignment.riders.push(rider);
         assignment.usedCapacity++;
-        riders.splice(i, 1);
+        availableRiders.splice(i, 1);
       } else {
         i++;
       }
     }
     // Second pass: Try to match by location group (friend-group mixing)
-    for (let i = 0; i < riders.length; ) {
+    for (let i = 0; i < availableRiders.length; ) {
       if (assignment.usedCapacity >= assignment.totalCapacity) break;
-      const rider = riders[i];
+      const rider = availableRiders[i];
       if (areLocationsCompatible(rider.location, driver.location)) {
         assignment.riders.push(rider);
         assignment.usedCapacity++;
-        riders.splice(i, 1);
+        availableRiders.splice(i, 1);
       } else {
         i++;
       }
     }
     // Third pass: Fill remaining spots with any available riders
-    for (let i = 0; i < riders.length; ) {
+    for (let i = 0; i < availableRiders.length; ) {
       if (assignment.usedCapacity >= assignment.totalCapacity) break;
-      const rider = riders[i];
+      const rider = availableRiders[i];
       assignment.riders.push(rider);
       assignment.usedCapacity++;
-      riders.splice(i, 1);
+      availableRiders.splice(i, 1);
     }
     assignments.push(assignment);
   }
   
   // Any remaining riders are unassigned
-  unassignedRiders.push(...riders);
+  unassignedRiders.push(...availableRiders);
   
   // Generate overflow message if needed
   let overflowMessage: string | undefined;
