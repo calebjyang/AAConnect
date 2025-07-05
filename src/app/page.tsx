@@ -18,7 +18,7 @@ type Event = {
 };
 
 export default function Home() {
-  const { user, loading, isAdmin } = useAuth();
+  const { user, loading } = useAuth();
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
 
@@ -171,7 +171,7 @@ export default function Home() {
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition shadow-md"
             >
-              <img src="/linktree-logo.svg" alt="Linktree" className="w-5 h-5" />
+              <Image src="/linktree-logo.svg" alt="Linktree" className="w-5 h-5" width={20} height={20} />
               Linktree
             </a>
           </div>

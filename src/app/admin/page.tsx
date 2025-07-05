@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { addDoc, collection, Timestamp, getDocs, query, orderBy, deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { assignCarpools, getAssignmentStats, exportAssignmentsCSV, type RideSignup } from "@/lib/carpoolAlgorithm";
+import { assignCarpools, getAssignmentStats, exportAssignmentsCSV, type RideSignup, type CarpoolAssignment, type AssignmentResult } from "@/lib/carpoolAlgorithm";
 import { signOutUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
@@ -250,7 +250,6 @@ function AftereventWeekConfig() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Parse 'Fall Week 5' into {quarter: 'Fall', week: '5'}
   function parseCurrentWeek(str: string) {
@@ -386,9 +385,8 @@ function RidesAdmin() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedWeek, setSelectedWeek] = useState<string>("");
-  const [assignments, setAssignments] = useState<CarpoolAssignment[]>([]);
+  const [assignments, setAssignments] = useState<AssignmentResult | null>(null);
   const [showAssignments, setShowAssignments] = useState(false);
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   // Helper to parse and sort afterevent weeks
   function parseWeekLabel(label: string): { quarter: number; week: number } {
@@ -441,11 +439,6 @@ function RidesAdmin() {
     return pa.week - pb.week;
   });
   const filtered = selectedWeek ? signups.filter(s => s.aftereventWeek === selectedWeek) : signups;
-  const filteredSorted = filtered.slice().sort((a: RideSignupAdmin, b: RideSignupAdmin) => {
-    const tA = new Date(a.submittedAt).getTime();
-    const tB = new Date(b.submittedAt).getTime();
-    return sortOrder === 'asc' ? tA - tB : tB - tA;
-  });
 
   function exportCSV() {
     const headers = ["Name", "Phone", "Can Drive", "Capacity", "Location", "Afterevent Week", "Submitted At"];
@@ -465,7 +458,6 @@ function RidesAdmin() {
       alert("Please select a week first!");
       return;
     }
-    
     // Convert RideSignupAdmin to RideSignup format
     const rideSignups: RideSignup[] = filtered.map(s => ({
       id: s.id,
@@ -477,7 +469,6 @@ function RidesAdmin() {
       submittedAt: s.submittedAt,
       capacity: s.capacity
     }));
-    
     const result = assignCarpools(rideSignups, selectedWeek);
     setAssignments(result);
     setShowAssignments(true);
@@ -485,7 +476,6 @@ function RidesAdmin() {
 
   function exportAssignments() {
     if (!assignments) return;
-    
     const csv = exportAssignmentsCSV(assignments);
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -510,12 +500,6 @@ function RidesAdmin() {
             <option key={week} value={week}>{week}</option>
           ))}
         </select>
-        <button
-          className="py-2 px-4 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold shadow transition"
-          onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-        >
-          Sort: {sortOrder === 'asc' ? 'Oldest First' : 'Newest First'}
-        </button>
         <button
           className="py-2 px-4 rounded-md bg-aacf-blue hover:bg-aacf-blue-700 text-white font-semibold shadow transition disabled:opacity-60 disabled:cursor-not-allowed"
           onClick={exportCSV}
@@ -548,22 +532,11 @@ function RidesAdmin() {
                 <th className="px-3 py-2 border text-gray-800 font-bold">Capacity</th>
                 <th className="px-3 py-2 border text-gray-800 font-bold">Location</th>
                 <th className="px-3 py-2 border text-gray-800 font-bold">Afterevent Week</th>
-                <th className="px-3 py-2 border text-gray-800 font-bold flex items-center gap-1">
-                  Submitted At
-                  <button
-                    type="button"
-                    className="ml-1 p-1 rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-aacf-blue"
-                    style={{ fontSize: '0.9em', lineHeight: 1 }}
-                    aria-label={sortOrder === 'asc' ? 'Sort newest first' : 'Sort oldest first'}
-                    onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                  >
-                    {sortOrder === 'asc' ? '▲' : '▼'}
-                  </button>
-                </th>
+                <th className="px-3 py-2 border text-gray-800 font-bold">Submitted At</th>
               </tr>
             </thead>
             <tbody>
-              {filteredSorted.map(s => (
+              {filtered.map(s => (
                 <tr key={s.id}>
                   <td className="px-3 py-2 border text-gray-700">{s.name}</td>
                   <td className="px-3 py-2 border text-gray-700">{s.phone}</td>
@@ -594,8 +567,8 @@ function RidesAdmin() {
           
           {/* Stats */}
           {(() => {
-            const stats = getAssignmentStats(assignments);
-            return (
+            const stats = assignments ? getAssignmentStats(assignments) : null;
+            return stats ? (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-aacf-blue">{stats.totalPeople}</div>
@@ -614,11 +587,11 @@ function RidesAdmin() {
                   <div className="text-sm text-gray-600">Success Rate</div>
                 </div>
               </div>
-            );
+            ) : null;
           })()}
           
           {/* Overflow Message */}
-          {assignments.overflowMessage && (
+          {assignments?.overflowMessage && (
             <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
               <div className="text-yellow-800 font-medium">{assignments.overflowMessage}</div>
             </div>
@@ -626,7 +599,7 @@ function RidesAdmin() {
           
           {/* Assignments List */}
           <div className="space-y-4">
-            {assignments.map((assignment: CarpoolAssignment, index: number) => (
+            {assignments?.assignments.map((assignment: CarpoolAssignment, index: number) => (
               <div key={index} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-semibold text-gray-800">
@@ -661,7 +634,7 @@ function RidesAdmin() {
             ))}
             
             {/* Unassigned Riders */}
-            {assignments.unassignedRiders.length > 0 && (
+            {assignments?.unassignedRiders.length > 0 && (
               <div className="border border-red-200 rounded-lg p-4 bg-red-50">
                 <h4 className="font-semibold text-red-800 mb-2">❌ Unassigned Riders ({assignments.unassignedRiders.length})</h4>
                 <ul className="space-y-1">
