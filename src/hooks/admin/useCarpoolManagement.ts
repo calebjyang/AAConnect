@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, setDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { assignCarpools, getAssignmentStats, exportAssignmentsCSV, type RideSignup, type AssignmentResult } from '@/lib/carpoolAlgorithm';
 import { PointerSensor, KeyboardSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
@@ -122,7 +122,7 @@ export function useCarpoolManagement() {
     try {
       setLoading(true);
       setError(null);
-      const querySnapshot = await getDocs(collection(db, 'rideSignups'));
+      const querySnapshot = await getDocs(collection(db, 'rides'));
       const signupsData: RideSignupAdmin[] = [];
       querySnapshot.forEach((doc) => {
         signupsData.push({ id: doc.id, ...doc.data() } as RideSignupAdmin);
