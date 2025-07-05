@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local environment variables
+.env.local
+.gitignore
+aaconnect-ba6dc-firebase-adminsdk-fbsvc-ec9de071c6.json
+setAdminClaim.js
