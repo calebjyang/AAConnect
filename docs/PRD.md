@@ -1,7 +1,7 @@
 # 📘 AAConnect – Product Requirements Document (PRD)
 
-**Version:** 1.3  
-**Last Updated:** January 2025
+**Version:** 1.4  
+**Last Updated:** July 2025
 
 ---
 
@@ -53,6 +53,35 @@ The landing page serves as the primary entry point for AAConnect, providing user
 
 ---
 
+## 🚗 Afterevent Carpool Coordinator - COMPLETED ✅
+
+The carpool system provides comprehensive ride coordination for afterevents with both automated assignment and manual admin override capabilities.
+
+### Features Implemented:
+- **Member Signup Form**: Easy-to-use form for drivers and riders to sign up
+- **Smart Assignment Algorithm**: Automatic carpool assignment with location-based optimization
+- **Admin Dashboard**: Complete management interface for ride coordination
+- **Interactive Editing**: Drag-and-drop interface for admins to manually adjust assignments
+- **Real-time Statistics**: Live assignment metrics and success rates
+- **Export Functionality**: CSV export for assignments and raw data
+- **Capacity Management**: Visual indicators for full cars and overflow handling
+- **Week-based Organization**: Filter and manage assignments by afterevent week
+
+### Algorithm Features:
+- **Location Optimization**: Prioritizes exact location matches, then location groups
+- **Capacity Management**: Respects vehicle capacity limits
+- **First-Come-First-Served**: Fair assignment based on signup time
+- **Overflow Handling**: Clear identification of unassigned riders
+
+### Admin Features:
+- **Visual Assignment Display**: Clear overview of all carpool assignments
+- **Drag-and-Drop Editing**: Intuitive interface to move riders between cars
+- **Capacity Validation**: Prevents overloading vehicles
+- **Save/Cancel Operations**: Safe editing with ability to revert changes
+- **Assignment Statistics**: Real-time metrics on assignment success
+
+---
+
 ## 👤 User Roles
 
 | Role   | Permissions |
@@ -64,13 +93,13 @@ The landing page serves as the primary entry point for AAConnect, providing user
 
 ## 🌟 Core Features
 
-### 📆 Event Calendar
+### 📆 Event Calendar - COMPLETED ✅
 - Chronological or calendar view of events
 - Each event includes name, date/time, location, description
 - RSVP handled via external Google Form
 - Admins can create/edit/delete events via admin dashboard
 
-### 🚗 Afterevent Carpool Coordinator
+### 🚗 Afterevent Carpool Coordinator - COMPLETED ✅
 - Members indicate whether they are a driver or need a ride
 - Drivers set max passengers
 - Riders can select early/late preference
@@ -78,7 +107,7 @@ The landing page serves as the primary entry point for AAConnect, providing user
   - Mix of grades
   - Gender balance
   - Car timing preference
-- Admins can edit generated car groupings
+- **Admins can edit generated car groupings** ✅
 - Output is shown in-app (CSV export optional in future)
 
 ### 🏠 Apartment Availability Wall
@@ -90,17 +119,17 @@ The landing page serves as the primary entry point for AAConnect, providing user
 - Global dashboard shows open/upcoming availability across all apartments
 - Admins can manage apartment assignments and remove members
 
-### 🔗 Social Media Links
+### 🔗 Social Media Links - COMPLETED ✅
 - Links out to AACF's Instagram, Facebook, YouTube, etc.
 
-### 🔐 Authentication
+### 🔐 Authentication - COMPLETED ✅
 - Login required via Google OAuth
 - No domain restrictions for multi-campus and staff support
 
-### 🛠 Admin Dashboard
+### 🛠 Admin Dashboard - COMPLETED ✅
 - Protected `/admin` route
 - CRUD access for events
-- Carpool edit UI
+- **Carpool edit UI** ✅
 - Apartment assignment tools
 
 ---
@@ -108,14 +137,14 @@ The landing page serves as the primary entry point for AAConnect, providing user
 ## ✅ User Stories
 
 ### Member
-- "I want to know when and where our next event is."
-- "I need a ride to an afterevent."
+- "I want to know when and where our next event is." ✅
+- "I need a ride to an afterevent." ✅
 - "I want to see which apartments are open to hang."
 - "I want to let people know our apartment is open for visitors."
 
 ### Admin
-- "I want to create and edit upcoming events."
-- "I want to generate and adjust carpool groupings."
+- "I want to create and edit upcoming events." ✅
+- "I want to generate and adjust carpool groupings." ✅
 - "I want to manage apartment membership."
 - "I want to keep the hangout wall clean and up-to-date."
 

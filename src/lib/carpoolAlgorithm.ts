@@ -58,8 +58,8 @@ export function assignCarpools(signups: RideSignup[], week: string): AssignmentR
   
   // Separate drivers and riders
   const drivers = weekSignups.filter(s => s.canDrive === "Yes" && s.capacity);
-  const riders = weekSignups.filter(s => s.canDrive === "No");
-  const _selfDrivers = weekSignups.filter(s => s.canDrive === "Self");
+  let riders = weekSignups.filter(s => s.canDrive === "No"); // make this mutable
+  // const _selfDrivers = weekSignups.filter(s => s.canDrive === "Self");
   
   // Sort drivers by capacity (descending) to prioritize larger vehicles
   drivers.sort((a, b) => {
@@ -87,42 +87,38 @@ export function assignCarpools(signups: RideSignup[], week: string): AssignmentR
       location: driver.location
     };
     
-    // Find riders for this driver
-    const availableRiders = riders.filter(r => !assignments.some(a => 
-      a.riders.some(rider => rider.id === r.id)
-    ));
-    
     // First pass: Try to match by exact location
-    for (const rider of availableRiders) {
+    for (let i = 0; i < riders.length; ) {
       if (assignment.usedCapacity >= assignment.totalCapacity) break;
-      
+      const rider = riders[i];
       if (rider.location === driver.location) {
         assignment.riders.push(rider);
         assignment.usedCapacity++;
-        riders.splice(riders.indexOf(rider), 1);
+        riders.splice(i, 1);
+      } else {
+        i++;
       }
     }
-    
     // Second pass: Try to match by location group (friend-group mixing)
-    for (const rider of availableRiders) {
+    for (let i = 0; i < riders.length; ) {
       if (assignment.usedCapacity >= assignment.totalCapacity) break;
-      
+      const rider = riders[i];
       if (areLocationsCompatible(rider.location, driver.location)) {
         assignment.riders.push(rider);
         assignment.usedCapacity++;
-        riders.splice(riders.indexOf(rider), 1);
+        riders.splice(i, 1);
+      } else {
+        i++;
       }
     }
-    
     // Third pass: Fill remaining spots with any available riders
-    for (const rider of availableRiders) {
+    for (let i = 0; i < riders.length; ) {
       if (assignment.usedCapacity >= assignment.totalCapacity) break;
-      
+      const rider = riders[i];
       assignment.riders.push(rider);
       assignment.usedCapacity++;
-      riders.splice(riders.indexOf(rider), 1);
+      riders.splice(i, 1);
     }
-    
     assignments.push(assignment);
   }
   

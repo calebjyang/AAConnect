@@ -14,8 +14,8 @@ export default function AuthTest() {
     setAuthError(null);
     try {
       await signInWithGoogle();
-    } catch (err: any) {
-      setAuthError(getAuthErrorMessage(err));
+    } catch (_err: any) {
+      setAuthError(getAuthErrorMessage(_err));
     } finally {
       setSigningIn(false);
     }
@@ -25,7 +25,7 @@ export default function AuthTest() {
     setSigningOut(true);
     try {
       await signOutUser();
-    } catch (err: any) {
+    } catch (_err: any) {
       setAuthError("Failed to sign out");
     } finally {
       setSigningOut(false);

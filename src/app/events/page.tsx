@@ -210,15 +210,15 @@ function CalendarView({ events }: { events: Event[] }) {
               }`}>
                 {day}
               </div>
-              {dayEvents.map((event, eventIndex) => (
-                <div
-                  key={eventIndex}
-                  className="text-xs bg-aacf-blue text-white p-1 rounded mt-1 truncate cursor-pointer hover:bg-blue-700"
-                  title={event.title}
-                >
-                  {event.title}
-                </div>
-              ))}
+                              {dayEvents.map((event, eventIndex) => (
+                  <div
+                    key={eventIndex}
+                    className="text-xs bg-aacf-blue text-white p-1 rounded mt-1 truncate cursor-pointer hover:bg-blue-700"
+                    title={event.title}
+                  >
+                    {event.title}
+                  </div>
+                ))}
             </div>
           );
         })}
