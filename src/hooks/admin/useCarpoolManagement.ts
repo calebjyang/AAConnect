@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { assignCarpools, getAssignmentStats, exportAssignmentsCSV, type RideSignup, type AssignmentResult } from '@/lib/carpoolAlgorithm';
 import { PointerSensor, KeyboardSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
@@ -14,6 +14,18 @@ export interface RideSignupAdmin {
   aftereventWeek: string;
   submittedAt: string;
   capacity?: string;
+}
+
+/**
+ * Interface for carpool assignments stored in Firestore
+ */
+export interface CarpoolAssignmentDoc {
+  id: string;
+  week: string;
+  assignments: AssignmentResult;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
 }
 
 /**
@@ -52,6 +64,8 @@ export interface RideSignupAdmin {
  * @returns {Function} returns.exportAssignments - Function to export assignments to CSV
  * @returns {Function} returns.getAssignmentStats - Function to get assignment statistics
  * @returns {Function} returns.fetchSignups - Function to refresh signups
+ * @returns {Function} returns.deleteAssignments - Function to delete assignments
+ * @returns {Function} returns.loadAssignments - Function to load assignments
  */
 export function useCarpoolManagement() {
   const [signups, setSignups] = useState<RideSignupAdmin[]>([]);
@@ -132,9 +146,54 @@ export function useCarpoolManagement() {
     }
   }, []);
 
+  /**
+   * Loads existing carpool assignments from Firestore for the selected week
+   * 
+   * This function retrieves saved assignments from the 'carpoolAssignments' collection
+   * and updates the local state. It's called when the selected week changes or
+   * when the component mounts.
+   * 
+   * @async
+   * @throws {Error} When Firestore query fails
+   */
+  const loadAssignments = useCallback(async () => {
+    if (!selectedWeek) {
+      setAssignments(null);
+      setEditingAssignments(null);
+      return;
+    }
+
+    try {
+      const docSnap = await getDocs(collection(db, 'carpoolAssignments'));
+      
+      // Find the document for the selected week
+      const assignmentDoc = docSnap.docs.find(doc => doc.data().week === selectedWeek);
+      
+      if (assignmentDoc) {
+        const data = assignmentDoc.data() as CarpoolAssignmentDoc;
+        setAssignments(data.assignments);
+        setEditingAssignments(data.assignments);
+        setShowAssignments(true);
+      } else {
+        // No saved assignments for this week
+        setAssignments(null);
+        setEditingAssignments(null);
+        setShowAssignments(false);
+      }
+    } catch (err: any) {
+      console.error('Error loading assignments:', err);
+      setError(err.message || 'Failed to load assignments');
+    }
+  }, [selectedWeek]);
+
   useEffect(() => {
     fetchSignups();
   }, [fetchSignups]);
+
+  // Load assignments when selected week changes
+  useEffect(() => {
+    loadAssignments();
+  }, [loadAssignments]);
 
   // Get unique afterevent weeks for filter dropdown
   const weeks = Array.from(new Set(signups.map(s => s.aftereventWeek).filter(Boolean)));
@@ -227,20 +286,44 @@ export function useCarpoolManagement() {
   }, [assignments]);
 
   /**
-   * Saves the edited assignments (currently simulated with timeout)
+   * Saves the edited assignments to Firestore
    * 
-   * TODO: Implement actual database persistence
+   * This function persists carpool assignments to the 'carpoolAssignments' collection
+   * in Firestore. It creates a new document or updates an existing one based on the week.
+   * The assignment data includes metadata like creation/update timestamps and user info.
+   * 
+   * @async
+   * @throws {Error} When Firestore save operation fails
    */
-  const saveAssignments = useCallback(() => {
-    if (!editingAssignments) return;
+  const saveAssignments = useCallback(async () => {
+    if (!editingAssignments || !selectedWeek) return;
+    
     setSaving(true);
-    // TODO: Save to database
-    setTimeout(() => {
+    try {
+      const assignmentDoc: Omit<CarpoolAssignmentDoc, 'id'> = {
+        week: selectedWeek,
+        assignments: editingAssignments,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: 'admin', // TODO: Get actual user ID from auth context
+      };
+
+      // Use the week as the document ID for easy retrieval and updates
+      const docRef = doc(db, 'carpoolAssignments', selectedWeek);
+      await setDoc(docRef, assignmentDoc, { merge: true });
+
+      // Update local state
       setAssignments(editingAssignments);
       setIsEditing(false);
+      setError(null);
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to save assignments';
+      setError(errorMessage);
+      console.error('Error saving assignments:', err);
+    } finally {
       setSaving(false);
-    }, 1000);
-  }, [editingAssignments]);
+    }
+  }, [editingAssignments, selectedWeek]);
 
   /**
    * Handles drag start events for DnD functionality
@@ -359,6 +442,34 @@ export function useCarpoolManagement() {
     URL.revokeObjectURL(url);
   }, [assignments, selectedWeek]);
 
+  /**
+   * Deletes carpool assignments for the selected week from Firestore
+   * 
+   * This function removes the saved assignments document from the 'carpoolAssignments'
+   * collection and clears the local state.
+   * 
+   * @async
+   * @throws {Error} When Firestore delete operation fails
+   */
+  const deleteAssignments = useCallback(async () => {
+    if (!selectedWeek) return;
+    
+    try {
+      const docRef = doc(db, 'carpoolAssignments', selectedWeek);
+      await deleteDoc(docRef);
+      
+      // Clear local state
+      setAssignments(null);
+      setEditingAssignments(null);
+      setShowAssignments(false);
+      setError(null);
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to delete assignments';
+      setError(errorMessage);
+      console.error('Error deleting assignments:', err);
+    }
+  }, [selectedWeek]);
+
   return {
     signups,
     loading,
@@ -380,6 +491,8 @@ export function useCarpoolManagement() {
     startEditing,
     cancelEditing,
     saveAssignments,
+    deleteAssignments,
+    loadAssignments,
     handleDragStart,
     handleDragEnd,
     exportAssignments,

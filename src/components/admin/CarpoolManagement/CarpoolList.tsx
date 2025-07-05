@@ -13,7 +13,7 @@ interface CarpoolListProps {
   activeId: string | null;
   sensors: any;
   onEdit: () => void;
-  onSave: () => void;
+  onSave: () => Promise<void>;
   onCancel: () => void;
   onDragStart: (event: any) => void;
   onDragEnd: (event: any) => void;
@@ -56,6 +56,17 @@ export default function CarpoolList({
     ].find(r => r.id === activeId);
   }
 
+  /**
+   * Handles the save operation with proper async handling
+   */
+  const handleSave = async () => {
+    try {
+      await onSave();
+    } catch (error) {
+      console.error('Error saving assignments:', error);
+    }
+  };
+
   return (
     <div className="mt-8 bg-white rounded-xl shadow p-6 border border-gray-100">
       <div className="flex items-center justify-between mb-4">
@@ -87,7 +98,7 @@ export default function CarpoolList({
               </button>
               <button
                 className="py-2 px-4 rounded-md bg-green-600 hover:bg-green-700 text-white font-semibold shadow transition disabled:opacity-60"
-                onClick={onSave}
+                onClick={handleSave}
                 disabled={saving}
               >
                 {saving ? "Saving..." : "Save Changes"}
