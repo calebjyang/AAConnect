@@ -227,7 +227,6 @@ function CalendarView({ events }: { events: Event[] }) {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function ListView({ events, onEventClick }: { events: Event[]; onEventClick: () => void }) {
   const now = new Date();
   const upcomingEvents = events.filter(e => new Date(e.date.seconds * 1000) >= now);
