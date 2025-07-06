@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, User, getIdToken } from "firebase/auth";
 import { auth } from "./firebase";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { db } from "./firebase";
 
 interface AuthState {
   user: User | null;
@@ -71,6 +73,23 @@ export function useAuth() {
       auth, 
       async (firebaseUser) => {
         if (firebaseUser) {
+          // --- Automatic user doc creation ---
+          try {
+            const userRef = doc(db, "users", firebaseUser.uid);
+            const userSnap = await getDoc(userRef);
+            if (!userSnap.exists()) {
+              await setDoc(userRef, {
+                displayName: firebaseUser.displayName,
+                email: firebaseUser.email,
+                photoURL: firebaseUser.photoURL,
+                createdAt: new Date(),
+              });
+            }
+          } catch (err) {
+            console.error("Error creating user doc:", err);
+          }
+          // --- End user doc creation ---
+
           // Check if user is admin using secure API route
           let isAdmin = false;
           try {

@@ -7,6 +7,8 @@ export const FIRESTORE_COLLECTIONS = {
   CONFIG: 'config',
   USERS: 'users',
   APARTMENTS: 'apartments',
+  APARTMENT_MEMBERS: 'apartmentMembers',
+  AVAILABILITY_SLOTS: 'availabilitySlots',
 } as const;
 
 // Firebase Documents
@@ -123,6 +125,7 @@ export const ROUTES = {
   HOME: '/',
   EVENTS: '/events',
   RIDES: '/events/rides',
+  APARTMENTS: '/apartments',
   LOGIN: '/login',
   ADMIN: '/admin',
 } as const;

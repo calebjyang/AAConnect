@@ -213,15 +213,18 @@ export default function Home() {
               <p className="text-gray-600">Get or give a ride to afterevents</p>
             </Link>
 
-            <div className="bg-white rounded-xl p-8 text-center border border-aacf-blue/20 shadow-md hover:shadow-xl hover:ring-2 hover:ring-aacf-blue/30 transition-all duration-200">
-              <div className="w-16 h-16 bg-aacf-blue rounded-full flex items-center justify-center mx-auto mb-4">
+            <Link
+              href="/apartments"
+              className="group bg-white rounded-xl p-8 text-center shadow-md border border-aacf-blue/20 hover:shadow-xl hover:ring-2 hover:ring-aacf-blue/30 transition-all duration-200"
+            >
+              <div className="w-16 h-16 bg-aacf-blue rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-md">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Community</h3>
-              <p className="text-gray-600">Connect with fellow members</p>
-            </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Apartment Hosting</h3>
+              <p className="text-gray-600">Find apartments open for hangouts</p>
+            </Link>
           </div>
         </div>
       </section>

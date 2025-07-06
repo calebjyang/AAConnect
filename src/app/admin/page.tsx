@@ -9,6 +9,7 @@ import { signOutUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import CarpoolManagement from '@/components/admin/CarpoolManagement/CarpoolManagement';
 import { EventManagement } from '@/components/admin/EventManagement';
+import ApartmentManagement from '@/components/admin/ApartmentManagement/ApartmentManagement';
 import {
   DndContext,
   closestCenter,
@@ -49,6 +50,7 @@ export default function AdminPage() {
           <nav className="flex gap-8 items-center">
             <a href="#events" className="text-white/90 hover:text-yellow-200 font-semibold text-lg transition">Events</a>
             <a href="#rides" className="text-white/90 hover:text-yellow-200 font-semibold text-lg transition">Rides</a>
+            <a href="#apartments" className="text-white/90 hover:text-yellow-200 font-semibold text-lg transition">Apartments</a>
             <a href="#users" className="text-white/90 hover:text-yellow-200 font-semibold text-lg transition">Users</a>
             <a href="#analytics" className="text-white/90 hover:text-yellow-200 font-semibold text-lg transition">Analytics</a>
             <button
@@ -74,6 +76,10 @@ export default function AdminPage() {
           {/* Events Section */}
           <section id="events" className="mb-12">
             <EventManagement />
+          </section>
+          {/* Apartments Section */}
+          <section id="apartments" className="mb-12">
+            <ApartmentManagement />
           </section>
           {/* Users Section */}
           <section id="users" className="mb-12">

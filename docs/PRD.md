@@ -1,6 +1,6 @@
 # 📘 AAConnect – Product Requirements Document (PRD)
 
-**Version:** 1.6  
+**Version:** 1.7  
 **Last Updated:** July 2025
 
 ---
@@ -166,14 +166,50 @@ The carpool system provides comprehensive ride coordination for afterevents with
 - **Export Functionality**: CSV export for assignments and raw data
 - Apartment assignment tools
 
-### 🏠 Apartment Availability Wall
-- Admins seed apartment names (e.g. "Treehouse", "The Fridge")
-- Members can join one apartment
-- Apartment members can post open time slots:
-  - Time window (e.g. 2–4pm)
-  - Short description ("extra pizza and Smash!")
-- Global dashboard shows open/upcoming availability across all apartments
-- Admins can manage apartment assignments and remove members
+### 🏠 Apartment Availability Wall - COMPLETED ✅
+
+The apartment availability system enables members to post and discover open time slots for spontaneous hangouts across all apartments in the community.
+
+#### Recent Implementation (July 2025):
+- **Complete Apartment Management**: Admin interface for creating apartments and assigning members
+- **User Apartment Assignment**: Automatic user-to-apartment assignment system
+- **Availability Posting**: Intuitive form for posting time slots with descriptions
+- **Global Availability Dashboard**: Real-time view of all apartment availability
+- **Responsive Design**: Mobile-first interface optimized for PWA usage
+
+#### Features Implemented:
+- **Admin Apartment Management**: Create, edit, and manage apartment listings
+- **Member Assignment System**: Assign users to specific apartments with admin controls
+- **Availability Form**: User-friendly interface for posting time slots with:
+  - Start and end time selection (24-hour format)
+  - Description field (200 character limit)
+  - Optional guest limit (1-20 guests, or unlimited)
+- **Global Availability List**: Comprehensive dashboard showing all availability slots
+- **Filtering & Sorting**: Filter by time (all/upcoming/past) and sort by time or apartment
+- **Delete Functionality**: Members can remove their own availability posts
+- **Real-time Updates**: Live data synchronization with Firestore
+
+#### Technical Implementation:
+- **TypeScript Types**: Comprehensive type definitions for apartments, members, and availability
+- **Custom Hooks**: `useUserApartment` and `useAvailabilityManagement` for state management
+- **Firestore Integration**: Real-time database with proper indexing and security rules
+- **Form Validation**: Client-side validation with error handling
+- **Modal Interface**: Clean modal-based posting interface
+- **Responsive UI**: Tailwind CSS styling consistent with app design system
+
+#### Bug Fixes & Optimizations:
+- **Timezone Handling**: Fixed 7-hour timezone shift by using local timezone formatting
+- **Manual Date Input**: Resolved year input issues with uncontrolled datetime-local inputs
+- **Firestore Compatibility**: Fixed `undefined` field errors by using `null` for optional values
+- **Form UX**: Improved input handling for better manual typing experience
+- **UI Consistency**: Updated styling to match app-wide design patterns
+- **Type Safety**: Enhanced TypeScript types to handle optional fields properly
+
+#### User Experience:
+- **Intuitive Interface**: Clean, card-based design with proper spacing
+- **Clear Feedback**: Success/error messages and loading states
+- **Accessibility**: Proper labels, ARIA attributes, and keyboard navigation
+- **Mobile Optimization**: Touch-friendly interface with responsive design
 
 ### 🔗 Social Media Links - COMPLETED ✅
 - Links out to AACF's Instagram, Facebook, YouTube, etc.
@@ -185,8 +221,8 @@ The carpool system provides comprehensive ride coordination for afterevents with
 ### Member
 - "I want to know when and where our next event is." ✅
 - "I need a ride to an afterevent." ✅
-- "I want to see which apartments are open to hang."
-- "I want to let people know our apartment is open for visitors."
+- "I want to see which apartments are open to hang." ✅
+- "I want to let people know our apartment is open for visitors." ✅
 
 ### Admin
 - "I want to create and edit upcoming events." ✅
@@ -194,8 +230,8 @@ The carpool system provides comprehensive ride coordination for afterevents with
 - "I want to manually override algorithm assignments when needed." ✅
 - "I want to see real-time statistics on assignment success." ✅
 - "I want to export carpool data for external communication." ✅
-- "I want to manage apartment membership."
-- "I want to keep the hangout wall clean and up-to-date."
+- "I want to manage apartment membership." ✅
+- "I want to keep the hangout wall clean and up-to-date." ✅
 
 ---
 
