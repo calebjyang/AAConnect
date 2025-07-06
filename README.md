@@ -18,6 +18,7 @@
 - ✅ **Admin Dashboard:** `/admin` route with protected access and event management
 - ✅ **Carpool Algorithm:** Advanced assignment logic with location-based optimization
 - ✅ **Carpool Admin UI:** Sophisticated drag-and-drop interface with @dnd-kit
+- ✅ **Apartment Availability Wall:** Members can post and browse open hangout slots for their apartments, with a modern tag selector (Snacks, Games, Study, Yap, Quiet, Prayer), real-time updates, and a clean, mobile-friendly UI.
 - ✅ **Code Quality:** ESLint compliance and TypeScript type safety
 - ⏳ **Up Next:**
   - Apartment Availability Wall feature
