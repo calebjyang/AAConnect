@@ -5,7 +5,6 @@ import { useUserApartment } from '@/hooks/useUserApartment';
 import { useAvailabilityManagement } from '@/hooks/useAvailabilityManagement';
 import { useAuth } from '@/lib/useAuth';
 import AvailabilityForm from '@/components/AvailabilityForm';
-import AvailabilityList from '@/components/AvailabilityList';
 import UserProfile from '@/components/UserProfile';
 import Image from "next/image";
 import Link from "next/link";
@@ -15,21 +14,16 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DatePickerWithRange } from "../date-range-picker";
 import { useMobile } from "@/hooks/use-mobile";
 import {
   Bell,
@@ -37,76 +31,25 @@ import {
   Home,
   LogOut,
   Menu,
-  Plus,
   User,
   X,
   MapPin,
   Clock,
   Users,
-  Star,
   Heart,
-  MessageCircle,
 } from "lucide-react";
-
-// Mock data for demonstration - you can replace with real data
-const mockUser = {
-  name: "Caleb Yang",
-  email: "caleb@university.edu",
-  image: "/placeholder.svg?height=40&width=40",
-  hasApartment: true,
-  apartment: {
-    name: "AAConnect House",
-    description: "The ultimate hangout spot for AAConnect members ✨",
-    address: "123 Campus Drive",
-    amenities: ["wifi", "gaming", "snacks", "chill vibes"],
-    rating: 4.8,
-    totalHangouts: 23,
-  },
-};
-
-const vibeColors = {
-  chill: "bg-blue-100 text-blue-800",
-  party: "bg-purple-100 text-purple-800",
-  study: "bg-green-100 text-green-800",
-  movie: "bg-orange-100 text-orange-800",
-};
-
-const vibeEmojis = {
-  chill: "😌",
-  party: "🎉",
-  study: "📚",
-  movie: "🎬",
-};
-
-const amenityIcons = {
-  wifi: "📶",
-  gaming: "🎮",
-  snacks: "🍿",
-  games: "🎲",
-  music: "🎵",
-  coffee: "☕",
-  quiet: "🤫",
-  tv: "📺",
-  cozy: "🛋️",
-};
 
 export default function ApartmentsPage() {
   const { user, loading } = useAuth();
   const { userApartment, loading: userLoading } = useUserApartment();
   const {
     slots,
-    loading: availabilityLoading,
-    error,
-    success,
     createAvailabilitySlot,
     deleteAvailabilitySlot,
-    clearMessages,
   } = useAvailabilityManagement();
 
-  const [showForm, setShowForm] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [likedPosts, setLikedPosts] = useState<string[]>([]);
   const { toast } = useToast();
   const isMobile = useMobile();
 
@@ -120,34 +63,13 @@ export default function ApartmentsPage() {
       user.email || '',
       user.displayName || 'Unknown User'
     );
-    setShowForm(false);
+    setIsPostModalOpen(false);
   };
 
   const handleDeleteAvailability = async (slotId: string) => {
     if (confirm('Are you sure you want to delete this availability slot?')) {
       await deleteAvailabilitySlot(slotId);
     }
-  };
-
-  const handlePostAvailability = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      setIsPostModalOpen(false);
-
-      toast({
-        title: "🎉 Posted successfully!",
-        description: "Your hangout is now live. Time to get social!",
-        variant: "default",
-      });
-    }, 1000);
-  };
-
-  const toggleLike = (id: string) => {
-    setLikedPosts((prev) => (prev.includes(id) ? prev.filter((postId) => postId !== id) : [...prev, id]));
   };
 
   if (userLoading) {
@@ -518,13 +440,13 @@ export default function ApartmentsPage() {
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     <Button
-                                      variant={likedPosts.includes(slot.id) ? "default" : "outline"}
+                                      variant="outline"
                                       size="sm"
-                                      onClick={() => toggleLike(slot.id)}
-                                      className={`flex items-center gap-1 px-4 py-2 rounded-full font-semibold transition-colors ${likedPosts.includes(slot.id) ? "bg-pink-600 text-white hover:bg-pink-700" : "border-pink-200 text-pink-600 hover:bg-pink-50"}`}
+                                      className="flex items-center gap-1 px-4 py-2 rounded-full font-semibold transition-colors border-pink-200 text-pink-600 hover:bg-pink-50"
+                                      disabled
                                     >
-                                      <Heart className={`h-4 w-4 ${likedPosts.includes(slot.id) ? "fill-current" : ""}`} />
-                                      {likedPosts.includes(slot.id) ? "Interested" : "Interested"}
+                                      <Heart className="h-4 w-4" />
+                                      Interested
                                     </Button>
                                     {slot.postedBy === user?.uid && (
                                       <Button

@@ -5,7 +5,7 @@ import type { AvailabilitySlot } from '@/types/apartment';
 interface AvailabilityListProps {
   slots: AvailabilitySlot[];
   loading?: boolean;
-  onDelete?: (_slotId: string) => void;
+  onDelete?: () => void;
   showDeleteButton?: boolean;
   title?: string;
 }
@@ -190,7 +190,7 @@ export default function AvailabilityList({
                     
                     {showDeleteButton && onDelete && (
                       <button
-                        onClick={() => onDelete(slot.id)}
+                        onClick={onDelete}
                         className="ml-4 px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
                       >
                         Delete
