@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from 'react';
 import { useUserApartment } from '@/hooks/useUserApartment';
 import { useAvailabilityManagement } from '@/hooks/useAvailabilityManagement';
@@ -6,10 +7,91 @@ import { useAuth } from '@/lib/useAuth';
 import AvailabilityForm from '@/components/AvailabilityForm';
 import AvailabilityList from '@/components/AvailabilityList';
 import UserProfile from '@/components/UserProfile';
+import Image from "next/image";
+import Link from "next/link";
 import type { AvailabilityFormData } from '@/types/apartment';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
+import { Toaster } from "@/components/ui/toaster";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DatePickerWithRange } from "../date-range-picker";
+import { useMobile } from "@/hooks/use-mobile";
+import {
+  Bell,
+  Calendar,
+  Home,
+  LogOut,
+  Menu,
+  Plus,
+  User,
+  X,
+  MapPin,
+  Clock,
+  Users,
+  Star,
+  Heart,
+  MessageCircle,
+} from "lucide-react";
+
+// Mock data for demonstration - you can replace with real data
+const mockUser = {
+  name: "Caleb Yang",
+  email: "caleb@university.edu",
+  image: "/placeholder.svg?height=40&width=40",
+  hasApartment: true,
+  apartment: {
+    name: "AAConnect House",
+    description: "The ultimate hangout spot for AAConnect members ✨",
+    address: "123 Campus Drive",
+    amenities: ["wifi", "gaming", "snacks", "chill vibes"],
+    rating: 4.8,
+    totalHangouts: 23,
+  },
+};
+
+const vibeColors = {
+  chill: "bg-blue-100 text-blue-800",
+  party: "bg-purple-100 text-purple-800",
+  study: "bg-green-100 text-green-800",
+  movie: "bg-orange-100 text-orange-800",
+};
+
+const vibeEmojis = {
+  chill: "😌",
+  party: "🎉",
+  study: "📚",
+  movie: "🎬",
+};
+
+const amenityIcons = {
+  wifi: "📶",
+  gaming: "🎮",
+  snacks: "🍿",
+  games: "🎲",
+  music: "🎵",
+  coffee: "☕",
+  quiet: "🤫",
+  tv: "📺",
+  cozy: "🛋️",
+};
 
 export default function ApartmentsPage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { userApartment, loading: userLoading } = useUserApartment();
   const {
     slots,
@@ -22,6 +104,11 @@ export default function ApartmentsPage() {
   } = useAvailabilityManagement();
 
   const [showForm, setShowForm] = useState(false);
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [likedPosts, setLikedPosts] = useState<string[]>([]);
+  const { toast } = useToast();
+  const isMobile = useMobile();
 
   const handleCreateAvailability = async (availabilityData: AvailabilityFormData) => {
     if (!user || !userApartment) return;
@@ -42,10 +129,31 @@ export default function ApartmentsPage() {
     }
   };
 
+  const handlePostAvailability = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false);
+      setIsPostModalOpen(false);
+
+      toast({
+        title: "🎉 Posted successfully!",
+        description: "Your hangout is now live. Time to get social!",
+        variant: "default",
+      });
+    }, 1000);
+  };
+
+  const toggleLike = (id: string) => {
+    setLikedPosts((prev) => (prev.includes(id) ? prev.filter((postId) => postId !== id) : [...prev, id]));
+  };
+
   if (userLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
             <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
@@ -61,141 +169,485 @@ export default function ApartmentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">🏠 Apartment Hosting</h1>
-            <p className="text-gray-600 mt-2">
-              Find apartments open for hangouts or post your own availability
-            </p>
-          </div>
-          <UserProfile />
-        </div>
-
-        {/* Messages */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <span className="text-red-400">⚠️</span>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-red-800">{error}</p>
-              </div>
-              <div className="ml-auto pl-3">
-                <button
-                  onClick={clearMessages}
-                  className="text-red-400 hover:text-red-600"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {success && (
-          <div className="bg-green-50 border border-green-200 rounded-md p-4 mb-6">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <span className="text-green-400">✅</span>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-green-800">{success}</p>
-              </div>
-              <div className="ml-auto pl-3">
-                <button
-                  onClick={clearMessages}
-                  className="text-green-400 hover:text-green-600"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* User's Apartment Status */}
-        {userApartment ? (
-          <div className="bg-white rounded-lg shadow border p-6 mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Your Apartment: {userApartment.name}
-                </h2>
-                {userApartment.description && (
-                  <p className="text-gray-600 mt-1">{userApartment.description}</p>
-                )}
-                {userApartment.address && (
-                  <p className="text-gray-500 text-sm mt-1">📍 {userApartment.address}</p>
-                )}
-              </div>
-              <button
-                onClick={() => setShowForm(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                Post Availability
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-md p-6 mb-8">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <span className="text-yellow-400">🏠</span>
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-yellow-800">
-                  No Apartment Assignment
-                </h3>
-                                  <p className="text-sm text-yellow-700 mt-1">
-                    You haven&apos;t been assigned to an apartment yet. Contact an admin to get assigned to an apartment so you can post availability.
-                  </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Availability Form Modal */}
-        {showForm && userApartment && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Post Availability
-                  </h3>
-                  <button
-                    onClick={() => setShowForm(false)}
-                    className="text-gray-400 hover:text-gray-600 focus:outline-none"
-                  >
-                    ✕
-                  </button>
-                </div>
-                
-                <AvailabilityForm
-                  onSubmit={handleCreateAvailability}
-                  loading={availabilityLoading}
-                  apartmentId={userApartment.id}
-                  apartmentName={userApartment.name}
-                  onCancel={() => setShowForm(false)}
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Enhanced Header */}
+      <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-slate-200/50 shadow-sm">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center">
+            <div className="mr-4">
+              <Link href="/" className="flex items-center space-x-2">
+                <Image 
+                  src="/logo.png" 
+                  alt="AAConnect Logo" 
+                  width={40} 
+                  height={40} 
+                  className="rounded-full bg-white p-1 shadow"
                 />
+                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  AAConnect
+                </span>
+              </Link>
+            </div>
+            {!isMobile && (
+              <nav className="hidden md:flex space-x-6">
+                <Link href="/" className="text-slate-700 hover:text-blue-600 transition-colors font-medium">
+                  Discover
+                </Link>
+                <Link href="/events" className="text-slate-700 hover:text-blue-600 transition-colors font-medium">
+                  Events
+                </Link>
+                <Link href="/apartments" className="text-blue-600 font-medium">
+                  Hosting
+                </Link>
+                <Link href="/admin" className="text-slate-700 hover:text-blue-600 transition-colors font-medium">
+                  Admin
+                </Link>
+              </nav>
+            )}
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" size="icon" className="relative hover:bg-blue-50">
+              <Bell className="h-5 w-5 text-slate-700" />
+              <span className="absolute -top-1 -right-1 h-3 w-3 bg-gradient-to-r from-pink-500 to-red-500 rounded-full flex items-center justify-center">
+                <span className="text-[10px] text-white font-bold">2</span>
+              </span>
+            </Button>
+
+            <div className="flex items-center">
+              {!loading && user && <UserProfile />}
+            </div>
+
+            {isMobile && (
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right">
+                  <div className="flex flex-col h-full">
+                    <div className="flex items-center mb-6 mt-2">
+                      <Avatar className="h-10 w-10 mr-3">
+                        <AvatarImage src={user?.photoURL || "/placeholder.svg"} alt={user?.displayName || "User"} />
+                        <AvatarFallback>{user?.displayName?.charAt(0) || "U"}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">{user?.displayName || "User"}</p>
+                        <p className="text-sm text-slate-500">{user?.email}</p>
+                      </div>
+                    </div>
+
+                    <nav className="space-y-4">
+                      <Link
+                        href="/"
+                        className="flex items-center space-x-2 text-slate-700 hover:text-blue-600 transition-colors"
+                      >
+                        <Home className="h-5 w-5" />
+                        <span>Discover</span>
+                      </Link>
+                      <Link
+                        href="/events"
+                        className="flex items-center space-x-2 text-slate-700 hover:text-blue-600 transition-colors"
+                      >
+                        <Calendar className="h-5 w-5" />
+                        <span>Events</span>
+                      </Link>
+                      <Link href="/apartments" className="flex items-center space-x-2 text-blue-600">
+                        <Home className="h-5 w-5" />
+                        <span>Hosting</span>
+                      </Link>
+                      <Link
+                        href="/admin"
+                        className="flex items-center space-x-2 text-slate-700 hover:text-blue-600 transition-colors"
+                      >
+                        <User className="h-5 w-5" />
+                        <span>Admin</span>
+                      </Link>
+                    </nav>
+
+                    <div className="mt-auto">
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <LogOut className="h-5 w-5 mr-2" />
+                        Sign Out
+                      </Button>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 bg-white">
+        {/* Hero Section */}
+        <section className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white py-12 md:py-16 relative overflow-hidden">
+          <div className="container mx-auto px-4 relative">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex items-center mb-4">
+                <span className="text-4xl mr-3">🏠</span>
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">Apartment Hosting</h1>
               </div>
+              <p className="text-lg md:text-xl text-blue-100 mb-6 max-w-2xl">
+                Turn your place into the ultimate hangout spot! Connect with friends, host epic gatherings, and discover amazing spaces around campus 🎉
+              </p>
             </div>
           </div>
-        )}
+          {/* Floating elements for visual interest */}
+          <div className="absolute top-20 right-20 text-6xl opacity-20 animate-bounce pointer-events-none select-none">🎮</div>
+          <div className="absolute bottom-20 left-20 text-4xl opacity-20 animate-pulse pointer-events-none select-none">☕</div>
+          <div className="absolute top-40 left-1/3 text-5xl opacity-20 animate-bounce delay-1000 pointer-events-none select-none">🍕</div>
+        </section>
 
-        {/* Global Availability List */}
-        <AvailabilityList
-          slots={slots}
-          loading={availabilityLoading}
-          onDelete={userApartment ? handleDeleteAvailability : undefined}
-          showDeleteButton={!!userApartment}
-          title="All Apartment Availability"
-        />
-      </div>
+        {/* Main Content - Centered Column */}
+        <section className="max-w-3xl mx-auto w-full px-4 flex flex-col gap-8 py-10 md:py-14">
+          {/* Your Space Card - balanced, professional */}
+          <Card className="border border-slate-200 shadow-md rounded-xl bg-white/95 w-full max-w-xl mx-auto p-4 mb-6">
+            <CardHeader className="pb-1">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="text-2xl mr-2">🏡</div>
+                  <div>
+                    <CardTitle className="text-base font-semibold text-slate-900">Your Space</CardTitle>
+                    <CardDescription className="text-sm text-slate-500">Your home base</CardDescription>
+                  </div>
+                </div>
+                <Badge className="bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full text-xs">Active</Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0 pb-1">
+              {userApartment ? (
+                <div>
+                  <h3 className="font-semibold text-slate-900 text-base mb-0.5 truncate">{userApartment.name}</h3>
+                  <p className="text-sm text-slate-600 mb-0.5 truncate">{userApartment.description || "The ultimate hangout spot for AAConnect members ✨"}</p>
+                  <div className="flex items-center text-slate-400 mb-0 text-sm">
+                    <MapPin className="h-4 w-4 mr-1" />
+                    <span>{userApartment.address || "123 Campus Drive"}</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-3 flex items-start">
+                  <div className="mr-2 text-amber-500 text-lg">⚠️</div>
+                  <div>
+                    <h3 className="font-semibold text-amber-800 mb-0.5 text-sm">No Space Registered</h3>
+                    <p className="text-xs text-amber-700 mb-1">Ready to become a host? Register your apartment!</p>
+                    <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs px-2 py-1">
+                      🏠 Register
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+            <CardFooter className="flex justify-end items-center gap-2 bg-transparent pt-0 pb-1">
+              {userApartment ? (
+                <>
+                  <Button
+                    variant="outline"
+                    className="h-10 px-4 text-sm font-semibold border-2 border-slate-300 hover:bg-slate-100 bg-white text-slate-700 flex items-center gap-2 shadow-sm"
+                  >
+                    <span className="text-base">✏️</span> Edit
+                  </Button>
+                  <Dialog open={isPostModalOpen} onOpenChange={setIsPostModalOpen}>
+                    <DialogTrigger asChild>
+                      <Button
+                        className="h-10 px-5 text-sm font-bold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-xl flex items-center gap-2 focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+                        style={{ boxShadow: '0 2px 12px 0 rgba(80, 63, 205, 0.10)' }}
+                      >
+                        + Post
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 flex flex-col items-center">
+                      <DialogHeader className="w-full">
+                        <DialogTitle className="text-lg font-bold text-slate-900 mb-2 text-center w-full">Post Availability</DialogTitle>
+                      </DialogHeader>
+                      <AvailabilityForm
+                        onSubmit={async (data) => {
+                          setIsLoading(true);
+                          await handleCreateAvailability(data);
+                          setIsLoading(false);
+                          setIsPostModalOpen(false);
+                          toast({
+                            title: (
+                              <span className="text-base font-bold text-green-700 flex items-center gap-2">
+                                <span className="text-xl">✅</span> Posted successfully!
+                              </span>
+                            ),
+                            description: (
+                              <span className="text-sm text-slate-800 font-medium">Your hangout is now live. Time to get social!</span>
+                            ),
+                            variant: "default",
+                          });
+                        }}
+                        loading={isLoading}
+                        apartmentId={userApartment.id}
+                        apartmentName={userApartment.name}
+                        onCancel={() => setIsPostModalOpen(false)}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                </>
+              ) : null}
+            </CardFooter>
+          </Card>
+
+          {/* Main Content - What's Happening */}
+          <section className="py-0 bg-white">
+            <div className="mb-8 text-center">
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3">
+                <span className="text-4xl mr-2">🔥</span>
+                What's Happening
+              </h2>
+              <p className="text-slate-600 text-lg max-w-2xl mx-auto">
+                Discover amazing hangout spots and connect with your community. From study sessions to game nights, there's always something going on!
+              </p>
+            </div>
+
+            <Tabs defaultValue="all" className="w-full">
+              <TabsList className="mb-8 bg-white shadow-sm border border-slate-200">
+                <TabsTrigger
+                  value="all"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white text-slate-700 font-semibold transition-colors"
+                >
+                  🌟 All Events
+                </TabsTrigger>
+                <TabsTrigger
+                  value="mine"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white text-slate-700 font-semibold transition-colors"
+                >
+                  🏡 My Posts
+                </TabsTrigger>
+                <TabsTrigger
+                  value="saved"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white text-slate-700 font-semibold transition-colors"
+                >
+                  ❤️ Saved
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="all" className="space-y-6">
+                {slots.length > 0 ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <p className="text-slate-600">
+                        <span className="font-semibold text-slate-900">{slots.length}</span> hangout spots
+                        found
+                      </p>
+                    </div>
+
+                    {slots.map((slot) => (
+                      <Card
+                        key={slot.id}
+                        className="border-slate-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white overflow-hidden group"
+                      >
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-start space-x-4 flex-1">
+                              <Avatar className="h-12 w-12 border-2 border-slate-200 group-hover:border-blue-300 transition-colors">
+                                <AvatarImage src="/placeholder.svg" alt={slot.postedByName} />
+                                <AvatarFallback className="bg-gradient-to-r from-blue-400 to-purple-400 text-white">
+                                  {slot.postedByName.charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-2 mb-1">
+                                  <h3 className="font-bold text-lg text-slate-900">{slot.apartmentName}</h3>
+                                  <Badge className="bg-blue-100 text-blue-800 border-0">
+                                    😌 chill
+                                  </Badge>
+                                  <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+                                    Upcoming
+                                  </Badge>
+                                </div>
+
+                                <p className="text-slate-700 mb-3 text-base">{slot.description || "Come hang out and enjoy snacks and play games! 🎮🍕"}</p>
+
+                                <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600 mb-3">
+                                  <div className="flex items-center">
+                                    <Calendar className="h-4 w-4 mr-1 text-blue-500" />
+                                    <span className="font-medium">
+                                      {slot.startTime.toDate().toLocaleDateString()}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <Clock className="h-4 w-4 mr-1 text-purple-500" />
+                                    <span>
+                                      {slot.startTime.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {slot.endTime.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <Users className="h-4 w-4 mr-1 text-green-500" />
+                                    <span>
+                                      0/{slot.maxGuests || 8} people
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="flex flex-wrap gap-2 mb-3">
+                                  {slot.tags && slot.tags.length > 0 && slot.tags.map((tag) => {
+                                    const tagMap = {
+                                      snacks: { icon: '🍿', label: 'snacks' },
+                                      games: { icon: '🎲', label: 'games' },
+                                      study: { icon: '📚', label: 'study' },
+                                      yap: { icon: '🗣️', label: 'yap' },
+                                      quiet: { icon: '🤫', label: 'quiet' },
+                                      prayer: { icon: '🙏', label: 'prayer' },
+                                    };
+                                    const tagInfo = tagMap[tag] || { icon: '🏠', label: tag };
+                                    return (
+                                      <Badge
+                                        key={tag}
+                                        variant="outline"
+                                        className="bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 flex items-center gap-1"
+                                      >
+                                        <span>{tagInfo.icon}</span> {tagInfo.label}
+                                      </Badge>
+                                    );
+                                  })}
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center text-sm text-slate-500">
+                                    <span>
+                                      Posted by {slot.postedByName} • {slot.createdAt.toDate().toLocaleDateString()}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <Button
+                                      variant={likedPosts.includes(slot.id) ? "default" : "outline"}
+                                      size="sm"
+                                      onClick={() => toggleLike(slot.id)}
+                                      className={`flex items-center gap-1 px-4 py-2 rounded-full font-semibold transition-colors ${likedPosts.includes(slot.id) ? "bg-pink-600 text-white hover:bg-pink-700" : "border-pink-200 text-pink-600 hover:bg-pink-50"}`}
+                                    >
+                                      <Heart className={`h-4 w-4 ${likedPosts.includes(slot.id) ? "fill-current" : ""}`} />
+                                      {likedPosts.includes(slot.id) ? "Interested" : "Interested"}
+                                    </Button>
+                                    {slot.postedBy === user?.uid && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-red-500 hover:bg-red-50"
+                                        onClick={() => handleDeleteAvailability(slot.id)}
+                                      >
+                                        <X className="h-4 w-4" />
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {slot.postedBy !== user?.uid && (
+                            <div className="mt-4 pt-4 border-t border-slate-100">
+                              <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold">
+                                🎉 Join This Hangout
+                              </Button>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-16">
+                    <div className="text-6xl mb-4">😴</div>
+                    <h3 className="text-xl font-semibold text-slate-900 mb-2">Pretty quiet around here...</h3>
+                    <p className="text-slate-500 mb-6">Be the first to post a hangout and get the party started!</p>
+                    <Button 
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                      onClick={() => setIsPostModalOpen(true)}
+                    >
+                      🚀 Create First Hangout
+                    </Button>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="mine">
+                <div className="space-y-4">
+                  {slots
+                    .filter((slot) => slot.postedBy === user?.uid)
+                    .map((slot) => (
+                      <Card
+                        key={slot.id}
+                        className="border-slate-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white"
+                      >
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-2">
+                                <h3 className="font-bold text-lg text-slate-900">{slot.apartmentName}</h3>
+                                <Badge className="bg-blue-100 text-blue-800 border-0">
+                                  😌 chill
+                                </Badge>
+                                <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+                                  Live
+                                </Badge>
+                              </div>
+
+                              <p className="text-slate-700 mb-3">{slot.description || "Come hang out and enjoy snacks and play games! 🎮🍕"}</p>
+
+                              <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600 mb-3">
+                                <div className="flex items-center">
+                                  <Calendar className="h-4 w-4 mr-1 text-blue-500" />
+                                  <span>{slot.startTime.toDate().toLocaleDateString()}</span>
+                                </div>
+                                <div className="flex items-center">
+                                  <Clock className="h-4 w-4 mr-1 text-purple-500" />
+                                  <span>
+                                    {slot.startTime.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {slot.endTime.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  </span>
+                                </div>
+                                <div className="flex items-center">
+                                  <Users className="h-4 w-4 mr-1 text-green-500" />
+                                  <span>
+                                    0/{slot.maxGuests || 8} people
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center justify-between">
+                                <div className="text-sm text-slate-500">
+                                  Posted {slot.createdAt.toDate().toLocaleDateString()}
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-red-500 hover:bg-red-50"
+                                  onClick={() => handleDeleteAvailability(slot.id)}
+                                >
+                                  <X className="h-4 w-4 mr-1" />
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="saved">
+                <div className="text-center py-16">
+                  <div className="text-6xl mb-4">💾</div>
+                  <h3 className="text-xl font-semibold text-slate-900 mb-2">No saved hangouts yet</h3>
+                  <p className="text-slate-500 mb-6">Start exploring and save the ones that catch your eye!</p>
+                  <Button variant="outline" className="hover:bg-slate-50 bg-transparent">
+                    🔍 Browse All Events
+                  </Button>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </section>
+        </section>
+      </main>
+      <Toaster />
     </div>
   );
 } 

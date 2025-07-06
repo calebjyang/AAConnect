@@ -87,6 +87,7 @@ export function useAvailabilityManagement() {
         endTime: Timestamp.fromDate(availabilityData.endTime),
         description: availabilityData.description,
         ...(availabilityData.maxGuests !== null && { maxGuests: availabilityData.maxGuests }),
+        ...(availabilityData.tags && availabilityData.tags.length > 0 && { tags: availabilityData.tags }),
         createdAt: now,
         updatedAt: now,
         isActive: true,

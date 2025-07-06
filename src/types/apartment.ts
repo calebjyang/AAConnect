@@ -36,6 +36,7 @@ export interface AvailabilitySlot {
   endTime: Timestamp;
   description: string;
   maxGuests?: number | null;
+  tags?: string[];
   createdAt: Timestamp;
   updatedAt: Timestamp;
   isActive: boolean;
@@ -55,6 +56,7 @@ export interface AvailabilityFormData {
   endTime: Date;
   description: string;
   maxGuests?: number | null;
+  tags?: string[];
 }
 
 // Admin apartment management state

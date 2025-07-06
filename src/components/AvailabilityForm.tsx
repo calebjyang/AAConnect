@@ -23,6 +23,7 @@ export default function AvailabilityForm({
     endTime: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
     description: '',
     maxGuests: null,
+    tags: [],
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -70,6 +71,7 @@ export default function AvailabilityForm({
         endTime: new Date(Date.now() + 2 * 60 * 60 * 1000),
         description: '',
         maxGuests: null,
+        tags: [],
       });
     } catch {
       // Error handling is done in the parent component
@@ -192,6 +194,43 @@ export default function AvailabilityForm({
         <span className="text-xs text-gray-400">
           {formData.description.length}/200 characters
         </span>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className="block font-semibold text-gray-800 mb-1">
+          Tags <span className="text-gray-500 font-normal">(select all that apply)</span>
+        </label>
+        <div className="grid grid-cols-3 gap-2 mb-2">
+          {[
+            { key: 'snacks', label: 'Snacks', icon: '🍿' },
+            { key: 'games', label: 'Games', icon: '🎲' },
+            { key: 'study', label: 'Study', icon: '📚' },
+            { key: 'yap', label: 'Yap', icon: '🗣️' },
+            { key: 'quiet', label: 'Quiet', icon: '🤫' },
+            { key: 'prayer', label: 'Prayer', icon: '🙏' },
+          ].map(tag => (
+            <button
+              key={tag.key}
+              type="button"
+              className={`flex items-center justify-center gap-1 px-2 py-1 rounded-full border text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 ${
+                formData.tags?.includes(tag.key)
+                  ? 'bg-blue-100 border-blue-400 text-blue-800'
+                  : 'bg-gray-50 border-gray-300 text-gray-500 hover:bg-gray-100'
+              }`}
+              onClick={() => {
+                setFormData(prev => ({
+                  ...prev,
+                  tags: prev.tags?.includes(tag.key)
+                    ? prev.tags.filter(t => t !== tag.key)
+                    : [...(prev.tags || []), tag.key],
+                }));
+              }}
+              aria-pressed={formData.tags?.includes(tag.key) ? 'true' : 'false'}
+            >
+              <span>{tag.icon}</span> {tag.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="flex flex-col gap-1">
