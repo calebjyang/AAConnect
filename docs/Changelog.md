@@ -21,7 +21,7 @@
 
 ---
 
-## v1.0.3 – January 2025
+## v1.0.3 – July 2025
 - **Google OAuth Authentication System** 🔐
   - Enhanced Firebase Auth integration with Google OAuth
   - Improved error handling and user feedback
@@ -32,7 +32,7 @@
   - AdminRoute component for admin-only page protection
   - AuthTest component for debugging authentication
 
-## v1.0.2 – January 2025
+## v1.0.2 – July 2025
 - **Landing Page (v1) Completed** ✨
   - Hero section with "Welcome to AAConnect 👋" headline
   - Centered card layout with dual CTAs (View Events, Find Rides)
@@ -43,12 +43,12 @@
   - Responsive design optimized for mobile-first PWA
   - Accessibility improvements (WCAG 2.2 AA compliant)
 
-## v1.0.1 – July 2024
+## v1.0.1 – July 2025
 - Event Details page implemented
 - Carpool Algorithm (v1) implemented
 - Admin Dashboard updated for carpooling
 
-## v1.0 – June 24, 2025
+## v1.0 – June 2025
 - Initial PRD and MVP scope defined
 - Scaffolding:
     - event calendar
