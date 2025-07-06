@@ -669,6 +669,25 @@ The final implementation provides a robust, user-friendly system for posting apa
 
 ---
 
+## 🐞 Apartment Availability Tag Selector & UI Integration (July 2025)
+
+### Problem Description
+- Tag selector was not saving or displaying selected tags correctly in apartment availability posts.
+- Module resolution error: `use-toast` import path was incorrect, causing build failures.
+- Legacy/temp code from apartment-hosting integration cluttered the codebase.
+
+### Solution
+- Refactored tag selector to use a 3x2 grid with 6 tags (Snacks, Games, Study, Yap, Quiet, Prayer), ensuring only selected tags are saved and displayed.
+- Fixed import path for `use-toast` to resolve module errors.
+- Removed unused/legacy files and cleaned up the codebase.
+
+### Key Lessons Learned
+- Always verify import paths after moving or integrating code.
+- UI/UX improvements should be paired with robust data handling.
+- Regularly clean up legacy and temp files to maintain project health.
+
+---
+
 **Document Version**: 1.1  
 **Last Updated**: July 2025  
 **Contributors**: Development Team  

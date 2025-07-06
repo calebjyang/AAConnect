@@ -57,6 +57,8 @@ FIREBASE_ADMIN_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your_project.iam.gserviceacc
 - [ ] Audit admin access quarterly
 - [ ] Update dependencies for security patches
 - [ ] Monitor Firebase usage and costs
+- [ ] Remove unused dependencies and legacy/temp code to reduce attack surface
+- [ ] Verify import paths after code moves to prevent module resolution errors
 
 ## 🚨 Incident Response
 
@@ -110,6 +112,8 @@ service cloud.firestore {
 - **Vercel Environment Variables**: Secure management of Firebase credentials
 - **Preview Deployments**: Test security changes before production
 - **Git Integration**: Secure deployment pipeline with automatic security scanning
+- **Remove unused code**: Regularly remove temp/legacy files and unused dependencies to minimize risk
+- **Verify import paths**: Ensure all imports resolve correctly after refactoring or code moves
 
 ### Error Logging
 - All authentication errors are logged

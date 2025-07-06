@@ -176,6 +176,10 @@ The apartment availability system enables members to post and discover open time
 - **Availability Posting**: Intuitive form for posting time slots with descriptions
 - **Global Availability Dashboard**: Real-time view of all apartment availability
 - **Responsive Design**: Mobile-first interface optimized for PWA usage
+- **Tag Selector Redesign**: Tag selector now uses a 3x2 grid with 6 tags (Snacks, Games, Study, Yap, Quiet, Prayer) for clear, accessible selection
+- **UI Component Library**: Integrated Shadcn UI for modern, reusable UI primitives
+- **Modal/Card Layouts**: Improved modal and card layouts for clarity and compactness
+- **Code Cleanup**: Removed legacy/temp files and fixed import path issues for better maintainability
 
 #### Features Implemented:
 - **Admin Apartment Management**: Create, edit, and manage apartment listings
