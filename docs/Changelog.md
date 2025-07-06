@@ -1,5 +1,26 @@
 # 🕘 Changelog
 
+## v1.0.4 – January 2025
+- **Critical Bug Fix: Collection Name Mismatch** 🔧
+  - Fixed admin dashboard not displaying ride signups due to collection name mismatch
+  - Unified collection usage: both public form and admin dashboard now use `rides` collection
+  - Resolved merge conflicts and cleaned up unused imports
+  - Improved code consistency and maintainability
+  - Enhanced error handling for Firestore operations
+
+### 🛠 Technical Improvements
+- **Collection Consistency**: Standardized on `rides` collection across all components
+- **Import Cleanup**: Removed unused Firestore imports to reduce bundle size
+- **Merge Resolution**: Successfully resolved conflicts between feature branch and main
+- **Code Quality**: Improved ESLint compliance and TypeScript type safety
+
+### 🐛 Bug Fixes
+- **Admin Dashboard**: Now correctly displays all ride signups including "Fall Week 1"
+- **Data Visibility**: Fixed issue where new signups weren't visible in admin interface
+- **Collection Access**: Ensured consistent data access patterns across the application
+
+---
+
 ## v1.0.3 – January 2025
 - **Google OAuth Authentication System** 🔐
   - Enhanced Firebase Auth integration with Google OAuth

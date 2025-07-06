@@ -1,4 +1,64 @@
-# 🐛 AAConnect Drag-and-Drop Implementation: Bug Fixes & Lessons Learned
+# 🐛 AAConnect Bug Fixes & Lessons Learned
+
+**Project**: AAConnect MVP - Carpool Management System  
+**Technology Stack**: Next.js, React, Firebase, TypeScript, Tailwind CSS  
+**Date**: January 2025  
+
+---
+
+## 📋 Executive Summary
+
+This document outlines critical bug fixes and debugging journeys in AAConnect, providing valuable insights into Firebase development, React state management, and systematic debugging approaches. Each section covers a specific issue, its root cause, solution, and key lessons learned.
+
+---
+
+## 🚨 Critical Bug: Collection Name Mismatch (January 2025)
+
+### **Problem Description**
+Admin dashboard was not displaying ride signups, specifically "Fall Week 1" and other recent signups. Users reported seeing "Missing or insufficient permissions" errors, and even with open Firestore rules, the admin interface showed empty results.
+
+### **Root Cause Analysis**
+**Collection Name Inconsistency**: The application was using two different Firestore collection names:
+- **Public ride signup form**: Writing to `rides` collection
+- **Admin dashboard**: Reading from `rideSignups` collection
+
+This mismatch meant:
+- New signups went to `rides` collection
+- Admin dashboard looked in `rideSignups` collection
+- Result: Admin dashboard showed empty results despite successful signups
+
+### **Debugging Process**
+
+1. **Initial Investigation**: Checked Firestore rules, authentication, and project configuration
+2. **Environment Variables**: Verified all Firebase config values were correct
+3. **Collection Discovery**: Found the mismatch through code review
+4. **Testing**: Confirmed fix by updating admin code to use `rides` collection
+
+### **Solution**
+```typescript
+// ❌ BEFORE: Admin reading from wrong collection
+const querySnapshot = await getDocs(collection(db, 'rideSignups'));
+
+// ✅ AFTER: Admin reading from correct collection
+const querySnapshot = await getDocs(collection(db, 'rides'));
+```
+
+### **Key Lessons Learned**
+
+1. **Collection Naming Consistency**: Always use the same collection names across your entire application
+2. **Systematic Debugging**: When facing "permission" errors, check collection names before diving into complex rule debugging
+3. **Code Review**: Regular code reviews can catch these inconsistencies early
+4. **Testing Strategy**: Test both write and read operations to ensure data flow works end-to-end
+
+### **Prevention Strategies**
+- Use constants for collection names
+- Implement collection name validation
+- Add integration tests that verify data flow
+- Document collection naming conventions
+
+---
+
+## 🎯 Drag-and-Drop Implementation: Bug Fixes & Lessons Learned
 
 **Project**: AAConnect MVP - Carpool Management System  
 **Feature**: Admin Drag-and-Drop Carpool Editing  
