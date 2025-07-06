@@ -394,15 +394,15 @@ export default function ApartmentsPage() {
             </CardFooter>
           </Card>
 
-          {/* Main Content - What's Happening */}
+          {/* Main Content - What&apos;s Happening */}
           <section className="py-0 bg-white">
             <div className="mb-8 text-center">
               <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3">
                 <span className="text-4xl mr-2">🔥</span>
-                What's Happening
+                What&apos;s Happening
               </h2>
               <p className="text-slate-600 text-lg max-w-2xl mx-auto">
-                Discover amazing hangout spots and connect with your community. From study sessions to game nights, there's always something going on!
+                Discover amazing hangout spots and connect with your community. From study sessions to game nights, there&apos;s always something going on!
               </p>
             </div>
 
