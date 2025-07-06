@@ -1,6 +1,6 @@
 # 🕘 Changelog
 
-## v1.0.4 – January 2025
+## v1.0.4 – July 2025
 - **Critical Bug Fix: Collection Name Mismatch** 🔧
   - Fixed admin dashboard not displaying ride signups due to collection name mismatch
   - Unified collection usage: both public form and admin dashboard now use `rides` collection

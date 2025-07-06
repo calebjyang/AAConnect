@@ -1,7 +1,7 @@
 # 📘 AAConnect – Product Requirements Document (PRD)
 
 **Version:** 1.6  
-**Last Updated:** January 2025
+**Last Updated:** July 2025
 
 ---
 
@@ -57,7 +57,7 @@ The landing page serves as the primary entry point for AAConnect, providing user
 
 The carpool system provides comprehensive ride coordination for afterevents with both automated assignment and manual admin override capabilities. This feature includes a sophisticated drag-and-drop interface built with @dnd-kit for intuitive manual assignment management.
 
-### Recent Fixes (January 2025):
+### Recent Fixes (July 2025):
 - **Collection Name Consistency**: Fixed critical bug where admin dashboard wasn't displaying ride signups due to collection name mismatch between public form (`rides`) and admin interface (`rideSignups`)
 - **Data Visibility**: Ensured all signups are now visible in admin dashboard, including "Fall Week 1" and other weeks
 - **Code Quality**: Improved import consistency and reduced bundle size

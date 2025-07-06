@@ -2,7 +2,7 @@
 
 **Project**: AAConnect MVP - Carpool Management System  
 **Technology Stack**: Next.js, React, Firebase, TypeScript, Tailwind CSS  
-**Date**: January 2025  
+**Date**: July 2025  
 
 ---
 
@@ -12,7 +12,7 @@ This document outlines critical bug fixes and debugging journeys in AAConnect, p
 
 ---
 
-## 🚨 Critical Bug: Collection Name Mismatch (January 2025)
+## 🚨 Critical Bug: Collection Name Mismatch (July 2025)
 
 ### **Problem Description**
 Admin dashboard was not displaying ride signups, specifically "Fall Week 1" and other recent signups. Users reported seeing "Missing or insufficient permissions" errors, and even with open Firestore rules, the admin interface showed empty results.
