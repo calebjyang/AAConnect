@@ -119,7 +119,7 @@ The carpool system provides comprehensive ride coordination for afterevents with
 
 ---
 
-## �� Core Features
+## 🔐 Core Features
 
 ### 🔐 Authentication - COMPLETED ✅
 - Login required via Google OAuth
@@ -221,11 +221,12 @@ The carpool system provides comprehensive ride coordination for afterevents with
 
 ## 🛠 Technical Stack
 
-### Frontend
+### Frontend & Deployment
 - **Next.js 14**: React framework with App Router
 - **TypeScript**: Type-safe development
 - **Tailwind CSS**: Utility-first styling
 - **@dnd-kit**: Modern drag-and-drop library
+- **Vercel**: Deployment platform with native Next.js support
 - **Firebase SDK**: Real-time database integration
 
 ### Backend
@@ -243,3 +244,4 @@ The carpool system provides comprehensive ride coordination for afterevents with
 - **Accessibility**: WCAG 2.2 AA compliance
 - **Performance**: Fast loading with optimized bundles
 - **Code Quality**: Comprehensive linting and type safety
+- **Deployment**: Vercel with automatic Git integration and preview deployments

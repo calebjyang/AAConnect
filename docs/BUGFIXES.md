@@ -1,7 +1,7 @@
 # 🐛 AAConnect Bug Fixes & Lessons Learned
 
 **Project**: AAConnect MVP - Carpool Management System  
-**Technology Stack**: Next.js, React, Firebase, TypeScript, Tailwind CSS  
+**Technology Stack**: Next.js, React, Firebase, TypeScript, Tailwind CSS, Vercel  
 **Date**: July 2025  
 
 ---
