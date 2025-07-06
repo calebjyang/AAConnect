@@ -119,16 +119,20 @@ The carpool system provides comprehensive ride coordination for afterevents with
 
 ---
 
-## 🌟 Core Features
+## �� Core Features
 
-### 📆 Event Calendar - COMPLETED ✅
-- Chronological or calendar view of events
-- Each event includes name, date/time, location, description
-- RSVP handled via external Google Form
-- Admins can create/edit/delete events via admin dashboard
-- **List and Calendar View Toggle**: Users can switch between chronological and calendar layouts
-- **Event Detail Modal**: Comprehensive event information with Google Calendar integration
-- **Past Events Display**: Historical event viewing with visual distinction
+### 🔐 Authentication - COMPLETED ✅
+- Login required via Google OAuth
+- No domain restrictions for multi-campus and staff support
+
+### 🏠 Landing Page - COMPLETED ✅
+- Hero section with welcoming design and dual call-to-action buttons
+- Social media integration with direct links to Instagram, Facebook, Discord, and Linktree
+- Email subscription form for community newsletter
+- Quick Actions section with Events Calendar, Rides, and Community cards
+- Upcoming Events section with dynamic loading from Firebase
+- Responsive design optimized for mobile-first PWA installation
+- Accessibility improvements (WCAG 2.2 AA compliant)
 
 ### 🚗 Afterevent Carpool Coordinator - COMPLETED ✅
 - Members indicate whether they are a driver or need a ride
@@ -145,6 +149,23 @@ The carpool system provides comprehensive ride coordination for afterevents with
 - **Fallback Error Handling**: Graceful handling of invalid operations
 - Output is shown in-app with CSV export functionality
 
+### 📆 Event Calendar - COMPLETED ✅
+- Chronological or calendar view of events
+- Each event includes name, date/time, location, description
+- RSVP handled via external Google Form
+- Admins can create/edit/delete events via admin dashboard
+- **List and Calendar View Toggle**: Users can switch between chronological and calendar layouts
+- **Event Detail Modal**: Comprehensive event information with Google Calendar integration
+- **Past Events Display**: Historical event viewing with visual distinction
+
+### 🛠 Admin Dashboard - COMPLETED ✅
+- Protected `/admin` route
+- CRUD access for events
+- **Advanced Carpool Management**: Drag-and-drop interface with real-time validation
+- **Assignment Statistics**: Live metrics and success rates
+- **Export Functionality**: CSV export for assignments and raw data
+- Apartment assignment tools
+
 ### 🏠 Apartment Availability Wall
 - Admins seed apartment names (e.g. "Treehouse", "The Fridge")
 - Members can join one apartment
@@ -156,18 +177,6 @@ The carpool system provides comprehensive ride coordination for afterevents with
 
 ### 🔗 Social Media Links - COMPLETED ✅
 - Links out to AACF's Instagram, Facebook, YouTube, etc.
-
-### 🔐 Authentication - COMPLETED ✅
-- Login required via Google OAuth
-- No domain restrictions for multi-campus and staff support
-
-### 🛠 Admin Dashboard - COMPLETED ✅
-- Protected `/admin` route
-- CRUD access for events
-- **Advanced Carpool Management**: Drag-and-drop interface with real-time validation
-- **Assignment Statistics**: Live metrics and success rates
-- **Export Functionality**: CSV export for assignments and raw data
-- Apartment assignment tools
 
 ---
 
