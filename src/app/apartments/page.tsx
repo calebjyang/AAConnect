@@ -293,21 +293,14 @@ export default function ApartmentsPage() {
                           setIsLoading(false);
                           setIsPostModalOpen(false);
                           toast({
-                            title: (
-                              <span className="text-base font-bold text-green-700 flex items-center gap-2">
-                                <span className="text-xl">✅</span> Posted successfully!
-                              </span>
-                            ),
-                            description: (
-                              <span className="text-sm text-slate-800 font-medium">Your hangout is now live. Time to get social!</span>
-                            ),
-                            variant: "default",
+                            title: '✅ Posted successfully!',
+                            description: 'Your hangout is now live. Time to get social!',
+                            variant: 'default',
                           });
                         }}
                         loading={isLoading}
                         apartmentId={userApartment.id}
                         apartmentName={userApartment.name}
-                        onCancel={() => setIsPostModalOpen(false)}
                       />
                     </DialogContent>
                   </Dialog>
@@ -419,7 +412,9 @@ export default function ApartmentsPage() {
                                       quiet: { icon: '🤫', label: 'quiet' },
                                       prayer: { icon: '🙏', label: 'prayer' },
                                     };
-                                    const tagInfo = tagMap[tag] || { icon: '🏠', label: tag };
+                                    const tagInfo = (tag in tagMap)
+                                      ? tagMap[tag as keyof typeof tagMap]
+                                      : { icon: '🏠', label: tag };
                                     return (
                                       <Badge
                                         key={tag}
