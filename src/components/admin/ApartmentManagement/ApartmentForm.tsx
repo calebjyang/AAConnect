@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { ApartmentFormData } from '@/types/apartment';
 
 interface ApartmentFormProps {
-  onSubmit: (apartmentData: ApartmentFormData) => Promise<void>;
+  onSubmit: (_formData: ApartmentFormData) => Promise<void>;
   loading?: boolean;
   initialData?: Partial<ApartmentFormData>;
   mode?: 'create' | 'edit';

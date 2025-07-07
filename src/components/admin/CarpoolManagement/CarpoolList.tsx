@@ -15,12 +15,10 @@ interface CarpoolListProps {
   onEdit: () => void;
   onSave: () => Promise<void>;
   onCancel: () => void;
-  onDragStart: (event: any) => void;
-  onDragEnd: (event: any) => void;
-  getAssignmentStats: (assignments: AssignmentResult) => any;
+  onDragStart: (_event: any) => void;
+  onDragEnd: (_event: any) => void;
+  getAssignmentStats: (_assignments: AssignmentResult) => any;
   onExport: () => void;
-  onEditSignup: (signup: RideSignup) => void;
-  onDeleteSignup: (id: string) => void;
 }
 
 export default function CarpoolList({
@@ -37,8 +35,6 @@ export default function CarpoolList({
   onDragEnd,
   getAssignmentStats,
   onExport,
-  onEditSignup,
-  onDeleteSignup,
 }: CarpoolListProps) {
   // Get stats for display
   const stats = assignments ? getAssignmentStats(assignments) : null;
@@ -238,8 +234,6 @@ export default function CarpoolList({
                         <span>{rider.location}</span>
                         <span className="text-gray-400">•</span>
                         <span>📞 {rider.phone}</span>
-                        <button className="ml-2 text-blue-600 hover:underline text-xs" onClick={() => onEditSignup(rider)}>Edit</button>
-                        <button className="ml-1 text-red-600 hover:underline text-xs" onClick={() => onDeleteSignup(rider.id)}>Delete</button>
                       </li>
                     ))}
                   </ul>
@@ -261,8 +255,6 @@ export default function CarpoolList({
                     <span>{rider.location}</span>
                     <span className="text-red-400">•</span>
                     <span>📞 {rider.phone}</span>
-                    <button className="ml-2 text-blue-600 hover:underline text-xs" onClick={() => onEditSignup(rider)}>Edit</button>
-                    <button className="ml-1 text-red-600 hover:underline text-xs" onClick={() => onDeleteSignup(rider.id)}>Delete</button>
                   </li>
                 ))}
               </ul>

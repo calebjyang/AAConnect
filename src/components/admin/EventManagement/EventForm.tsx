@@ -4,7 +4,7 @@ import { Timestamp } from 'firebase/firestore';
 import type { EventData } from '@/hooks/admin/useEventManagement';
 
 interface EventFormProps {
-  onSubmit: (eventData: EventData) => Promise<void>;
+  onSubmit: (_formData: EventData) => Promise<void>;
   loading?: boolean;
 }
 

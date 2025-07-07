@@ -3,8 +3,8 @@ import type { RideSignupAdmin } from '@/hooks/admin/useCarpoolManagement';
 
 interface CarpoolSignupsListProps {
   signups: RideSignupAdmin[];
-  onEdit: (signup: RideSignupAdmin) => void;
-  onDelete: (id: string) => void;
+  onEdit: (_signup: RideSignupAdmin) => void;
+  onDelete: (_id: string) => void;
   loading?: boolean;
 }
 

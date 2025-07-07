@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { collection, getDocs, query } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
@@ -136,9 +137,11 @@ export default function MemberAssignmentModal({
                     >
                       <div className="flex items-center space-x-3">
                         {user.photoURL && (
-                          <img
+                          <Image
                             src={user.photoURL}
                             alt={user.displayName}
+                            width={32}
+                            height={32}
                             className="w-8 h-8 rounded-full"
                           />
                         )}

@@ -1,5 +1,6 @@
 "use client";
 import { useState } from 'react';
+import Image from 'next/image';
 import type { Apartment, ApartmentMember } from '@/types/apartment';
 
 interface ApartmentListProps {
@@ -130,9 +131,11 @@ export default function ApartmentList({
                       {apartmentMembers.map((member) => (
                         <div key={member.id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded">
                           {member.userPicture && (
-                            <img
+                            <Image
                               src={member.userPicture}
                               alt={member.userName}
+                              width={32}
+                              height={32}
                               className="w-8 h-8 rounded-full"
                             />
                           )}

@@ -3,7 +3,7 @@ import type { Event } from '@/hooks/admin/useEventManagement';
 
 interface EventListProps {
   events: Event[];
-  onDelete: (id: string) => Promise<void>;
+  onDelete: (_id: string) => Promise<void>;
   loading?: boolean;
 }
 

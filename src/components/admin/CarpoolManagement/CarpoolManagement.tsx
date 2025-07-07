@@ -18,8 +18,6 @@ export default function CarpoolManagement() {
     exportCSV,
     testAssignment,
     assignments,
-    showAssignments,
-    setShowAssignments,
     isEditing,
     startEditing,
     cancelEditing,
@@ -164,8 +162,6 @@ export default function CarpoolManagement() {
           onDragEnd={handleDragEnd}
           getAssignmentStats={getAssignmentStats}
           onExport={exportAssignments}
-          onEditSignup={signup => { setEditingSignup(signup); setShowForm(true); }}
-          onDeleteSignup={handleDeleteSignup}
         />
       )}
     </div>

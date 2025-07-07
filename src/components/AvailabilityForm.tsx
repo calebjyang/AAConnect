@@ -3,19 +3,17 @@ import { useState } from 'react';
 import type { AvailabilityFormData } from '@/types/apartment';
 
 interface AvailabilityFormProps {
-  onSubmit: (_availabilityData: AvailabilityFormData) => Promise<void>;
+  onSubmit: (_data: AvailabilityFormData) => Promise<void>;
   loading?: boolean;
   apartmentId: string;
   apartmentName: string;
-  onCancel?: () => void;
 }
 
 export default function AvailabilityForm({
   onSubmit,
   loading = false,
   apartmentId,
-  apartmentName,
-  onCancel
+  apartmentName
 }: AvailabilityFormProps) {
   const [formData, setFormData] = useState<AvailabilityFormData>({
     apartmentId,

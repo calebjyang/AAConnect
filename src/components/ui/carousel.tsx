@@ -28,7 +28,11 @@ type CarouselContextProps = {
   scrollNext: () => void
   canScrollPrev: boolean
   canScrollNext: boolean
-} & CarouselProps
+  opts?: CarouselOptions
+  plugins?: CarouselPlugin
+  orientation?: "horizontal" | "vertical"
+  setApi?: (api: CarouselApi) => void
+}
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null)
 
@@ -126,6 +130,7 @@ const Carousel = React.forwardRef<
           carouselRef,
           api: api,
           opts,
+          plugins,
           orientation:
             orientation || (opts?.axis === "y" ? "vertical" : "horizontal"),
           scrollPrev,

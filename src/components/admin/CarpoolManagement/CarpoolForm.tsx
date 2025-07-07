@@ -4,7 +4,7 @@ import type { RideSignupAdmin } from '@/hooks/admin/useCarpoolManagement';
 
 interface CarpoolFormProps {
   initialValues?: Partial<RideSignupAdmin>;
-  onSubmit: (values: Omit<RideSignupAdmin, 'id'>) => Promise<void>;
+  onSubmit: (_formData: Omit<RideSignupAdmin, 'id'>) => Promise<void>;
   loading?: boolean;
   aftereventWeeks: string[];
 }
