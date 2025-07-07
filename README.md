@@ -1,6 +1,68 @@
 # AAConnect
 
-**AAConnect** is a modern PWA for AACF chapters, centralizing event discovery, RSVP, and carpool coordination. Built with Next.js, Firebase, and Tailwind CSS, it streamlines community logistics and fosters connection.
+A Next.js PWA for Asian American Christian Fellowship chapters that centralizes event access, afterevent ride coordination, and apartment availability for spontaneous hangouts.
+
+<!-- Vercel deployment fix: Updated tsconfig.json and resolved import issues -->
+
+## Features
+
+- **Authentication**: Google OAuth via Firebase Auth
+- **Event Management**: Calendar view with event details and RSVP
+- **Carpool Coordination**: Smart assignment algorithm with admin override
+- **Apartment Availability**: Post and discover hangout opportunities
+- **Admin Dashboard**: Complete management interface
+- **Mobile-First PWA**: Optimized for mobile devices
+
+## Tech Stack
+
+- **Frontend**: Next.js 14, TypeScript, Tailwind CSS, Shadcn UI
+- **Backend**: Firebase (Auth, Firestore)
+- **Deployment**: Vercel
+- **UI Components**: Radix UI, Lucide React icons
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up environment variables (see `.env.example`)
+4. Run development server: `npm run dev`
+5. Build for production: `npm run build`
+
+## Environment Variables
+
+Create a `.env.local` file with your Firebase configuration:
+
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+```
+
+## Development
+
+- **Code Style**: ESLint + Prettier
+- **Type Safety**: TypeScript strict mode
+- **Testing**: Jest + React Testing Library (planned)
+- **Performance**: Next.js App Router with SSR/SSG
+
+## Deployment
+
+The app is configured for deployment on Vercel with automatic builds from the main branch.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests and linting
+5. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details.
 
 ---
 
