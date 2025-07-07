@@ -48,6 +48,20 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 - **Testing**: Jest + React Testing Library (planned)
 - **Performance**: Next.js App Router with SSR/SSG
 
+### UI Component File Naming Convention
+
+All files in `src/components/ui/` **must be lowercase** (e.g., `button.tsx`, `card.tsx`).
+
+> This prevents deployment errors on Vercel and other Linux servers, which are case-sensitive. Imports like `@/components/ui/button` will only work if the file is named `button.tsx` (not `Button.tsx`).
+
+**To check for violations before pushing:**
+
+```sh
+find src/components/ui -type f | grep -E '[A-Z]'
+```
+
+If any files are listed, rename them to lowercase using `git mv`.
+
 ## Deployment
 
 The app is configured for deployment on Vercel with automatic builds from the main branch.
