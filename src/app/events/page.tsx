@@ -353,9 +353,10 @@ export default function EventsPage() {
           id: doc.id,
           ...doc.data(),
         })) as Event[];
+        console.log("Fetched events:", data);
         setEvents(data);
       } catch (error) {
-        console.error("Error fetching events:", error);
+        console.error("Error fetching events:", error instanceof Error ? error.message : error);
       } finally {
         setEventsLoading(false);
       }

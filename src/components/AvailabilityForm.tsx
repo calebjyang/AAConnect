@@ -206,6 +206,7 @@ export default function AvailabilityForm({
             { key: 'yap', label: 'Yap', icon: '🗣️' },
             { key: 'quiet', label: 'Quiet', icon: '🤫' },
             { key: 'prayer', label: 'Prayer', icon: '🙏' },
+            { key: 'jam', label: 'Jam Sesh', icon: '🎸' },
           ].map(tag => (
             <button
               key={tag.key}

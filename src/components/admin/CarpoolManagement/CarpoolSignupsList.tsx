@@ -23,6 +23,8 @@ export default function CarpoolSignupsList({ signups, onEdit, onDelete, loading 
               <tr className="bg-gray-100">
                 <th className="px-3 py-2 border text-gray-800 font-bold">Name</th>
                 <th className="px-3 py-2 border text-gray-800 font-bold">Phone</th>
+                <th className="px-3 py-2 border text-gray-800 font-bold">Grade</th>
+                <th className="px-3 py-2 border text-gray-800 font-bold">Gender</th>
                 <th className="px-3 py-2 border text-gray-800 font-bold">Can Drive</th>
                 <th className="px-3 py-2 border text-gray-800 font-bold">Capacity</th>
                 <th className="px-3 py-2 border text-gray-800 font-bold">Location</th>
@@ -36,6 +38,8 @@ export default function CarpoolSignupsList({ signups, onEdit, onDelete, loading 
                 <tr key={signup.id}>
                   <td className="px-3 py-2 border text-gray-700">{signup.name}</td>
                   <td className="px-3 py-2 border text-gray-700">{signup.phone}</td>
+                  <td className="px-3 py-2 border text-gray-700">{signup.grade ?? ''}</td>
+                  <td className="px-3 py-2 border text-gray-700">{signup.gender ?? ''}</td>
                   <td className="px-3 py-2 border text-gray-700">{signup.canDrive}</td>
                   <td className="px-3 py-2 border text-gray-700">{signup.capacity ?? ''}</td>
                   <td className="px-3 py-2 border text-gray-700">{signup.location}</td>

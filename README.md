@@ -66,6 +66,49 @@ If any files are listed, rename them to lowercase using `git mv`.
 
 The app is configured for deployment on Vercel with automatic builds from the main branch.
 
+---
+
+## Vercel Deployment
+
+### 1. Connect to Vercel
+- Go to [Vercel](https://vercel.com/) and import this repository.
+- Set the **Production Branch** to `main` (or your preferred branch).
+
+### 2. Set Environment Variables
+- In your Vercel project dashboard, go to **Settings → Environment Variables**.
+- Add all required Firebase variables (see `.env.example` or below):
+  - `NEXT_PUBLIC_FIREBASE_API_KEY`
+  - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+  - `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+  - `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+  - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+  - `NEXT_PUBLIC_FIREBASE_APP_ID`
+  - `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID`
+- For server-side admin features, add:
+  - `FIREBASE_ADMIN_PROJECT_ID`
+  - `FIREBASE_ADMIN_PRIVATE_KEY`
+  - `FIREBASE_ADMIN_CLIENT_EMAIL`
+
+### 3. Add Vercel Domain to Firebase Auth
+- In the [Firebase Console](https://console.firebase.google.com/), go to **Authentication → Settings → Authorized domains**.
+- Add your Vercel domain (e.g., `your-app.vercel.app`) and any custom domains you use.
+- Also add `localhost` for local development.
+
+### 4. Deployment Workflow
+- **Automatic Deploys:** By default, every push to the production branch triggers a deployment.
+- **Preview Deploys:** Every pull request or branch gets a unique preview URL.
+- **Best Practice:**
+  - Work on feature branches and only merge to `main` when ready for production.
+  - If you want to push code without deploying, use a non-production branch.
+  - You can disable automatic deploys in Vercel settings if you want to deploy manually.
+
+### 5. Environment-Specific Auth Domain
+- For local development, set `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=localhost` in `.env.local`.
+- For production, set `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-app.vercel.app` in Vercel.
+- Both domains must be in Firebase's authorized domains list.
+
+---
+
 ## Contributing
 
 1. Fork the repository

@@ -63,6 +63,8 @@ export default function CarpoolManagement() {
         location: values.location,
         aftereventWeek: values.aftereventWeek,
         submittedAt: values.submittedAt,
+        grade: values.grade,
+        gender: values.gender,
       };
       if (values.canDrive === 'yes' && values.capacity) {
         update.capacity = values.capacity;

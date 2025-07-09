@@ -688,7 +688,127 @@ The final implementation provides a robust, user-friendly system for posting apa
 
 ---
 
+## 🚀 Vercel Deployment: Lessons Learned & Best Practices (July 2025)
+
+### Problem
+Deployments to Vercel failed or authentication broke due to misconfigured environment variables, missing Firebase Auth domains, or confusion about automatic deploys.
+
+### Key Lessons Learned
+
+1. **Environment Variables Must Be Set in Vercel**
+   - All Firebase config variables (API key, Auth domain, etc.) must be set in the Vercel dashboard under Project → Settings → Environment Variables.
+   - Server-side admin variables (private key, client email) must also be set for admin features.
+
+2. **Firebase Auth Domain Configuration**
+   - Your Vercel deployment domain (e.g., `your-app.vercel.app`) must be added to the Firebase Console under Authentication → Settings → Authorized domains.
+   - For local development, add `localhost` as well.
+   - The value of `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` should match the domain your app is running on (use `localhost` locally, Vercel domain in production).
+
+3. **Deployment Workflow**
+   - By default, every push to the production branch (e.g., `main`) triggers an automatic deployment on Vercel.
+   - Use feature branches for development and only merge to `main` when ready for production.
+   - Preview deployments are available for every branch and pull request.
+   - You can disable automatic deploys in Vercel settings if you want to deploy manually.
+
+4. **Debugging Deployment Issues**
+   - If authentication fails after deployment, check that the deployed domain is in Firebase's authorized domains and that all environment variables are set correctly in Vercel.
+   - Case sensitivity in file names (especially in `src/components/ui/`) can cause build failures on Vercel's Linux environment—always use lowercase file names.
+
+### Best Practices
+- Document all required environment variables in `.env.example` and your README.
+- Add new deployment domains to Firebase Auth as soon as you create them.
+- Use Vercel's preview deployments to test features before merging to production.
+- Regularly review Vercel and Firebase settings after major changes or refactors.
+
+---
+
 **Document Version**: 1.1  
 **Last Updated**: July 2025  
 **Contributors**: Development Team  
 **Review Status**: ✅ Complete 
+
+---
+
+## 🚀 Feature Enhancements: Lessons Learned (July 2025)
+
+### Enhanced Carpool Algorithm with Grade & Gender Matching
+
+#### Problem
+The original carpool algorithm only considered location proximity, which could result in cars with homogeneous grade levels and gender imbalances, limiting community building opportunities.
+
+#### Solution Implemented
+- **Grade Mixing**: Added grade field to signup forms and algorithm logic to ensure diverse grade levels in each car
+- **Gender Balance**: Implemented logic to prioritize having at least 2 females per car when possible
+- **Post-Processing Optimization**: Added `optimizeAssignments` function that swaps riders between cars to improve distribution
+- **Enhanced Data Collection**: Updated all forms (public and admin) to collect grade and gender information
+
+#### Key Lessons Learned
+1. **Algorithm Design**: Post-processing optimization is more effective than trying to build all constraints into the initial assignment
+2. **Data Consistency**: When adding new fields, ensure they're added to all related interfaces, forms, and database operations
+3. **User Experience**: New required fields should be clearly labeled and have sensible default options
+4. **Admin Interface**: Admin forms and data displays should be updated simultaneously with public forms
+
+#### Technical Implementation
+- Updated `RideSignup` interface in `carpoolAlgorithm.ts`
+- Enhanced `assignCarpools` function with post-processing optimization
+- Added grade and gender fields to public signup form (`/events/rides`)
+- Updated admin carpool management forms and data display
+- Maintained backward compatibility with existing data
+
+### Jam Sesh Tag Addition
+
+#### Problem
+Users wanted to indicate when their apartment availability included music/jam sessions, but the existing tag system only had 6 options.
+
+#### Solution Implemented
+- Added "Jam Sesh" tag with 🎸 icon to the availability form
+- Updated tag mapping in both form and display components
+- Maintained the 3-column grid layout (7 tags now span 3 rows)
+
+#### Key Lessons Learned
+1. **Tag System Design**: Keep tag options focused and meaningful to users
+2. **Icon Selection**: Choose intuitive icons that clearly represent the activity
+3. **Grid Layout**: Consider how new tags will affect the visual layout
+4. **Consistency**: Update both form and display components to maintain consistency
+
+### Global Navigation System
+
+#### Problem
+Users had to manually navigate by typing URLs or use inconsistent navigation patterns across different pages, making the app difficult to use.
+
+#### Solution Implemented
+- **Global Navigation Component**: Created `GlobalNavigation.tsx` with persistent header
+- **Mobile Hamburger Menu**: Responsive slide-out menu for mobile devices
+- **Active Page Indicators**: Visual feedback showing current location
+- **Authentication Integration**: Sign in/out functionality integrated into navigation
+- **Layout Integration**: Updated main layout to include global navigation
+
+#### Key Lessons Learned
+1. **Component Architecture**: Global navigation should be a separate component for maintainability
+2. **Authentication State**: Navigation needs to handle loading states and authentication changes gracefully
+3. **Mobile-First Design**: Hamburger menus are essential for mobile usability
+4. **Active States**: Visual feedback for current page improves user experience
+5. **Layout Structure**: Global navigation should be integrated at the layout level, not individual pages
+
+#### Technical Implementation
+- Created `GlobalNavigation.tsx` component with mobile responsiveness
+- Updated `useAuth` hook to include `signOut` function
+- Integrated navigation into main layout (`src/app/layout.tsx`)
+- Removed duplicate navigation from individual pages (e.g., apartments page)
+- Used Next.js App Router for client-side navigation
+
+### Code Quality Improvements
+
+#### Lessons Learned
+1. **Import Cleanup**: When removing features, clean up all related imports to prevent build errors
+2. **Type Safety**: Always update TypeScript interfaces when adding new fields
+3. **Component Reusability**: Global components like navigation should be designed for reuse across the app
+4. **Error Handling**: New features should include proper error handling and loading states
+5. **Documentation**: Update documentation (PRD, lessons learned) when implementing new features
+
+#### Best Practices Established
+- **Feature Documentation**: Document all new features in PRD with implementation details
+- **Interface Updates**: When adding fields, update all related interfaces and forms
+- **Component Testing**: Test new components across different screen sizes and authentication states
+- **Code Review**: Review imports and unused variables when making changes
+- **User Experience**: Consider how new features affect the overall user flow 

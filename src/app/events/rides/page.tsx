@@ -12,6 +12,7 @@ interface RideSignup {
   submittedAt: string;
   aftereventWeek: string;
   capacity?: string;
+  grade?: string;
 }
 
 export default function RidesFormPage() {
@@ -21,6 +22,7 @@ export default function RidesFormPage() {
   const [capacity, setCapacity] = useState("");
   const [location, setLocation] = useState("");
   const [otherLocation, setOtherLocation] = useState("");
+  const [grade, setGrade] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
@@ -37,6 +39,16 @@ export default function RidesFormPage() {
     "Plaza",
     "Other ACC (NOT Plaza)",
     "Other"
+  ];
+
+  const gradeOptions = [
+    "First Year",
+    "Second Year",
+    "Third Year",
+    "Fourth Year",
+    "Fifth Year",
+    "Graduate Student",
+    "Staff"
   ];
 
   useEffect(() => {
@@ -70,7 +82,7 @@ export default function RidesFormPage() {
     setError("");
     setSuccess("");
     const finalLocation = location === "Other" ? otherLocation : location;
-    if (!name || !phone || !canDrive || !finalLocation) {
+    if (!name || !phone || !canDrive || !finalLocation || !grade) {
       setError("Please fill out all required fields.");
       setLoading(false);
       return;
@@ -88,6 +100,7 @@ export default function RidesFormPage() {
         location: finalLocation,
         submittedAt: new Date().toISOString(),
         aftereventWeek,
+        grade,
       };
       if (canDrive === "Yes" && capacity) data.capacity = capacity;
       await addDoc(collection(db, "rides"), data);
@@ -98,6 +111,7 @@ export default function RidesFormPage() {
       setCapacity("");
       setLocation("");
       setOtherLocation("");
+      setGrade("");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError("Failed to submit. " + err.message);
@@ -130,6 +144,15 @@ export default function RidesFormPage() {
           <div>
             <label className="block font-semibold text-gray-800 mb-1">Phone Number <span className="text-red-500">*</span></label>
             <input type="tel" className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition text-gray-900" value={phone} onChange={e => setPhone(e.target.value)} required />
+          </div>
+          <div>
+            <label className="block font-semibold text-gray-800 mb-1">Grade/Year <span className="text-red-500">*</span></label>
+            <select className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition text-gray-900" value={grade} onChange={e => setGrade(e.target.value)} required>
+              <option value="">Select your grade/year</option>
+              {gradeOptions.map(option => (
+                <option key={option} value={option}>{option}</option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block font-semibold text-gray-800 mb-1">Can you drive? <span className="text-red-500">*</span></label>

@@ -5,9 +5,6 @@ import { useUserApartment } from '@/hooks/useUserApartment';
 import { useAvailabilityManagement } from '@/hooks/useAvailabilityManagement';
 import { useAuth } from '@/lib/useAuth';
 import AvailabilityForm from '@/components/AvailabilityForm';
-import UserProfile from '@/components/UserProfile';
-import Image from "next/image";
-import Link from "next/link";
 import type { AvailabilityFormData } from '@/types/apartment';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,25 +15,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useMobile } from "@/hooks/use-mobile";
 import {
-  Bell,
-  Calendar,
-  Home,
-  LogOut,
-  Menu,
-  User,
   X,
   MapPin,
   Clock,
   Users,
   Heart,
+  Calendar,
 } from "lucide-react";
 
 export default function ApartmentsPage() {
@@ -51,7 +40,6 @@ export default function ApartmentsPage() {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const isMobile = useMobile();
 
   const handleCreateAvailability = async (availabilityData: AvailabilityFormData) => {
     if (!user || !userApartment) return;
@@ -92,119 +80,6 @@ export default function ApartmentsPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Enhanced Header */}
-      <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-slate-200/50 shadow-sm">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="mr-4">
-              <Link href="/" className="flex items-center space-x-2">
-                <Image 
-                  src="/logo.png" 
-                  alt="AAConnect Logo" 
-                  width={40} 
-                  height={40} 
-                  className="rounded-full bg-white p-1 shadow"
-                />
-                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  AAConnect
-                </span>
-              </Link>
-            </div>
-            {!isMobile && (
-              <nav className="hidden md:flex space-x-6">
-                <Link href="/" className="text-slate-700 hover:text-blue-600 transition-colors font-medium">
-                  Discover
-                </Link>
-                <Link href="/events" className="text-slate-700 hover:text-blue-600 transition-colors font-medium">
-                  Events
-                </Link>
-                <Link href="/apartments" className="text-blue-600 font-medium">
-                  Hosting
-                </Link>
-                <Link href="/admin" className="text-slate-700 hover:text-blue-600 transition-colors font-medium">
-                  Admin
-                </Link>
-              </nav>
-            )}
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="icon" className="relative hover:bg-blue-50">
-              <Bell className="h-5 w-5 text-slate-700" />
-              <span className="absolute -top-1 -right-1 h-3 w-3 bg-gradient-to-r from-pink-500 to-red-500 rounded-full flex items-center justify-center">
-                <span className="text-[10px] text-white font-bold">2</span>
-              </span>
-            </Button>
-
-            <div className="flex items-center">
-              {!loading && user && <UserProfile />}
-            </div>
-
-            {isMobile && (
-              <Sheet>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Menu className="h-5 w-5" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right">
-                  <div className="flex flex-col h-full">
-                    <div className="flex items-center mb-6 mt-2">
-                      <Avatar className="h-10 w-10 mr-3">
-                        <AvatarImage src={user?.photoURL || "/placeholder.svg"} alt={user?.displayName || "User"} />
-                        <AvatarFallback>{user?.displayName?.charAt(0) || "U"}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium">{user?.displayName || "User"}</p>
-                        <p className="text-sm text-slate-500">{user?.email}</p>
-                      </div>
-                    </div>
-
-                    <nav className="space-y-4">
-                      <Link
-                        href="/"
-                        className="flex items-center space-x-2 text-slate-700 hover:text-blue-600 transition-colors"
-                      >
-                        <Home className="h-5 w-5" />
-                        <span>Discover</span>
-                      </Link>
-                      <Link
-                        href="/events"
-                        className="flex items-center space-x-2 text-slate-700 hover:text-blue-600 transition-colors"
-                      >
-                        <Calendar className="h-5 w-5" />
-                        <span>Events</span>
-                      </Link>
-                      <Link href="/apartments" className="flex items-center space-x-2 text-blue-600">
-                        <Home className="h-5 w-5" />
-                        <span>Hosting</span>
-                      </Link>
-                      <Link
-                        href="/admin"
-                        className="flex items-center space-x-2 text-slate-700 hover:text-blue-600 transition-colors"
-                      >
-                        <User className="h-5 w-5" />
-                        <span>Admin</span>
-                      </Link>
-                    </nav>
-
-                    <div className="mt-auto">
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <LogOut className="h-5 w-5 mr-2" />
-                        Sign Out
-                      </Button>
-                    </div>
-                  </div>
-                </SheetContent>
-              </Sheet>
-            )}
-          </div>
-        </div>
-      </header>
-
       <main className="flex-1 bg-white">
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white py-12 md:py-16 relative overflow-hidden">
@@ -361,12 +236,9 @@ export default function ApartmentsPage() {
                         <CardContent className="p-6">
                           <div className="flex items-start justify-between mb-4">
                             <div className="flex items-start space-x-4 flex-1">
-                              <Avatar className="h-12 w-12 border-2 border-slate-200 group-hover:border-blue-300 transition-colors">
-                                <AvatarImage src="/placeholder.svg" alt={slot.postedByName} />
-                                <AvatarFallback className="bg-gradient-to-r from-blue-400 to-purple-400 text-white">
-                                  {slot.postedByName.charAt(0)}
-                                </AvatarFallback>
-                              </Avatar>
+                              <div className="h-12 w-12 border-2 border-slate-200 group-hover:border-blue-300 transition-colors rounded-full bg-gradient-to-r from-blue-400 to-purple-400 text-white flex items-center justify-center font-semibold text-lg">
+                                {slot.postedByName.charAt(0)}
+                              </div>
 
                               <div className="flex-1">
                                 <div className="flex items-center space-x-2 mb-1">
@@ -411,6 +283,7 @@ export default function ApartmentsPage() {
                                       yap: { icon: '🗣️', label: 'yap' },
                                       quiet: { icon: '🤫', label: 'quiet' },
                                       prayer: { icon: '🙏', label: 'prayer' },
+                                      jam: { icon: '🎸', label: 'jam sesh' },
                                     };
                                     const tagInfo = (tag in tagMap)
                                       ? tagMap[tag as keyof typeof tagMap]

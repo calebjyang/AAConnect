@@ -1,5 +1,20 @@
 # 🕘 Changelog
 
+## v1.0.5 – July 2025
+- **UI/UX Enhancements**
+  - Apartment availability tag selector redesigned: now uses a 3x2 grid with 6 tags (Snacks, Games, Study, Yap, Quiet, Prayer)
+  - Tag selector buttons are visually balanced, centered, and accessible
+  - Apartment cards now display only selected tags with correct icons
+  - Improved modal and card layouts for clarity and compactness
+- **Technical Improvements**
+  - Integrated Shadcn UI component library for modern, reusable UI primitives
+  - Removed legacy/temp files and unused code from apartment-hosting integration
+  - Fixed import path for use-toast to resolve module errors
+  - Cleaned up unused npm processes and ensured clean workspace
+- **Testing & Linting**
+  - All unit tests pass
+  - Linter warnings remain (mostly unused variables), but no critical errors
+
 ## v1.0.4 – July 2025
 - **Critical Bug Fix: Collection Name Mismatch** 🔧
   - Fixed admin dashboard not displaying ride signups due to collection name mismatch
@@ -61,7 +76,7 @@
   - Members can join one apartment and post hangout windows
 - Carpool Rides Manual Editing
 - Unit Tests
-- Deploy to Firebase Hosting
+- Deploy to Vercel
 - Weekly Recap
 
 ### 🚀 New Features

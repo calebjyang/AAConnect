@@ -8,6 +8,8 @@ export interface RideSignup {
   aftereventWeek: string;
   submittedAt: string;
   capacity?: string;
+  grade?: string;
+  gender?: string;
 }
 
 export interface CarpoolAssignment {
@@ -48,9 +50,33 @@ function areLocationsCompatible(location1: string, location2: string): boolean {
   return getLocationGroup(location1) === getLocationGroup(location2);
 }
 
+// Helper function to count females in a car
+function countFemales(riders: RideSignup[]): number {
+  return riders.filter(rider => rider.gender === 'Female').length;
+}
+
+// Helper function to get grade level (for sorting)
+function getGradeLevel(grade: string): number {
+  const gradeMap: { [key: string]: number } = {
+    'First Year': 1,
+    'Second Year': 2,
+    'Third Year': 3,
+    'Fourth Year': 4,
+    'Fifth Year': 5,
+    'Graduate Student': 6,
+    'Staff': 7,
+  };
+  return gradeMap[grade] || 0;
+}
+
 /**
- * Main carpool assignment algorithm
- * Priority: Departure > Capacity > Friend-Group mixing
+ * Enhanced carpool assignment algorithm
+ * Priority: Departure > Capacity > Grade Mixing > Gender Balance > Friend-Group mixing
+ * 
+ * New features:
+ * - Grade-based matching (mix of grades in each car)
+ * - Gender balance (ensure at least 2 females per car when possible)
+ * - Maintains existing location-based matching
  */
 export function assignCarpools(signups: RideSignup[], week: string): AssignmentResult {
   // Filter signups for the specified week
@@ -102,6 +128,7 @@ export function assignCarpools(signups: RideSignup[], week: string): AssignmentR
         i++;
       }
     }
+    
     // Second pass: Try to match by location group (friend-group mixing)
     for (let i = 0; i < availableRiders.length; ) {
       if (assignment.usedCapacity >= assignment.totalCapacity) break;
@@ -114,6 +141,7 @@ export function assignCarpools(signups: RideSignup[], week: string): AssignmentR
         i++;
       }
     }
+    
     // Third pass: Fill remaining spots with any available riders
     for (let i = 0; i < availableRiders.length; ) {
       if (assignment.usedCapacity >= assignment.totalCapacity) break;
@@ -122,8 +150,12 @@ export function assignCarpools(signups: RideSignup[], week: string): AssignmentR
       assignment.usedCapacity++;
       availableRiders.splice(i, 1);
     }
+    
     assignments.push(assignment);
   }
+  
+  // Post-processing: Optimize grade and gender distribution
+  optimizeAssignments(assignments, availableRiders);
   
   // Any remaining riders are unassigned
   unassignedRiders.push(...availableRiders);
@@ -140,6 +172,95 @@ export function assignCarpools(signups: RideSignup[], week: string): AssignmentR
     unassignedRiders,
     overflowMessage
   };
+}
+
+/**
+ * Optimize assignments for better grade and gender distribution
+ */
+function optimizeAssignments(assignments: CarpoolAssignment[], availableRiders: RideSignup[]) {
+  // Try to improve gender balance by swapping riders between cars
+  for (let i = 0; i < assignments.length; i++) {
+    const car1 = assignments[i];
+    const femaleCount1 = countFemales(car1.riders);
+    
+    // If this car has less than 2 females, try to get more
+    if (femaleCount1 < 2) {
+      for (let j = 0; j < assignments.length; j++) {
+        if (i === j) continue;
+        
+        const car2 = assignments[j];
+        const femaleCount2 = countFemales(car2.riders);
+        
+        // If car2 has more than 2 females, try to swap
+        if (femaleCount2 > 2) {
+          // Find a female in car2 to swap with a male in car1
+          const femaleInCar2 = car2.riders.find(r => r.gender === 'Female');
+          const maleInCar1 = car1.riders.find(r => r.gender === 'Male');
+          
+          if (femaleInCar2 && maleInCar1) {
+            // Perform the swap
+            car1.riders = car1.riders.map(r => r.id === maleInCar1.id ? femaleInCar2 : r);
+            car2.riders = car2.riders.map(r => r.id === femaleInCar2.id ? maleInCar1 : r);
+            break;
+          }
+        }
+      }
+    }
+  }
+  
+  // Try to improve grade distribution
+  for (let i = 0; i < assignments.length; i++) {
+    const car1 = assignments[i];
+    const grades1 = car1.riders.map(r => r.grade).filter(Boolean);
+    
+    // If this car has too many of the same grade, try to diversify
+    if (grades1.length > 0) {
+      const gradeCounts = grades1.reduce((acc, grade) => {
+        acc[grade!] = (acc[grade!] || 0) + 1;
+        return acc;
+      }, {} as { [key: string]: number });
+      
+      const maxGradeCount = Math.max(...Object.values(gradeCounts));
+      
+      // If more than half the riders are the same grade, try to swap
+      if (maxGradeCount > grades1.length / 2) {
+        for (let j = 0; j < assignments.length; j++) {
+          if (i === j) continue;
+          
+          const car2 = assignments[j];
+          const grades2 = car2.riders.map(r => r.grade).filter(Boolean);
+          
+          if (grades2.length > 0) {
+            const gradeCounts2 = grades2.reduce((acc, grade) => {
+              acc[grade!] = (acc[grade!] || 0) + 1;
+              return acc;
+            }, {} as { [key: string]: number });
+            
+            const maxGradeCount2 = Math.max(...Object.values(gradeCounts2));
+            
+            // If car2 also has grade concentration, try to swap
+            if (maxGradeCount2 > grades2.length / 2) {
+              // Find riders with different grades to swap
+              const dominantGrade1 = Object.keys(gradeCounts).find(grade => gradeCounts[grade] === maxGradeCount);
+              const dominantGrade2 = Object.keys(gradeCounts2).find(grade => gradeCounts2[grade] === maxGradeCount2);
+              
+              if (dominantGrade1 !== dominantGrade2) {
+                const rider1 = car1.riders.find(r => r.grade === dominantGrade1);
+                const rider2 = car2.riders.find(r => r.grade === dominantGrade2);
+                
+                if (rider1 && rider2) {
+                  // Perform the swap
+                  car1.riders = car1.riders.map(r => r.id === rider1.id ? rider2 : r);
+                  car2.riders = car2.riders.map(r => r.id === rider2.id ? rider1 : r);
+                  break;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 /**

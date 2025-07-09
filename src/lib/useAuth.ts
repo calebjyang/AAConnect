@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { onAuthStateChanged, User, getIdToken } from "firebase/auth";
+import { onAuthStateChanged, User, getIdToken, signOut as firebaseSignOut } from "firebase/auth";
 import { auth } from "./firebase";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "./firebase";
@@ -9,6 +9,7 @@ interface AuthState {
   loading: boolean;
   isAdmin: boolean;
   error: string | null;
+  signOut: () => Promise<void>;
 }
 
 /**
@@ -56,7 +57,15 @@ export function useAuth() {
     user: null,
     loading: true,
     isAdmin: false,
-    error: null
+    error: null,
+    signOut: async () => {
+      try {
+        await firebaseSignOut(auth);
+      } catch (error) {
+        console.error("Error signing out:", error);
+        throw error;
+      }
+    }
   });
 
   useEffect(() => {
@@ -114,14 +123,30 @@ export function useAuth() {
             user: firebaseUser,
             loading: false,
             isAdmin,
-            error: null
+            error: null,
+            signOut: async () => {
+              try {
+                await firebaseSignOut(auth);
+              } catch (error) {
+                console.error("Error signing out:", error);
+                throw error;
+              }
+            }
           });
         } else {
           setAuthState({
             user: null,
             loading: false,
             isAdmin: false,
-            error: null
+            error: null,
+            signOut: async () => {
+              try {
+                await firebaseSignOut(auth);
+              } catch (error) {
+                console.error("Error signing out:", error);
+                throw error;
+              }
+            }
           });
         }
       },
@@ -130,7 +155,15 @@ export function useAuth() {
           user: null,
           loading: false,
           isAdmin: false,
-          error: error.message
+          error: error.message,
+          signOut: async () => {
+            try {
+              await firebaseSignOut(auth);
+            } catch (error) {
+              console.error("Error signing out:", error);
+              throw error;
+            }
+          }
         });
       }
     );

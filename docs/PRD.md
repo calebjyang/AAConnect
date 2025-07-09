@@ -1,6 +1,6 @@
 # 📘 AAConnect – Product Requirements Document (PRD)
 
-**Version:** 1.7  
+**Version:** 1.8  
 **Last Updated:** July 2025
 
 ---
@@ -32,6 +32,35 @@ The authentication system provides secure access control using Google OAuth via 
 
 ---
 
+## 🧭 Global Navigation System - COMPLETED ✅
+
+A comprehensive navigation system that provides consistent access to all app features across all pages.
+
+### Features Implemented:
+- **Global Navigation Bar**: Persistent navigation header with logo and main menu items
+- **Mobile Hamburger Menu**: Responsive mobile navigation with slide-out menu
+- **Active Page Indicators**: Visual feedback showing current page location
+- **User Authentication Integration**: Sign in/out functionality integrated into navigation
+- **Admin Access Control**: Conditional admin menu items based on user permissions
+- **Responsive Design**: Optimized for both desktop and mobile devices
+- **Loading States**: Smooth loading indicators during authentication checks
+
+### Navigation Items:
+- **Home**: Landing page and community discovery
+- **Events**: Event calendar and management
+- **Rides**: Carpool coordination and signup
+- **Hosting**: Apartment availability and hangout coordination
+- **Admin**: Administrative dashboard (admin users only)
+
+### Technical Implementation:
+- **Next.js App Router**: Leverages Next.js 15 routing system
+- **React Server Components**: Optimized performance with RSC
+- **Tailwind CSS**: Consistent styling with design system
+- **Firebase Auth Integration**: Real-time authentication state management
+- **Mobile-First Design**: Responsive breakpoints and touch-friendly interface
+
+---
+
 ## 🏠 Landing Page (v1) - COMPLETED ✅
 
 The landing page serves as the primary entry point for AAConnect, providing users with immediate access to key features and community information.
@@ -57,14 +86,21 @@ The landing page serves as the primary entry point for AAConnect, providing user
 
 The carpool system provides comprehensive ride coordination for afterevents with both automated assignment and manual admin override capabilities. This feature includes a sophisticated drag-and-drop interface built with @dnd-kit for intuitive manual assignment management.
 
+### Recent Enhancements (July 2025):
+- **Enhanced Matching Algorithm**: Added grade and gender-based matching for better carpool assignments
+- **Grade Mixing**: Ensures diverse grade levels in each car for better community building
+- **Gender Balance**: Prioritizes having at least 2 females per car when possible
+- **Improved User Experience**: Added grade and gender fields to signup forms
+- **Admin Interface Updates**: Enhanced admin forms and data display with new fields
+
 ### Recent Fixes (July 2025):
 - **Collection Name Consistency**: Fixed critical bug where admin dashboard wasn't displaying ride signups due to collection name mismatch between public form (`rides`) and admin interface (`rideSignups`)
 - **Data Visibility**: Ensured all signups are now visible in admin dashboard, including "Fall Week 1" and other weeks
 - **Code Quality**: Improved import consistency and reduced bundle size
 
 ### Features Implemented:
-- **Member Signup Form**: Easy-to-use form for drivers and riders to sign up
-- **Smart Assignment Algorithm**: Automatic carpool assignment with location-based optimization
+- **Member Signup Form**: Easy-to-use form for drivers and riders to sign up with grade and gender information
+- **Smart Assignment Algorithm**: Automatic carpool assignment with location-based optimization, grade mixing, and gender balance
 - **Admin Dashboard**: Complete management interface for ride coordination
 - **Advanced Drag-and-Drop Interface**: Intuitive drag-and-drop editing for admins to manually adjust assignments
 - **Real-time Statistics**: Live assignment metrics and success rates
@@ -77,6 +113,8 @@ The carpool system provides comprehensive ride coordination for afterevents with
 
 ### Algorithm Features:
 - **Location Optimization**: Prioritizes exact location matches, then location groups
+- **Grade Mixing**: Ensures diverse grade levels in each car for better community building
+- **Gender Balance**: Prioritizes having at least 2 females per car when possible
 - **Capacity Management**: Respects vehicle capacity limits
 - **First-Come-First-Served**: Fair assignment based on signup time
 - **Overflow Handling**: Clear identification of unassigned riders
@@ -90,6 +128,7 @@ The carpool system provides comprehensive ride coordination for afterevents with
 - **Assignment Statistics**: Real-time metrics on assignment success
 - **Empty Container Support**: Ability to drag to empty cars and unassigned areas
 - **Custom Drag Overlay**: Professional drag preview that maintains card dimensions and styling
+- **Enhanced Data Management**: Grade and gender fields in admin forms and data display
 
 ### Technical Implementation:
 - **@dnd-kit Integration**: Modern drag-and-drop library with accessibility support
@@ -125,6 +164,13 @@ The carpool system provides comprehensive ride coordination for afterevents with
 - Login required via Google OAuth
 - No domain restrictions for multi-campus and staff support
 
+### 🧭 Global Navigation - COMPLETED ✅
+- Persistent navigation bar across all pages
+- Mobile hamburger menu with slide-out navigation
+- Active page indicators and user authentication integration
+- Admin access control with conditional menu items
+- Responsive design optimized for all devices
+
 ### 🏠 Landing Page - COMPLETED ✅
 - Hero section with welcoming design and dual call-to-action buttons
 - Social media integration with direct links to Instagram, Facebook, Discord, and Linktree
@@ -138,9 +184,10 @@ The carpool system provides comprehensive ride coordination for afterevents with
 - Members indicate whether they are a driver or need a ride
 - Drivers set max passengers
 - Riders can select early/late preference
-- Algorithm groups cars with considerations:
-  - Mix of grades
-  - Gender balance
+- **Enhanced Algorithm** with grade and gender matching:
+  - Mix of grades for better community building
+  - Gender balance (at least 2 females per car when possible)
+  - Location-based optimization
   - Car timing preference
 - **Advanced Drag-and-Drop Admin Interface**: Intuitive manual assignment editing
 - **Multi-Container Drag Support**: Drag between cars, unassigned area, and empty containers
@@ -176,7 +223,7 @@ The apartment availability system enables members to post and discover open time
 - **Availability Posting**: Intuitive form for posting time slots with descriptions
 - **Global Availability Dashboard**: Real-time view of all apartment availability
 - **Responsive Design**: Mobile-first interface optimized for PWA usage
-- **Tag Selector Redesign**: Tag selector now uses a 3x2 grid with 6 tags (Snacks, Games, Study, Yap, Quiet, Prayer) for clear, accessible selection
+- **Enhanced Tag System**: Tag selector now includes 7 tags (Snacks, Games, Study, Yap, Quiet, Prayer, Jam Sesh) for comprehensive activity selection
 - **UI Component Library**: Integrated Shadcn UI for modern, reusable UI primitives
 - **Modal/Card Layouts**: Improved modal and card layouts for clarity and compactness
 - **Code Cleanup**: Removed legacy/temp files and fixed import path issues for better maintainability
@@ -188,6 +235,7 @@ The apartment availability system enables members to post and discover open time
   - Start and end time selection (24-hour format)
   - Description field (200 character limit)
   - Optional guest limit (1-20 guests, or unlimited)
+  - Enhanced tag selection (7 tags including new "Jam Sesh" option)
 - **Global Availability List**: Comprehensive dashboard showing all availability slots
 - **Filtering & Sorting**: Filter by time (all/upcoming/past) and sort by time or apartment
 - **Delete Functionality**: Members can remove their own availability posts
@@ -227,6 +275,7 @@ The apartment availability system enables members to post and discover open time
 - "I need a ride to an afterevent." ✅
 - "I want to see which apartments are open to hang." ✅
 - "I want to let people know our apartment is open for visitors." ✅
+- "I want to easily navigate between different sections of the app." ✅
 
 ### Admin
 - "I want to create and edit upcoming events." ✅
@@ -236,6 +285,7 @@ The apartment availability system enables members to post and discover open time
 - "I want to export carpool data for external communication." ✅
 - "I want to manage apartment membership." ✅
 - "I want to keep the hangout wall clean and up-to-date." ✅
+- "I want better carpool matching that considers grade and gender for community building." ✅
 
 ---
 
@@ -262,7 +312,7 @@ The apartment availability system enables members to post and discover open time
 ## 🛠 Technical Stack
 
 ### Frontend & Deployment
-- **Next.js 14**: React framework with App Router
+- **Next.js 15**: React framework with App Router
 - **TypeScript**: Type-safe development
 - **Tailwind CSS**: Utility-first styling
 - **@dnd-kit**: Modern drag-and-drop library

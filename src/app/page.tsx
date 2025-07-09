@@ -36,14 +36,14 @@ export default function Home() {
           id: doc.id,
           ...doc.data(),
         })) as Event[];
-        
+        console.log("Fetched home events:", allEvents);
         const futureEvents = allEvents.filter((event: Event) => 
           new Date(event.date.seconds * 1000) > now
         );
         
         setUpcomingEvents(futureEvents.slice(0, 3));
       } catch (error) {
-        console.error("Error fetching events:", error);
+        console.error("Error fetching home events:", error instanceof Error ? error.message : error);
       } finally {
         setEventsLoading(false);
       }

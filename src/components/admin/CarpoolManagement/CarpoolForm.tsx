@@ -17,6 +17,8 @@ const defaultForm = {
   location: '',
   aftereventWeek: '',
   submittedAt: '',
+  grade: '',
+  gender: '',
 };
 
 /**
@@ -30,6 +32,7 @@ const defaultForm = {
  * - Dynamic capacity field based on driving ability
  * - Loading states and error handling
  * - Success feedback
+ * - Grade and gender fields for enhanced matching
  * 
  * @param {CarpoolFormProps} props - Component props
  * @param {Partial<RideSignupAdmin>} [props.initialValues] - Pre-populated form data for editing
@@ -51,10 +54,27 @@ const defaultForm = {
  *   aftereventWeeks={['Fall Week 1', 'Fall Week 2']}
  * />
  */
-const CarpoolForm = memo(function CarpoolForm({ initialValues, onSubmit, loading = false, aftereventWeeks }: CarpoolFormProps) {
+const CarpoolForm = memo<CarpoolFormProps>(({ initialValues, onSubmit, loading = false, aftereventWeeks }) => {
   const [form, setForm] = useState({ ...defaultForm, ...initialValues });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const gradeOptions = [
+    "First Year",
+    "Second Year",
+    "Third Year",
+    "Fourth Year",
+    "Fifth Year",
+    "Graduate Student",
+    "Staff"
+  ];
+
+  const genderOptions = [
+    "Male",
+    "Female",
+    "Non-binary",
+    "Prefer not to say"
+  ];
 
   /**
    * Updates form when initialValues change (for edit mode)
@@ -96,7 +116,7 @@ const CarpoolForm = memo(function CarpoolForm({ initialValues, onSubmit, loading
     let localError = '';
     
     // Validation
-    if (!form.name || !form.phone || !form.location || !form.aftereventWeek) {
+    if (!form.name || !form.phone || !form.location || !form.aftereventWeek || !form.grade || !form.gender) {
       localError = 'Please fill in all required fields.';
     } else if (form.canDrive === 'yes' && (!form.capacity || isNaN(Number(form.capacity)))) {
       localError = 'Please enter a valid capacity for drivers.';
@@ -116,6 +136,8 @@ const CarpoolForm = memo(function CarpoolForm({ initialValues, onSubmit, loading
         location: form.location,
         aftereventWeek: form.aftereventWeek,
         submittedAt: form.submittedAt || new Date().toISOString(),
+        grade: form.grade,
+        gender: form.gender,
       });
       setSuccess('Signup saved!');
       setForm(defaultForm);
@@ -136,6 +158,24 @@ const CarpoolForm = memo(function CarpoolForm({ initialValues, onSubmit, loading
       <div className="flex flex-col gap-1">
         <label htmlFor="phone" className="font-semibold text-gray-800 mb-1">Phone<span className="text-red-500 ml-1">*</span></label>
         <input id="phone" type="tel" className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900" value={form.phone} onChange={e => handleChange('phone', e.target.value)} />
+      </div>
+      <div className="flex flex-col gap-1">
+        <label htmlFor="grade" className="font-semibold text-gray-800 mb-1">Grade/Year<span className="text-red-500 ml-1">*</span></label>
+        <select id="grade" className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900" value={form.grade} onChange={e => handleChange('grade', e.target.value)}>
+          <option value="">Select grade/year</option>
+          {gradeOptions.map(option => (
+            <option key={option} value={option}>{option}</option>
+          ))}
+        </select>
+      </div>
+      <div className="flex flex-col gap-1">
+        <label htmlFor="gender" className="font-semibold text-gray-800 mb-1">Gender<span className="text-red-500 ml-1">*</span></label>
+        <select id="gender" className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900" value={form.gender} onChange={e => handleChange('gender', e.target.value)}>
+          <option value="">Select gender</option>
+          {genderOptions.map(option => (
+            <option key={option} value={option}>{option}</option>
+          ))}
+        </select>
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="canDrive" className="font-semibold text-gray-800 mb-1">Can Drive?<span className="text-red-500 ml-1">*</span></label>
@@ -167,5 +207,7 @@ const CarpoolForm = memo(function CarpoolForm({ initialValues, onSubmit, loading
     </form>
   );
 });
+
+CarpoolForm.displayName = 'CarpoolForm';
 
 export default CarpoolForm; 
