@@ -72,6 +72,7 @@ describe('CarpoolForm', () => {
     await userEvent.type(screen.getByLabelText(/capacity/i), '3');
     await userEvent.type(screen.getByLabelText(/location/i), 'Mesa Court');
     await userEvent.selectOptions(screen.getByLabelText(/afterevent week/i), 'Fall Week 1');
+    await userEvent.selectOptions(screen.getByLabelText(/grade/i), 'First Year');
     
     // Submit the form
     await userEvent.click(screen.getByRole('button', { name: /add signup/i }));
@@ -84,6 +85,7 @@ describe('CarpoolForm', () => {
         capacity: '3',
         location: 'Mesa Court',
         aftereventWeek: 'Fall Week 1',
+        grade: 'First Year',
         submittedAt: expect.any(String),
       });
     });
@@ -94,7 +96,6 @@ describe('CarpoolForm', () => {
     // Try to submit without filling required fields
     await userEvent.click(screen.getByRole('button', { name: /add signup/i }));
     await waitFor(() => {
-      screen.debug();
       expect(screen.getByTestId('error-message')).toHaveTextContent(/please fill in all required fields/i);
     });
   });
@@ -104,6 +105,7 @@ describe('CarpoolForm', () => {
     // Fill out form but with invalid capacity
     await userEvent.type(screen.getByLabelText(/name/i), 'John Doe');
     await userEvent.type(screen.getByLabelText(/phone/i), '555-123-4567');
+    await userEvent.selectOptions(screen.getByLabelText(/grade/i), 'First Year');
     await userEvent.selectOptions(screen.getByLabelText(/can drive/i), 'yes');
     await userEvent.type(screen.getByLabelText(/capacity/i), 'invalid');
     await userEvent.type(screen.getByLabelText(/location/i), 'Middle Earth');
@@ -111,7 +113,6 @@ describe('CarpoolForm', () => {
     // Submit the form
     await userEvent.click(screen.getByRole('button', { name: /add signup/i }));
     await waitFor(() => {
-      screen.debug();
       expect(screen.getByTestId('error-message')).toHaveTextContent(/please enter a valid capacity for drivers/i);
     });
   });
@@ -131,6 +132,7 @@ describe('CarpoolForm', () => {
     // Fill out the form
     await userEvent.type(screen.getByLabelText(/name/i), 'Jane Smith');
     await userEvent.type(screen.getByLabelText(/phone/i), '555-123-4567');
+    await userEvent.selectOptions(screen.getByLabelText(/grade/i), 'First Year');
     await userEvent.selectOptions(screen.getByLabelText(/can drive/i), 'no');
     await userEvent.type(screen.getByLabelText(/location/i), 'Mesa Court');
     await userEvent.selectOptions(screen.getByLabelText(/afterevent week/i), 'Fall Week 1');
@@ -152,6 +154,7 @@ describe('CarpoolForm', () => {
     // Fill out the form
     await userEvent.type(screen.getByLabelText(/name/i), 'Jane Smith');
     await userEvent.type(screen.getByLabelText(/phone/i), '555-123-4567');
+    await userEvent.selectOptions(screen.getByLabelText(/grade/i), 'First Year');
     await userEvent.selectOptions(screen.getByLabelText(/can drive/i), 'no');
     await userEvent.type(screen.getByLabelText(/location/i), 'Mesa Court');
     await userEvent.selectOptions(screen.getByLabelText(/afterevent week/i), 'Fall Week 1');
@@ -175,6 +178,7 @@ describe('CarpoolForm', () => {
     await userEvent.selectOptions(screen.getByLabelText(/can drive/i), 'no');
     await userEvent.type(screen.getByLabelText(/location/i), 'Mesa Court');
     await userEvent.selectOptions(screen.getByLabelText(/afterevent week/i), 'Fall Week 1');
+    await userEvent.selectOptions(screen.getByLabelText(/grade/i), 'First Year');
     
     // Submit the form
     await userEvent.click(screen.getByRole('button', { name: /add signup/i }));
@@ -183,7 +187,7 @@ describe('CarpoolForm', () => {
       expect(screen.getByLabelText(/name/i)).toHaveValue('');
       expect(screen.getByLabelText(/phone/i)).toHaveValue('');
       expect(screen.getByLabelText(/location/i)).toHaveValue('');
-    });
+    }, { timeout: 2000 });
   });
 
   it('updates form when initialValues change', async () => {

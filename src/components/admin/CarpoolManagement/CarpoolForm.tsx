@@ -18,7 +18,6 @@ const defaultForm = {
   aftereventWeek: '',
   submittedAt: '',
   grade: '',
-  gender: '',
 };
 
 /**
@@ -69,13 +68,6 @@ const CarpoolForm = memo<CarpoolFormProps>(({ initialValues, onSubmit, loading =
     "Staff"
   ];
 
-  const genderOptions = [
-    "Male",
-    "Female",
-    "Non-binary",
-    "Prefer not to say"
-  ];
-
   /**
    * Updates form when initialValues change (for edit mode)
    * 
@@ -116,7 +108,7 @@ const CarpoolForm = memo<CarpoolFormProps>(({ initialValues, onSubmit, loading =
     let localError = '';
     
     // Validation
-    if (!form.name || !form.phone || !form.location || !form.aftereventWeek || !form.grade || !form.gender) {
+    if (!form.name || !form.phone || !form.location || !form.aftereventWeek || !form.grade) {
       localError = 'Please fill in all required fields.';
     } else if (form.canDrive === 'yes' && (!form.capacity || isNaN(Number(form.capacity)))) {
       localError = 'Please enter a valid capacity for drivers.';
@@ -137,7 +129,6 @@ const CarpoolForm = memo<CarpoolFormProps>(({ initialValues, onSubmit, loading =
         aftereventWeek: form.aftereventWeek,
         submittedAt: form.submittedAt || new Date().toISOString(),
         grade: form.grade,
-        gender: form.gender,
       });
       setSuccess('Signup saved!');
       setForm(defaultForm);
@@ -164,15 +155,6 @@ const CarpoolForm = memo<CarpoolFormProps>(({ initialValues, onSubmit, loading =
         <select id="grade" className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900" value={form.grade} onChange={e => handleChange('grade', e.target.value)}>
           <option value="">Select grade/year</option>
           {gradeOptions.map(option => (
-            <option key={option} value={option}>{option}</option>
-          ))}
-        </select>
-      </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="gender" className="font-semibold text-gray-800 mb-1">Gender<span className="text-red-500 ml-1">*</span></label>
-        <select id="gender" className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900" value={form.gender} onChange={e => handleChange('gender', e.target.value)}>
-          <option value="">Select gender</option>
-          {genderOptions.map(option => (
             <option key={option} value={option}>{option}</option>
           ))}
         </select>
