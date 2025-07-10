@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { onAuthStateChanged, User, getIdToken, signOut as firebaseSignOut } from "firebase/auth";
+import { onAuthStateChanged, User, signOut as firebaseSignOut } from "firebase/auth";
 import { auth } from "./firebase";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "./firebase";
@@ -17,10 +17,10 @@ interface AuthState {
  * 
  * This hook provides comprehensive authentication functionality including:
  * - Real-time authentication state monitoring
- * - Automatic admin status verification
+ * - Automatic admin status verification via Firestore
  * - Loading states for async operations
  * - Error handling for auth failures
- * - Secure admin verification via API route
+ * - Secure admin verification using Firestore security rules
  * 
  * The hook automatically:
  * - Listens for Firebase auth state changes
@@ -74,7 +74,7 @@ export function useAuth() {
      * 
      * This function is called whenever the Firebase authentication state changes.
      * It handles both login and logout events, and performs admin verification
-     * for authenticated users.
+     * for authenticated users using Firestore.
      * 
      * @param {User|null} firebaseUser - Firebase user object or null
      */
@@ -99,24 +99,16 @@ export function useAuth() {
           }
           // --- End user doc creation ---
 
-          // Check if user is admin using secure API route
+          // Check if user is admin using Firestore
           let isAdmin = false;
           try {
-            const idToken = await getIdToken(firebaseUser);
-            const response = await fetch('/api/admin/verify', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ idToken }),
-            });
-            
-            if (response.ok) {
-              const data = await response.json();
-              isAdmin = data.isAdmin;
-            }
+            const adminRef = doc(db, "admins", firebaseUser.email || '');
+            const adminSnap = await getDoc(adminRef);
+            isAdmin = adminSnap.exists();
           } catch (error) {
             console.error("Error checking admin status:", error instanceof Error ? error.message : 'Unknown error');
+            // If we can't verify admin status, assume not admin for security
+            isAdmin = false;
           }
 
           setAuthState({

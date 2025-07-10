@@ -61,9 +61,9 @@ export const UI = {
   MAX_DESCRIPTION_LENGTH: 500,
 } as const;
 
-// API Endpoints
+// API Endpoints (for future use if needed)
 export const API_ENDPOINTS = {
-  ADMIN_VERIFY: '/api/admin/verify',
+  // Removed admin verification - now handled client-side
   EVENTS: '/api/events',
   RIDES: '/api/rides',
 } as const;
