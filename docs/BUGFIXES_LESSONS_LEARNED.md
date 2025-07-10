@@ -12,6 +12,46 @@ This document outlines critical bug fixes and debugging journeys in AAConnect, p
 
 ---
 
+## 🛠️ Refactoring Admin for Native/Static Deployment (July 2025)
+
+### **Problem**
+The admin dashboard originally relied on Next.js API routes (e.g., `/api/admin/verify`) and the Firebase Admin SDK for admin verification. This approach is incompatible with static exports and native deployment (e.g., Capacitor), since API routes and server-side code are not available.
+
+### **Solution**
+- **Moved admin verification to client-side:**  
+  Instead of calling an API route, the app now checks for an admin document in Firestore using the Firebase client SDK.
+- **Removed all server-side dependencies:**  
+  Deleted the API route, removed the `firebase-admin` SDK, and cleaned up related code.
+- **Relied on Firestore security rules:**  
+  Firestore rules ensure only the authenticated user can read their own admin status, maintaining security.
+
+### **Key Code Change**
+```typescript
+// ❌ BEFORE: Server-side API route for admin check
+const response = await fetch('/api/admin/verify', { ... });
+
+// ✅ AFTER: Client-side Firestore check
+const adminRef = doc(db, "admins", firebaseUser.email || '');
+const adminSnap = await getDoc(adminRef);
+const isAdmin = adminSnap.exists();
+```
+
+### **Lessons Learned**
+1. **Static/Native compatibility:**  
+   Avoid server-side code and API routes if you need static export or native builds.
+2. **Security can be enforced with Firestore rules:**  
+   You don’t need server-side admin checks if your Firestore rules are strict.
+3. **Simpler deployment:**  
+   Removing server-side code means easier hosting (Vercel, Netlify, GitHub Pages, Capacitor, etc.).
+4. **Bundle size and performance:**  
+   Removing `firebase-admin` and API code reduces bundle size and complexity.
+
+### **Testing**
+- Verified that `npm run build` and `npx cap sync` work with no errors.
+- Confirmed admin dashboard works when opening `index.html` directly.
+
+---
+
 ## 🚨 Critical Bug: Collection Name Mismatch (July 2025)
 
 ### **Problem Description**
