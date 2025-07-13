@@ -9,25 +9,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // --- Firebase Initialization Debug Prints ---
-        print("Before FirebaseApp.configure()")
+        // Initialize Firebase
         if FirebaseApp.app() == nil {
             FirebaseApp.configure()
         }
-        print("After FirebaseApp.configure()")
         
-        // --- Google Sign-In Configuration ---
-        print("Configuring Google Sign-In...")
-        // Get the client ID from GoogleService-Info.plist
+        // Configure Google Sign-In
         if let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
            let plist = NSDictionary(contentsOfFile: path),
            let clientId = plist["CLIENT_ID"] as? String {
-            print("Google Client ID found: \(clientId)")
             GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientId)
         } else {
             print("ERROR: Could not find Google Client ID in GoogleService-Info.plist")
         }
-        // --------------------------------------------
         
         // Override point for customization after application launch.
         return true

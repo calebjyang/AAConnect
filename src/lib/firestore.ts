@@ -60,7 +60,6 @@ class FirestoreManager {
         
         this.capacitorFirestore = safePlugin;
         this.isPluginLoaded = true;
-        console.log('Capacitor Firestore plugin loaded successfully');
         return this.capacitorFirestore;
       } catch (error) {
         console.warn('Capacitor Firestore plugin not available:', error);
@@ -235,9 +234,7 @@ class FirestoreManager {
     try {
       const response = await plugin.getCollection({ reference: path });
       const snapshots = response.snapshots || [];
-      console.log('Native Firestore snapshots:', snapshots);
       let docs = snapshots.map((snapshot: any) => {
-        console.log('Raw event data:', snapshot.data);
         const data = { ...snapshot.data };
         if (!data.date) {
           console.warn('Event missing date field:', data, snapshot);
