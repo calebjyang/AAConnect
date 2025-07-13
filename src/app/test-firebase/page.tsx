@@ -6,11 +6,15 @@ import { Capacitor } from '@capacitor/core';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/lib/useAuth';
+import { getDoc } from '@/lib/firestore';
 
 export default function TestFirebasePage() {
   const [testResults, setTestResults] = useState<any[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [debugLog, setDebugLog] = useState<any[]>([]);
+  const [adminTestResult, setAdminTestResult] = useState<any>(null);
+  const { user, isAdmin, loading } = useAuth();
 
   const runTests = async () => {
     setIsRunning(true);
@@ -34,6 +38,40 @@ export default function TestFirebasePage() {
     setDebugLog([]);
   };
 
+  const testAdminVerification = async () => {
+    if (!user) {
+      setAdminTestResult({ error: 'No user logged in' });
+      return;
+    }
+
+    try {
+      console.log('Testing admin verification for user:', user.email);
+      
+      // Test direct admin document access
+      const adminPath = `admins/${user.email || ''}`;
+      console.log('Checking admin path:', adminPath);
+      
+      const adminDoc = await getDoc(adminPath);
+      console.log('Admin document result:', adminDoc);
+      
+      setAdminTestResult({
+        userEmail: user.email,
+        adminPath,
+        adminDocExists: !!adminDoc,
+        adminDocContent: adminDoc,
+        useAuthIsAdmin: isAdmin,
+        platform: Capacitor.isNativePlatform() ? 'Native' : 'Web'
+      });
+    } catch (error) {
+      console.error('Admin verification test failed:', error);
+      setAdminTestResult({
+        error: error instanceof Error ? error.message : 'Unknown error',
+        userEmail: user.email,
+        platform: Capacitor.isNativePlatform() ? 'Native' : 'Web'
+      });
+    }
+  };
+
   const isNative = Capacitor.isNativePlatform();
 
   return (
@@ -50,6 +88,44 @@ export default function TestFirebasePage() {
             Platform: {isNative ? 'Native' : 'Web'}
           </Badge>
         </div>
+
+        {/* Admin Verification Test */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Admin Verification Test</CardTitle>
+            <CardDescription>
+              Debug admin authentication issues on iOS
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex gap-2">
+              <Button onClick={testAdminVerification} variant="outline">
+                Test Admin Verification
+              </Button>
+            </div>
+            
+            {adminTestResult && (
+              <div className="space-y-2">
+                <h3 className="font-semibold">Admin Test Results:</h3>
+                <div className="bg-gray-100 p-4 rounded text-sm font-mono">
+                  <pre>{JSON.stringify(adminTestResult, null, 2)}</pre>
+                </div>
+              </div>
+            )}
+
+            {user && (
+              <div className="bg-blue-50 p-4 rounded">
+                <h4 className="font-semibold mb-2">Current Auth State:</h4>
+                <div className="text-sm space-y-1">
+                  <div>Email: {user.email}</div>
+                  <div>useAuth isAdmin: {isAdmin ? 'true' : 'false'}</div>
+                  <div>Loading: {loading ? 'true' : 'false'}</div>
+                  <div>Platform: {isNative ? 'Native' : 'Web'}</div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>

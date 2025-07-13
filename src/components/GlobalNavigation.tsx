@@ -37,6 +37,9 @@ export default function GlobalNavigation({ safeAreaStyle }: GlobalNavigationProp
     navigationItems.push({ href: '/admin', label: 'Admin', icon: Settings });
   }
 
+  // Add test page for debugging (temporary)
+  navigationItems.push({ href: '/test-firebase', label: 'Debug Test', icon: Settings });
+
   const isActive = (href: string) => {
     if (href === '/') {
       return pathname === '/';
