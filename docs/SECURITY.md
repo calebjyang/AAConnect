@@ -184,3 +184,8 @@ service cloud.firestore {
 - [Capacitor Security Best Practices](https://capacitorjs.com/docs/security)
 - [iOS App Security](https://developer.apple.com/security/)
 - [Android App Security](https://developer.android.com/topic/security) 
+
+## July 2025 Update: Error Handling & Server-Side SDK Removal
+
+- All Firebase operations now use robust error handling in the cross-platform abstraction layer.
+- The server-side Firebase Admin SDK is no longer used; all admin verification is client-side and enforced by Firestore security rules. 

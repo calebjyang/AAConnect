@@ -12,13 +12,23 @@ A Next.js PWA for Asian American Christian Fellowship chapters that centralizes 
 - **Apartment Availability**: Post and discover hangout opportunities
 - **Admin Dashboard**: Complete management interface
 - **Mobile-First PWA**: Optimized for mobile devices
+- **Cross-Platform Firebase**: Unified abstraction for web and native (Capacitor) platforms
 
 ## Tech Stack
 
 - **Frontend**: Next.js 14, TypeScript, Tailwind CSS, Shadcn UI
 - **Backend**: Firebase (Auth, Firestore)
-- **Deployment**: Vercel
+- **Deployment**: Vercel (web), Capacitor (native iOS/Android)
 - **UI Components**: Radix UI, Lucide React icons
+
+## Architecture: Cross-Platform Firebase Abstraction
+
+- Uses a single abstraction layer (`src/lib/firestore.ts`, `src/lib/auth.ts`) to automatically detect platform (web/native) and use the appropriate Firebase SDK:
+  - **Web**: Firebase Web SDK (dynamic imports, async query helpers)
+  - **Native (iOS/Android)**: Capacitor Firebase plugins
+- Handles all Firestore/Auth operations with unified API and robust error handling
+- Next.js config (`next.config.ts`) only blocks Firebase Web SDK for native builds (`BUILD_FOR_NATIVE=true`)
+- All advanced queries use async helpers (e.g., `orderByQuery`, `limitQuery`, `whereQuery`) for dynamic import and error handling
 
 ## Getting Started
 
@@ -47,6 +57,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 - **Type Safety**: TypeScript strict mode
 - **Testing**: Jest + React Testing Library (planned)
 - **Performance**: Next.js App Router with SSR/SSG
+- **Cross-Platform**: All Firebase operations use the abstraction layer; never import Firebase Web SDK directly in components
 
 ### UI Component File Naming Convention
 
@@ -64,11 +75,11 @@ If any files are listed, rename them to lowercase using `git mv`.
 
 ## Deployment
 
-The app is configured for deployment on Vercel with automatic builds from the main branch.
+The app is configured for deployment on Vercel with automatic builds from the main branch. For native builds, use Capacitor.
 
 ---
 
-## Vercel Deployment
+## Vercel Deployment (Web)
 
 ### 1. Connect to Vercel
 - Go to [Vercel](https://vercel.com/) and import this repository.
@@ -84,10 +95,6 @@ The app is configured for deployment on Vercel with automatic builds from the ma
   - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
   - `NEXT_PUBLIC_FIREBASE_APP_ID`
   - `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID`
-- For server-side admin features, add:
-  - `FIREBASE_ADMIN_PROJECT_ID`
-  - `FIREBASE_ADMIN_PRIVATE_KEY`
-  - `FIREBASE_ADMIN_CLIENT_EMAIL`
 
 ### 3. Add Vercel Domain to Firebase Auth
 - In the [Firebase Console](https://console.firebase.google.com/), go to **Authentication → Settings → Authorized domains**.
@@ -106,6 +113,42 @@ The app is configured for deployment on Vercel with automatic builds from the ma
 - For local development, set `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=localhost` in `.env.local`.
 - For production, set `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-app.vercel.app` in Vercel.
 - Both domains must be in Firebase's authorized domains list.
+
+---
+
+## Native Deployment (iOS/Android via Capacitor)
+
+### 1. Prerequisites
+- Install [Capacitor](https://capacitorjs.com/) and native dependencies: `npm install @capacitor/core @capacitor/cli @capacitor/ios @capacitor/android`
+- Install Capacitor Firebase plugins: `@capacitor-firebase/app`, `@capacitor-firebase/firestore`, `@capacitor-firebase/authentication`
+- Add native platform: `npx cap add ios` or `npx cap add android`
+
+### 2. Sync and Build
+- Sync web assets: `npx cap sync ios` (or `android`)
+- Open in Xcode/Android Studio: `npx cap open ios` (or `android`)
+- Build and run on device/emulator
+
+### 3. Native Firebase Config
+- iOS: Add `GoogleService-Info.plist` to Xcode project
+- Android: Add `google-services.json` to `android/app/`
+- Ensure Firebase is initialized in `AppDelegate.swift` (iOS)
+
+### 4. Native Build Flag
+- When building for native, set `BUILD_FOR_NATIVE=true` to block Firebase Web SDK in Next.js config
+
+---
+
+## Troubleshooting
+
+### Firebase Web SDK / CORS Errors
+- If you see errors like `orderBy is not a function` or `getApps is not a function`, ensure you are not blocking Firebase Web SDK in web builds (see `next.config.ts`)
+- Only set `BUILD_FOR_NATIVE=true` when building for native platforms
+- Always use the abstraction layer for all Firebase operations
+
+### Native Plugin Issues
+- Ensure all Capacitor Firebase plugins are installed and synced
+- Double-check native config files (`GoogleService-Info.plist`, `google-services.json`)
+- Make sure Firebase is initialized before any plugin usage
 
 ---
 
@@ -150,8 +193,11 @@ MIT License - see LICENSE file for details.
 
 ## 📘 Docs
 
-- [Product Requirements Document (PRD)](docs/docs_PRD.md)
-- [Changelog](docs/Changelog.md)
+- [Product Requirements Document (PRD)](docs/PRD.md)
+- [Changelog](docs/CHANGELOG.md)
+- [Admin Native Refactor](docs/ADMIN_NATIVE_REFACTOR.md)
+- [Bugfixes & Lessons Learned](docs/BUGFIXES_LESSONS_LEARNED.md)
+- [Security Guide](docs/SECURITY.md)
 
 ---
 

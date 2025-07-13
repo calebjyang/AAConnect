@@ -850,6 +850,79 @@ Deployments to Vercel failed or authentication broke due to misconfigured enviro
 
 ---
 
+## July 2025 Update: Async Query Helpers & Dynamic Imports
+
+- All Firestore query helpers (orderByQuery, limitQuery, whereQuery) are now async and use dynamic imports for the Firebase Web SDK.
+- This ensures robust error handling and compatibility with both web and native builds.
+- See README and ADMIN_NATIVE_REFACTOR.md for details.
+
+---
+
+## July 2025: The 'Events Not Showing Up on iOS Native Build' Bonanza
+
+### Problem Summary
+- **Symptom:** Events were visible on the web app, but not on the iOS native build (Capacitor).
+- **Impact:** Users could not see any upcoming events on iOS, even though data existed in Firestore and worked on web.
+
+### Debugging Timeline & Steps
+
+#### 1. Initial Investigation
+- Confirmed that events were present in Firestore and loaded correctly on the web (Vercel deployment).
+- On iOS (native), the events list was always empty.
+- No obvious errors in the UI, but events simply did not render.
+
+#### 2. CORS Errors
+- Checked Xcode logs and browser console (for PWA): saw repeated CORS errors when the app tried to access Firestore from the native build.
+- Error message: `Access to fetch at ... from origin 'capacitor://localhost' has been blocked by CORS policy`.
+- Realized that the Firebase Web SDK is not designed for non-standard origins like `capacitor://localhost`.
+- **Lesson:** CORS is a browser security feature; native apps need platform-specific APIs.
+
+#### 3. Cross-Platform Firebase Abstraction
+- Decided to implement a cross-platform abstraction layer in `src/lib/firestore.ts` and `src/lib/auth.ts`.
+- On web: use Firebase Web SDK (with dynamic imports for tree-shaking and error handling).
+- On native (iOS/Android): use Capacitor Firebase plugins (`@capacitor-firebase/app`, `@capacitor-firebase/firestore`, `@capacitor-firebase/authentication`).
+- Updated all Firestore and Auth operations to go through this abstraction.
+- Updated Next.js config to only block Firebase Web SDK for native builds (`BUILD_FOR_NATIVE=true`).
+- **Result:** CORS errors resolved, but events still not showing up on iOS.
+
+#### 4. Timestamp/Date Parsing Issues
+- On web, Firestore returns Timestamps or ISO strings, which were being parsed into JS `Date` objects.
+- On native, the Capacitor plugin sometimes returned date fields as strings, sometimes as objects, or omitted them entirely if the field was missing.
+- The event list code expected a valid `date` field, but on iOS, some events had `date: undefined` or an invalid format, causing them to be filtered out or sorted incorrectly.
+- Added robust date parsing and fallback logic in all event loading code:
+  - If `typeof date === 'string'`, parse as ISO.
+  - If `date` is missing, use a default or skip.
+  - Always log and handle unexpected date formats.
+- **Lesson:** Always normalize and validate Firestore data, especially for cross-platform plugins.
+
+#### 5. Async Query Helpers & Dynamic Imports
+- Migrated all query helpers (`orderByQuery`, `limitQuery`, `whereQuery`) to async functions with dynamic imports for the Firebase Web SDK.
+- Ensured that all constraints and queries are compatible with both web and native plugin APIs.
+- Added error handling for missing SDKs or plugin failures.
+- **Result:** Queries now work consistently across platforms.
+
+#### 6. Testing & Validation
+- Ran `npm run build` and `npx cap sync ios` after every major change.
+- Used Xcode logs and in-app debug output to confirm that events loaded and rendered correctly.
+- Verified that events now show up on both web and iOS native builds, with correct date sorting and display.
+
+### Key Lessons Learned
+1. **CORS is a browser-only issue:** Native apps need native plugins, not web SDKs.
+2. **Abstraction is essential:** Always use a cross-platform abstraction for Firebase or similar services.
+3. **Date/timestamp normalization:** Never assume Firestore returns the same format on all platforms; always validate and normalize.
+4. **Async/dynamic imports:** Use async query helpers and dynamic imports for maximum compatibility and error handling.
+5. **Test on all platforms:** Always test on both web and native after major changes.
+6. **Log everything:** Add debug logs for data shape, especially for critical fields like dates.
+
+### Prevention Strategies
+- Use a single abstraction layer for all cross-platform data access.
+- Normalize and validate all Firestore data before using it in the UI.
+- Add robust error handling and logging for all data fetches.
+- Test on all target platforms (web, iOS, Android) before release.
+- Document platform-specific quirks and solutions for future reference.
+
+---
+
 **Document Version**: 1.1  
 **Last Updated**: July 2025  
 **Contributors**: Development Team  

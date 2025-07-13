@@ -171,6 +171,14 @@ The carpool system provides comprehensive ride coordination for afterevents with
 
 ---
 
+## July 2025 Update: Async Query Helpers & Error Handling
+
+- All Firestore query helpers (orderByQuery, limitQuery, whereQuery) are now async and use dynamic imports for the Firebase Web SDK.
+- This ensures robust error handling and compatibility with both web and native builds.
+- See README and ADMIN_NATIVE_REFACTOR.md for details.
+
+---
+
 ## 👤 User Roles
 
 | Role   | Permissions |

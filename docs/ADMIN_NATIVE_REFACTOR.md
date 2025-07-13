@@ -67,6 +67,11 @@ export const getDoc = async (path: string): Promise<any> => {
 };
 ```
 
+## Additional Note (July 2025)
+
+- All advanced Firestore queries now use async query helpers (e.g., orderByQuery, limitQuery, whereQuery) for dynamic import and robust error handling.
+- The abstraction layer ensures that errors related to missing Firebase Web SDK or native plugins are caught and reported clearly.
+
 ### 3. Removed API Route
 
 **Deleted:**
