@@ -1,6 +1,7 @@
 import UIKit
 import Capacitor
 import FirebaseCore
+import GoogleSignIn
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -14,7 +15,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             FirebaseApp.configure()
         }
         print("After FirebaseApp.configure()")
+        
+        // --- Google Sign-In Configuration ---
+        print("Configuring Google Sign-In...")
+        // Get the client ID from GoogleService-Info.plist
+        if let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
+           let plist = NSDictionary(contentsOfFile: path),
+           let clientId = plist["CLIENT_ID"] as? String {
+            print("Google Client ID found: \(clientId)")
+            GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientId)
+        } else {
+            print("ERROR: Could not find Google Client ID in GoogleService-Info.plist")
+        }
         // --------------------------------------------
+        
         // Override point for customization after application launch.
         return true
     }
@@ -26,6 +40,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillTerminate(_ application: UIApplication) { }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+        // Handle Google Sign-In URL
+        if url.scheme?.hasPrefix("com.googleusercontent.apps") == true {
+            return GIDSignIn.sharedInstance.handle(url)
+        }
         return ApplicationDelegateProxy.shared.application(app, open: url, options: options)
     }
     

@@ -25,10 +25,11 @@ A Next.js PWA for Asian American Christian Fellowship chapters that centralizes 
 
 - Uses a single abstraction layer (`src/lib/firestore.ts`, `src/lib/auth.ts`) to automatically detect platform (web/native) and use the appropriate Firebase SDK:
   - **Web**: Firebase Web SDK (dynamic imports, async query helpers)
-  - **Native (iOS/Android)**: Capacitor Firebase plugins
+  - **Native (iOS/Android)**: Official Capacitor Firebase plugins (`@capacitor-firebase/authentication`, `@capacitor-firebase/firestore`)
 - Handles all Firestore/Auth operations with unified API and robust error handling
 - Next.js config (`next.config.ts`) only blocks Firebase Web SDK for native builds (`BUILD_FOR_NATIVE=true`)
 - All advanced queries use async helpers (e.g., `orderByQuery`, `limitQuery`, `whereQuery`) for dynamic import and error handling
+- **Authentication**: Google Sign-In works seamlessly on both web and native platforms using the official Capacitor Firebase Authentication plugin
 
 ## Getting Started
 
@@ -132,6 +133,8 @@ The app is configured for deployment on Vercel with automatic builds from the ma
 - iOS: Add `GoogleService-Info.plist` to Xcode project
 - Android: Add `google-services.json` to `android/app/`
 - Ensure Firebase is initialized in `AppDelegate.swift` (iOS)
+- **Google Sign-In**: Configured automatically via the official Capacitor Firebase Authentication plugin
+- **URL Schemes**: Google Sign-In URL scheme automatically added to `Info.plist` (iOS)
 
 ### 4. Native Build Flag
 - When building for native, set `BUILD_FOR_NATIVE=true` to block Firebase Web SDK in Next.js config
@@ -149,6 +152,8 @@ The app is configured for deployment on Vercel with automatic builds from the ma
 - Ensure all Capacitor Firebase plugins are installed and synced
 - Double-check native config files (`GoogleService-Info.plist`, `google-services.json`)
 - Make sure Firebase is initialized before any plugin usage
+- **Google Sign-In Issues**: Use the official `@capacitor-firebase/authentication` plugin instead of custom implementations
+- **UNIMPLEMENTED Errors**: Indicate plugin registration issues - check that plugins are properly synced with `npx cap sync ios`
 
 ---
 

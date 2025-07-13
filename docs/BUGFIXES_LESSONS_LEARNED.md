@@ -858,7 +858,7 @@ Deployments to Vercel failed or authentication broke due to misconfigured enviro
 
 ---
 
-## July 2025: The 'Events Not Showing Up on iOS Native Build' Bonanza
+## July 13, 2025: The 'Events Not Showing Up on iOS Native Build' Bonanza
 
 ### Problem Summary
 - **Symptom:** Events were visible on the web app, but not on the iOS native build (Capacitor).
@@ -888,7 +888,7 @@ Deployments to Vercel failed or authentication broke due to misconfigured enviro
 #### 4. Timestamp/Date Parsing Issues
 - On web, Firestore returns Timestamps or ISO strings, which were being parsed into JS `Date` objects.
 - On native, the Capacitor plugin sometimes returned date fields as strings, sometimes as objects, or omitted them entirely if the field was missing.
-- The event list code expected a valid `date` field, but on iOS, some events had `date: undefined` or an invalid format, causing them to be filtered out or sorted incorrectly.
+- The event list code expected a valid `date` field, but on iOS, some events had `date: undefined` or an invalid format, causing them to not appear on the /events page.
 - Added robust date parsing and fallback logic in all event loading code:
   - If `typeof date === 'string'`, parse as ISO.
   - If `date` is missing, use a default or skip.
@@ -923,7 +923,113 @@ Deployments to Vercel failed or authentication broke due to misconfigured enviro
 
 ---
 
-**Document Version**: 1.1  
+---
+
+## 🔐 iOS Google Sign-In Authentication Fix (July 13, 2025)
+
+### Problem Summary
+- **Symptom:** Google Sign-In button showed infinite loading spinner on iOS native platform
+- **Error:** Console logs showed `UNIMPLEMENTED` errors from custom native plugin
+- **Impact:** Users could not authenticate on iOS, while web authentication worked fine
+
+### Root Cause Analysis
+The issue was caused by a custom native Google Sign-In plugin that wasn't properly registered with Capacitor's plugin system. The custom plugin files existed but weren't included in the Xcode project build, causing all plugin method calls to return `UNIMPLEMENTED` errors.
+
+### Debugging Steps
+
+#### 1. Initial Investigation
+- Confirmed Google Sign-In worked on web but failed on iOS
+- Console logs showed: `Native Google Sign-In error: {"code":"UNIMPLEMENTED"}`
+- Error message: `"GoogleSignIn" plugin is not implemented on ios`
+
+#### 2. Plugin Registration Issues
+- Custom plugin files (`GoogleSignInPlugin.swift`, `GoogleSignInHandler.swift`, `GoogleSignInPlugin.m`) existed but weren't in Xcode project
+- Attempted manual plugin registration in `AppDelegate.swift` but this approach was unreliable
+- Capacitor's automatic plugin detection wasn't finding the custom plugin
+
+#### 3. Solution: Switch to Official Plugin
+- Removed all custom native plugin files
+- Updated `src/lib/auth.ts` to use the official `@capacitor-firebase/authentication` plugin
+- Verified all iOS configuration was correct:
+  - `Podfile`: Includes `CapacitorFirebaseAuthentication/Google` and `GoogleSignIn` pods
+  - `Info.plist`: Google URL scheme properly configured
+  - `AppDelegate.swift`: Firebase initialization and Google Sign-In configuration
+  - `GoogleService-Info.plist`: Client ID properly configured
+
+### Technical Implementation
+
+#### Before (Custom Plugin - Broken)
+```typescript
+// src/lib/auth.ts
+import GoogleSignIn from './nativeGoogleSignIn';
+
+async signInWithGoogle(): Promise<any> {
+  if (isNative) {
+    const result = await GoogleSignIn.signInWithGoogle(); // UNIMPLEMENTED
+    return result;
+  }
+  // web implementation...
+}
+```
+
+#### After (Official Plugin - Working)
+```typescript
+// src/lib/auth.ts
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
+
+async signInWithGoogle(): Promise<any> {
+  if (isNative) {
+    const result = await FirebaseAuthentication.signInWithGoogle();
+    return result;
+  }
+  // web implementation unchanged...
+}
+```
+
+### Key Lessons Learned
+
+1. **Use Official Plugins When Available**
+   - Official Capacitor plugins are thoroughly tested and properly integrated
+   - Custom plugins require careful Xcode project configuration and maintenance
+   - The official `@capacitor-firebase/authentication` plugin handles all native complexity automatically
+
+2. **Plugin Registration is Critical**
+   - Custom plugins must be properly registered with Capacitor's plugin system
+   - Plugin files must be included in the Xcode project build
+   - `UNIMPLEMENTED` errors indicate plugin registration failures
+
+3. **Cross-Platform Abstraction**
+   - The auth abstraction layer in `auth.ts` made switching plugins seamless
+   - Web implementation remained unchanged during the fix
+   - Platform detection (`Capacitor.isNativePlatform()`) enables different implementations
+
+4. **Configuration Verification**
+   - Always verify all platform-specific configuration files
+   - Podfile, Info.plist, AppDelegate, and service configuration files must be correct
+   - The official plugin requires the same configuration as custom plugins
+
+### Prevention Strategies
+
+1. **Prefer Official Plugins**: Always use official Capacitor plugins when available instead of custom implementations
+2. **Test on All Platforms**: Always test authentication flows on both web and native platforms
+3. **Monitor Console Logs**: Pay attention to `UNIMPLEMENTED` errors as they indicate plugin issues
+4. **Maintain Abstraction**: Keep platform-specific code in abstraction layers for easy switching
+5. **Document Configuration**: Document all required configuration files and their purposes
+
+### Files Changed
+- **Removed**: `src/lib/nativeGoogleSignIn.ts`, `ios/App/App/GoogleSignInPlugin.swift`, `ios/App/App/GoogleSignInHandler.swift`, `ios/App/App/GoogleSignInPlugin.m`
+- **Updated**: `src/lib/auth.ts` - switched to official Firebase Authentication plugin
+- **Verified**: `ios/App/Podfile`, `ios/App/App/Info.plist`, `ios/App/App/AppDelegate.swift`, `ios/App/App/GoogleService-Info.plist`
+
+### Result
+✅ Google Sign-In now works seamlessly on both iOS and web platforms  
+✅ No more infinite loading or `UNIMPLEMENTED` errors  
+✅ Maintained web compatibility with existing Firebase Web SDK  
+✅ Cleaner codebase with official plugin integration  
+
+---
+
+**Document Version**: 1.2  
 **Last Updated**: July 2025  
 **Contributors**: Development Team  
 **Review Status**: ✅ Complete 

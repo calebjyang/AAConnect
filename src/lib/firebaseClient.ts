@@ -1,4 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
+import { Capacitor } from '@capacitor/core';
+
+const isNative = Capacitor.isNativePlatform();
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,7 +15,23 @@ const firebaseConfig = {
 
 export function getFirebaseApp() {
   try {
+    // On native platforms, don't initialize the Web SDK - let the native SDK handle it
+    if (isNative) {
+      console.log('Native platform detected, using existing Firebase app');
+      // Just return the existing app if it exists, don't initialize
+      const apps = getApps();
+      if (apps.length > 0) {
+        return apps[0];
+      } else {
+        console.warn('No Firebase app found on native platform - this should be initialized by the native SDK');
+        // On native, we might not need to return an app at all for auth operations
+        return undefined;
+      }
+    }
+    
+    // Web platform - initialize as normal
     if (!getApps().length) {
+      console.log('Web platform detected, initializing Firebase Web SDK');
       initializeApp(firebaseConfig);
     }
     return getApp();
