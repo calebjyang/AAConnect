@@ -38,3 +38,6 @@ next-env.d.ts
 # Capacitor
 ios/App/App/GoogleService-Info.plist
 android/app/google-services.json
+
+# Firebase config files with sensitive data
+src/lib/firebaseClient.ts
