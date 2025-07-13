@@ -367,30 +367,7 @@ export default function EventsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center gap-3">
-              <Link href="/" className="flex items-center gap-3">
-                <Image 
-                  src="/logo.png" 
-                  alt="AAConnect Logo" 
-                  width={40} 
-                  height={40} 
-                  className="rounded-full bg-white p-1 shadow"
-                />
-                <span className="font-extrabold text-2xl text-aacf-blue tracking-tight">
-                  AAConnect
-                </span>
-              </Link>
-            </div>
-            <div className="flex items-center gap-4">
-              {!loading && user && <UserProfile />}
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Header - removed, handled by global navigation */}
 
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
