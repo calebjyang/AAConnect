@@ -96,8 +96,8 @@ export default function GlobalNavigation() {
   }
 
   return (
-    <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-slate-200/50 shadow-sm">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+    <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-slate-200/50 shadow-sm pt-[env(safe-area-inset-top)]">
+      <div className="container mx-auto px-4 min-h-[64px] flex items-center justify-between mt-[env(safe-area-inset-top)]">
         <div className="flex items-center">
           <div className="mr-4">
             <Link href="/" className="flex items-center space-x-2">

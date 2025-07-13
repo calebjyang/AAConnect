@@ -1,4 +1,5 @@
 "use client";
+import React from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import type { RideSignup } from '@/lib/carpoolAlgorithm';
@@ -9,7 +10,7 @@ interface SortableRiderProps {
   isUnassigned?: boolean;
 }
 
-export default function SortableRider({ id, rider, isUnassigned = false }: SortableRiderProps) {
+const SortableRider = React.memo(function SortableRider({ id, rider, isUnassigned = false }: SortableRiderProps) {
   const {
     attributes,
     listeners,
@@ -44,4 +45,6 @@ export default function SortableRider({ id, rider, isUnassigned = false }: Sorta
       </div>
     </div>
   );
-} 
+});
+
+export default SortableRider; 

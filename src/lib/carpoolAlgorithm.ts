@@ -55,20 +55,6 @@ function countFemales(riders: RideSignup[]): number {
   return riders.filter(rider => rider.gender === 'Female').length;
 }
 
-// Helper function to get grade level (for sorting)
-function getGradeLevel(grade: string): number {
-  const gradeMap: { [key: string]: number } = {
-    'First Year': 1,
-    'Second Year': 2,
-    'Third Year': 3,
-    'Fourth Year': 4,
-    'Fifth Year': 5,
-    'Graduate Student': 6,
-    'Staff': 7,
-  };
-  return gradeMap[grade] || 0;
-}
-
 /**
  * Enhanced carpool assignment algorithm
  * Priority: Departure > Capacity > Grade Mixing > Gender Balance > Friend-Group mixing
@@ -97,23 +83,20 @@ export function assignCarpools(signups: RideSignup[], week: string): AssignmentR
   // Sort riders by submission time (first come, first served)
   allRiders.sort((a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
   
-  const assignments: CarpoolAssignment[] = [];
-  const unassignedRiders: RideSignup[] = [];
-  
   // Create a mutable copy of riders for assignment processing
   const availableRiders = [...allRiders];
   
   // Create assignments for each driver
+  const assignments: CarpoolAssignment[] = [];
+  const unassignedRiders: RideSignup[] = [];
+  
   for (const driver of drivers) {
-    const capacity = parseInt(driver.capacity || "0");
-    if (capacity <= 0) continue;
-    
     const assignment: CarpoolAssignment = {
       driver,
       riders: [],
-      totalCapacity: capacity,
-      usedCapacity: 1, // Driver takes 1 spot
-      location: driver.location
+      usedCapacity: 0,
+      totalCapacity: parseInt(driver.capacity || "0"),
+      location: driver.location,
     };
     
     // First pass: Try to match by exact location

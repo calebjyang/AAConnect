@@ -1,19 +1,19 @@
 # 📘 AAConnect – Product Requirements Document (PRD)
 
-**Version:** 1.8  
+**Version:** 1.9  
 **Last Updated:** July 2025
 
 ---
 
 ## 🔍 Overview
 
-AAConnect is a mobile-first PWA for Asian American Christian Fellowship chapters that centralizes event access, afterevent ride coordination, and apartment availability for spontaneous hangouts. It's designed to reduce planning friction and foster deeper in-community connection.
+AAConnect is a mobile-first PWA for Asian American Christian Fellowship chapters that centralizes event access, afterevent ride coordination, and apartment availability for spontaneous hangouts. It's designed to reduce planning friction and foster deeper in-community connection. The application now supports both web and native iOS/Android deployment with cross-platform Firebase integration.
 
 ---
 
 ## 🔐 Authentication System - COMPLETED ✅
 
-The authentication system provides secure access control using Google OAuth via Firebase Auth.
+The authentication system provides secure access control using Google OAuth via Firebase Auth, with cross-platform compatibility for web and native deployment.
 
 ### Features Implemented:
 - **Google OAuth Integration**: Seamless sign-in with Google accounts
@@ -23,18 +23,26 @@ The authentication system provides secure access control using Google OAuth via 
 - **Error Handling**: Comprehensive error messages and recovery flows
 - **Loading States**: Smooth UX with proper loading indicators
 - **Admin-Only Routes**: Specialized protection for admin pages
+- **Cross-Platform Support**: Works seamlessly on web, iOS, and Android
 
 ### Security Features:
 - Firebase Auth integration with Google OAuth
 - Admin role verification against Firestore database
 - Automatic session management and persistence
 - Secure route protection with proper redirects
+- Cross-platform security model using Firestore rules
+
+### Technical Implementation:
+- **Web Platform**: Firebase Web SDK for authentication
+- **Native Platforms**: Capacitor Firebase Authentication plugin
+- **Cross-Platform Abstraction**: Automatic platform detection and appropriate API usage
+- **No CORS Issues**: Native platforms use platform-specific APIs
 
 ---
 
 ## 🧭 Global Navigation System - COMPLETED ✅
 
-A comprehensive navigation system that provides consistent access to all app features across all pages.
+A comprehensive navigation system that provides consistent access to all app features across all pages and platforms.
 
 ### Features Implemented:
 - **Global Navigation Bar**: Persistent navigation header with logo and main menu items
@@ -44,6 +52,7 @@ A comprehensive navigation system that provides consistent access to all app fea
 - **Admin Access Control**: Conditional admin menu items based on user permissions
 - **Responsive Design**: Optimized for both desktop and mobile devices
 - **Loading States**: Smooth loading indicators during authentication checks
+- **Cross-Platform Compatibility**: Consistent behavior across web, iOS, and Android
 
 ### Navigation Items:
 - **Home**: Landing page and community discovery
@@ -56,14 +65,15 @@ A comprehensive navigation system that provides consistent access to all app fea
 - **Next.js App Router**: Leverages Next.js 15 routing system
 - **React Server Components**: Optimized performance with RSC
 - **Tailwind CSS**: Consistent styling with design system
-- **Firebase Auth Integration**: Real-time authentication state management
+- **Cross-Platform Firebase**: Real-time authentication state management across platforms
 - **Mobile-First Design**: Responsive breakpoints and touch-friendly interface
+- **Capacitor Integration**: Native navigation support for iOS/Android
 
 ---
 
 ## 🏠 Landing Page (v1) - COMPLETED ✅
 
-The landing page serves as the primary entry point for AAConnect, providing users with immediate access to key features and community information.
+The landing page serves as the primary entry point for AAConnect, providing users with immediate access to key features and community information across all platforms.
 
 ### Features Implemented:
 - **Hero Section**: Welcoming headline with "Welcome to AAConnect 👋" and dual call-to-action buttons
@@ -73,20 +83,23 @@ The landing page serves as the primary entry point for AAConnect, providing user
 - **Upcoming Events**: Dynamic display of upcoming events from Firebase
 - **Responsive Design**: Mobile-first approach optimized for PWA installation
 - **Accessibility**: WCAG 2.2 AA compliant with proper ARIA labels and semantic HTML
+- **Cross-Platform Data**: Events loaded using cross-platform Firestore abstraction
 
 ### Design Principles:
 - Clean, centered card layout for focus
 - Consistent color scheme using AACF brand colors
 - Clear visual hierarchy and intuitive navigation
 - Fast loading with optimized performance
+- Consistent experience across web and native platforms
 
 ---
 
 ## 🚗 Afterevent Carpool Coordinator - COMPLETED ✅
 
-The carpool system provides comprehensive ride coordination for afterevents with both automated assignment and manual admin override capabilities. This feature includes a sophisticated drag-and-drop interface built with @dnd-kit for intuitive manual assignment management.
+The carpool system provides comprehensive ride coordination for afterevents with both automated assignment and manual admin override capabilities. This feature includes a sophisticated drag-and-drop interface built with @dnd-kit for intuitive manual assignment management, now with cross-platform Firebase integration.
 
 ### Recent Enhancements (July 2025):
+- **Cross-Platform Firebase Integration**: Seamless operation on web, iOS, and Android without CORS issues
 - **Enhanced Matching Algorithm**: Added grade and gender-based matching for better carpool assignments
 - **Grade Mixing**: Ensures diverse grade levels in each car for better community building
 - **Gender Balance**: Prioritizes having at least 2 females per car when possible
@@ -94,9 +107,11 @@ The carpool system provides comprehensive ride coordination for afterevents with
 - **Admin Interface Updates**: Enhanced admin forms and data display with new fields
 
 ### Recent Fixes (July 2025):
+- **Native Platform Compatibility**: Resolved CORS issues by implementing cross-platform Firebase abstraction
 - **Collection Name Consistency**: Fixed critical bug where admin dashboard wasn't displaying ride signups due to collection name mismatch between public form (`rides`) and admin interface (`rideSignups`)
 - **Data Visibility**: Ensured all signups are now visible in admin dashboard, including "Fall Week 1" and other weeks
 - **Code Quality**: Improved import consistency and reduced bundle size
+- **Firebase Initialization**: Fixed timing issues in iOS AppDelegate for proper Firebase setup
 
 ### Features Implemented:
 - **Member Signup Form**: Easy-to-use form for drivers and riders to sign up with grade and gender information
@@ -110,6 +125,7 @@ The carpool system provides comprehensive ride coordination for afterevents with
 - **Custom Drag Preview**: Optimized drag overlay with exact styling matching original cards
 - **Multi-Container Support**: Drag between cars, unassigned area, and empty containers
 - **Fallback Logic**: Graceful handling of invalid drop zones with automatic reversion
+- **Cross-Platform Data**: All Firestore operations work seamlessly across web and native platforms
 
 ### Algorithm Features:
 - **Location Optimization**: Prioritizes exact location matches, then location groups
@@ -129,6 +145,7 @@ The carpool system provides comprehensive ride coordination for afterevents with
 - **Empty Container Support**: Ability to drag to empty cars and unassigned areas
 - **Custom Drag Overlay**: Professional drag preview that maintains card dimensions and styling
 - **Enhanced Data Management**: Grade and gender fields in admin forms and data display
+- **Cross-Platform Admin**: Admin dashboard works consistently across all platforms
 
 ### Technical Implementation:
 - **@dnd-kit Integration**: Modern drag-and-drop library with accessibility support
@@ -137,6 +154,9 @@ The carpool system provides comprehensive ride coordination for afterevents with
 - **State Management**: Optimistic updates with fallback error handling
 - **Performance Optimized**: Efficient re-rendering and minimal DOM manipulation
 - **Accessibility Compliant**: Full keyboard navigation and screen reader support
+- **Cross-Platform Firebase**: Uses appropriate Firebase API for each platform (Web SDK vs Capacitor plugins)
+- **Platform Detection**: Automatic detection of web vs native environment
+- **In-Memory Filtering**: Advanced queries handled with client-side filtering on native platforms
 
 ### Bug Fixes & Optimizations:
 - **Snap-back Issue**: Resolved by removing SortableContext for multi-container operations
@@ -146,6 +166,8 @@ The carpool system provides comprehensive ride coordination for afterevents with
 - **Invalid Drop Handling**: Added fallback logic to revert moves when dropped outside valid zones
 - **Empty Container Support**: Ensured all containers are registered as droppable zones
 - **React Hooks Compliance**: Fixed Rules of Hooks violations by extracting droppable logic
+- **CORS Resolution**: Eliminated CORS issues on native platforms through cross-platform Firebase integration
+- **Firebase Initialization**: Fixed timing issues preventing Firebase from loading on iOS
 
 ---
 
@@ -163,6 +185,8 @@ The carpool system provides comprehensive ride coordination for afterevents with
 ### 🔐 Authentication - COMPLETED ✅
 - Login required via Google OAuth
 - No domain restrictions for multi-campus and staff support
+- Cross-platform compatibility (web, iOS, Android)
+- Secure admin role verification using Firestore
 
 ### 🧭 Global Navigation - COMPLETED ✅
 - Persistent navigation bar across all pages
@@ -170,6 +194,7 @@ The carpool system provides comprehensive ride coordination for afterevents with
 - Active page indicators and user authentication integration
 - Admin access control with conditional menu items
 - Responsive design optimized for all devices
+- Cross-platform consistency across web and native platforms
 
 ### 🏠 Landing Page - COMPLETED ✅
 - Hero section with welcoming design and dual call-to-action buttons
@@ -179,6 +204,7 @@ The carpool system provides comprehensive ride coordination for afterevents with
 - Upcoming Events section with dynamic loading from Firebase
 - Responsive design optimized for mobile-first PWA installation
 - Accessibility improvements (WCAG 2.2 AA compliant)
+- Cross-platform data loading using unified Firestore abstraction
 
 ### 🚗 Afterevent Carpool Coordinator - COMPLETED ✅
 - Members indicate whether they are a driver or need a ride
@@ -194,6 +220,7 @@ The carpool system provides comprehensive ride coordination for afterevents with
 - **Custom Drag Preview**: Professional drag overlay with exact styling
 - **Capacity Validation**: Real-time validation prevents overloading vehicles
 - **Fallback Error Handling**: Graceful handling of invalid operations
+- **Cross-Platform Compatibility**: Works seamlessly on web, iOS, and Android
 - Output is shown in-app with CSV export functionality
 
 ### 📆 Event Calendar - COMPLETED ✅

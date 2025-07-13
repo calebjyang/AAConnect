@@ -2,15 +2,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { getCollection, orderByQuery, limitQuery } from "@/lib/firestore";
 import { useAuth } from "@/lib/useAuth";
-import UserProfile from "@/components/UserProfile";
+import { parseEventDate } from '@/lib/utils';
 
 type Event = {
   id: string;
   title: string;
-  date: { seconds: number; nanoseconds: number };
+  date: Date;
   location: string;
   description?: string;
   rsvpUrl?: string;
@@ -18,7 +17,7 @@ type Event = {
 };
 
 export default function Home() {
-  const { user, loading } = useAuth();
+  const { } = useAuth();
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
 
@@ -26,19 +25,13 @@ export default function Home() {
     async function fetchUpcomingEvents() {
       try {
         const now = new Date();
-        const q = query(
-          collection(db, "events"),
-          orderBy("date", "asc"),
-          limit(3)
-        );
-        const querySnapshot = await getDocs(q);
-        const allEvents = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Event[];
+        const allEvents = await getCollection("events", [
+          orderByQuery("date", "asc"),
+          limitQuery(3)
+        ]) as Event[];
         console.log("Fetched home events:", allEvents);
         const futureEvents = allEvents.filter((event: Event) => 
-          new Date(event.date.seconds * 1000) > now
+          (parseEventDate(event.date) ?? new Date()) > now
         );
         
         setUpcomingEvents(futureEvents.slice(0, 3));
@@ -54,44 +47,10 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center gap-3">
-              <Image 
-                src="/logo.png" 
-                alt="AAConnect Logo" 
-                width={40} 
-                height={40} 
-                className="rounded-full bg-white p-1 shadow"
-              />
-              <span className="font-extrabold text-2xl text-aacf-blue tracking-tight">
-                AAConnect
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
-              {!loading && (
-                <>
-                  {user ? (
-                    <UserProfile />
-                  ) : (
-                    <Link
-                      href="/login"
-                      className="px-4 py-2 bg-aacf-blue text-white rounded-lg font-semibold hover:bg-blue-800 transition shadow-sm"
-                    >
-                      Sign In
-                    </Link>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Remove local header: GlobalNavigation already provides logo and sign in */}
 
       {/* Hero Section - Centered Card Layout */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 via-white to-blue-50">
+      <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 via-white to-blue-50 mt-4">
         <div className="max-w-2xl mx-auto">
           {/* Centered Card */}
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-12 text-center">
@@ -246,7 +205,7 @@ export default function Home() {
                 <div key={event.id} className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-100">
                   <h3 className="text-xl font-semibold text-aacf-blue mb-2">{event.title}</h3>
                   <p className="text-gray-600 text-sm mb-3">
-                    {new Date(event.date.seconds * 1000).toLocaleDateString('en-US', {
+                    {parseEventDate(event.date)?.toLocaleDateString('en-US', {
                       weekday: 'long',
                       month: 'long',
                       day: 'numeric',

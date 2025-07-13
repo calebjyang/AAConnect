@@ -3,8 +3,7 @@ import { useState } from 'react';
 import { useCarpoolManagement } from '@/hooks/admin/useCarpoolManagement';
 import CarpoolList from './CarpoolList';
 import CarpoolForm from './CarpoolForm';
-import { collection, addDoc, doc, updateDoc, deleteDoc, deleteField } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { addDocToCollection, updateDoc, deleteDoc } from '@/lib/firestore';
 import type { RideSignupAdmin } from '@/hooks/admin/useCarpoolManagement';
 import CarpoolSignupsList from './CarpoolSignupsList';
 
@@ -25,7 +24,6 @@ export default function CarpoolManagement() {
     saving,
     exportAssignments,
     filteredSignups,
-    editingAssignments,
     activeId,
     sensors,
     handleDragStart,
@@ -43,7 +41,7 @@ export default function CarpoolManagement() {
   async function handleAddSignup(values: Omit<RideSignupAdmin, 'id'>) {
     setFormLoading(true);
     try {
-      await addDoc(collection(db, 'rides'), values);
+      await addDocToCollection('rides', values);
       setShowForm(false);
       await fetchSignups();
     } finally {
@@ -69,9 +67,9 @@ export default function CarpoolManagement() {
       if (values.canDrive === 'yes' && values.capacity) {
         update.capacity = values.capacity;
       } else {
-        update.capacity = deleteField();
+        update.capacity = null; // Use null for deletion
       }
-      await updateDoc(doc(db, 'rides', editingSignup.id), update);
+      await updateDoc(`rides/${editingSignup.id}`, update);
       setEditingSignup(null);
       setShowForm(false);
       await fetchSignups();
@@ -83,7 +81,7 @@ export default function CarpoolManagement() {
   // Delete Signup handler
   async function handleDeleteSignup(id: string) {
     if (!window.confirm('Are you sure you want to delete this signup?')) return;
-    await deleteDoc(doc(db, 'rides', id));
+    await deleteDoc(`rides/${id}`);
     await fetchSignups();
   }
 
@@ -152,7 +150,7 @@ export default function CarpoolManagement() {
       ) : (
         <CarpoolList
           assignments={assignments}
-          editingAssignments={editingAssignments}
+          editingAssignments={null}
           isEditing={isEditing}
           saving={saving}
           activeId={activeId}

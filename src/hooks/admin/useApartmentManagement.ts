@@ -1,9 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
-import { collection, getDocs, addDoc, doc, updateDoc, query, orderBy, where, Timestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getCollection, addDocToCollection, updateDoc } from '@/lib/firestore';
+import { Timestamp } from 'firebase/firestore';
 import type { 
-  Apartment, 
-  ApartmentMember, 
   ApartmentFormData,
   ApartmentManagementState 
 } from '@/types/apartment';
@@ -25,16 +23,8 @@ export function useApartmentManagement() {
   const fetchApartments = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const q = query(
-        collection(db, 'apartments'), 
-        where('isActive', '==', true),
-        orderBy('name', 'asc')
-      );
-      const querySnapshot = await getDocs(q);
-      const apartments: Apartment[] = querySnapshot.docs.map(docSnap => ({
-        id: docSnap.id,
-        ...docSnap.data(),
-      } as Apartment));
+      let apartments = await getCollection('apartments');
+      apartments = apartments.filter((a: any) => a.isActive).sort((a: any, b: any) => a.name.localeCompare(b.name));
       setState(prev => ({ ...prev, apartments, loading: false }));
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch apartments';
@@ -48,16 +38,8 @@ export function useApartmentManagement() {
   const fetchMembers = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const q = query(
-        collection(db, 'apartmentMembers'), 
-        where('isActive', '==', true),
-        orderBy('joinedAt', 'desc')
-      );
-      const querySnapshot = await getDocs(q);
-      const members: ApartmentMember[] = querySnapshot.docs.map(docSnap => ({
-        id: docSnap.id,
-        ...docSnap.data(),
-      } as ApartmentMember));
+      let members = await getCollection('apartmentMembers');
+      members = members.filter((m: any) => m.isActive).sort((a: any, b: any) => b.joinedAt?.seconds - a.joinedAt?.seconds);
       setState(prev => ({ ...prev, members, loading: false }));
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch members';
@@ -79,12 +61,11 @@ export function useApartmentManagement() {
         createdBy,
         isActive: true,
       };
-      
-      await addDoc(collection(db, 'apartments'), apartmentDoc);
+      await addDocToCollection('apartments', apartmentDoc);
       setState(prev => ({ 
         ...prev, 
         loading: false, 
-        success: 'Apartment created successfully!' 
+        success: 'Apartment created successfully!'
       }));
       await fetchApartments();
     } catch (error) {
@@ -96,19 +77,18 @@ export function useApartmentManagement() {
   /**
    * Updates an existing apartment
    */
-  const updateApartment = useCallback(async (id: string, apartmentData: Partial<ApartmentFormData>) => {
+  const updateApartment = useCallback(async (apartmentId: string, apartmentData: ApartmentFormData) => {
     setState(prev => ({ ...prev, loading: true, error: null, success: null }));
     try {
-      const updateData = {
+      const now = Timestamp.now();
+      await updateDoc(`apartments/${apartmentId}`, {
         ...apartmentData,
-        updatedAt: Timestamp.now(),
-      };
-      
-      await updateDoc(doc(db, 'apartments', id), updateData);
-      setState(prev => ({ 
-        ...prev, 
-        loading: false, 
-        success: 'Apartment updated successfully!' 
+        updatedAt: now,
+      });
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        success: 'Apartment updated successfully!'
       }));
       await fetchApartments();
     } catch (error) {
@@ -118,19 +98,20 @@ export function useApartmentManagement() {
   }, [fetchApartments]);
 
   /**
-   * Deletes an apartment (soft delete)
+   * Deletes an apartment (soft delete by setting isActive to false)
    */
-  const deleteApartment = useCallback(async (id: string) => {
+  const deleteApartment = useCallback(async (apartmentId: string) => {
     setState(prev => ({ ...prev, loading: true, error: null, success: null }));
     try {
-      await updateDoc(doc(db, 'apartments', id), {
+      const now = Timestamp.now();
+      await updateDoc(`apartments/${apartmentId}`, {
         isActive: false,
-        updatedAt: Timestamp.now(),
+        updatedAt: now,
       });
-      setState(prev => ({ 
-        ...prev, 
-        loading: false, 
-        success: 'Apartment deleted successfully!' 
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        success: 'Apartment deleted successfully!'
       }));
       await fetchApartments();
     } catch (error) {
@@ -140,12 +121,14 @@ export function useApartmentManagement() {
   }, [fetchApartments]);
 
   /**
+   * Clears error and success messages
+   */
+  const clearMessages = useCallback(() => {
+    setState(prev => ({ ...prev, error: null, success: null }));
+  }, []);
+
+  /**
    * Assigns a user to an apartment
-   * @param apartmentId - The apartment's Firestore ID
-   * @param userId - The user's Firebase UID (NOT email!)
-   * @param userEmail - The user's email
-   * @param userName - The user's display name
-   * @param userPicture - The user's photo URL (optional)
    */
   const assignMemberToApartment = useCallback(async (
     apartmentId: string, 
@@ -157,22 +140,15 @@ export function useApartmentManagement() {
     setState(prev => ({ ...prev, loading: true, error: null, success: null }));
     try {
       // First, check if user is already assigned to an apartment
-      const existingMemberQuery = query(
-        collection(db, 'apartmentMembers'),
-        where('userId', '==', userId),
-        where('isActive', '==', true)
-      );
-      const existingMemberSnapshot = await getDocs(existingMemberQuery);
-      
-      if (!existingMemberSnapshot.empty) {
+      const members = await getCollection('apartmentMembers');
+      const existingMember = members.find((m: any) => m.userId === userId && m.isActive);
+      if (existingMember) {
         // Remove existing membership
-        const existingMember = existingMemberSnapshot.docs[0];
-        await updateDoc(doc(db, 'apartmentMembers', existingMember.id), {
+        await updateDoc(`apartmentMembers/${existingMember.id}`, {
           isActive: false,
           updatedAt: Timestamp.now(),
         });
       }
-
       // Create new membership
       const memberDoc = {
         apartmentId,
@@ -183,12 +159,11 @@ export function useApartmentManagement() {
         joinedAt: Timestamp.now(),
         isActive: true,
       };
-      
-      await addDoc(collection(db, 'apartmentMembers'), memberDoc);
+      await addDocToCollection('apartmentMembers', memberDoc);
       setState(prev => ({ 
         ...prev, 
         loading: false, 
-        success: 'Member assigned successfully!' 
+        success: 'Member assigned successfully!'
       }));
       await fetchMembers();
     } catch (error) {
@@ -197,36 +172,6 @@ export function useApartmentManagement() {
     }
   }, [fetchMembers]);
 
-  /**
-   * Removes a member from an apartment
-   */
-  const removeMemberFromApartment = useCallback(async (memberId: string) => {
-    setState(prev => ({ ...prev, loading: true, error: null, success: null }));
-    try {
-      await updateDoc(doc(db, 'apartmentMembers', memberId), {
-        isActive: false,
-        updatedAt: Timestamp.now(),
-      });
-      setState(prev => ({ 
-        ...prev, 
-        loading: false, 
-        success: 'Member removed successfully!' 
-      }));
-      await fetchMembers();
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to remove member';
-      setState(prev => ({ ...prev, error: errorMessage, loading: false }));
-    }
-  }, [fetchMembers]);
-
-  /**
-   * Clears success/error messages
-   */
-  const clearMessages = useCallback(() => {
-    setState(prev => ({ ...prev, error: null, success: null }));
-  }, []);
-
-  // Load data on mount
   useEffect(() => {
     fetchApartments();
     fetchMembers();
@@ -234,15 +179,12 @@ export function useApartmentManagement() {
 
   return {
     ...state,
+    fetchApartments,
+    fetchMembers,
     createApartment,
     updateApartment,
     deleteApartment,
-    assignMemberToApartment,
-    removeMemberFromApartment,
     clearMessages,
-    refetch: () => {
-      fetchApartments();
-      fetchMembers();
-    },
+    assignMemberToApartment,
   };
 } 

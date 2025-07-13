@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
 import GlobalNavigation from "@/components/GlobalNavigation";
 import PwaServiceWorker from "@/components/PwaServiceWorker";
 
@@ -25,6 +24,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  if (typeof window !== 'undefined') {
+    console.log('window.location.origin', window.location.origin);
+  }
   return (
     <html lang="en">
       <head>
@@ -34,12 +36,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <PwaServiceWorker />
-        <ErrorBoundary>
-          <GlobalNavigation />
-          <main>
-            {children}
-          </main>
-        </ErrorBoundary>
+        <GlobalNavigation />
+        <main>
+          {children}
+        </main>
       </body>
     </html>
   );

@@ -10,6 +10,29 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  {
+    ignores: [
+      "out/**",
+      ".next/**",
+      "dist/**",
+      "build/**",
+      "node_modules/**",
+      "ios/**",
+      "android/**",
+      "public/**",
+      "*.config.js",
+      "*.config.mjs",
+      "*.config.ts",
+      "jest.config.js",
+      "jest.setup.js",
+      "postcss.config.js",
+      "postcss.config.mjs",
+      "tailwind.config.js",
+      "next.config.ts",
+      "capacitor.config.ts",
+      "firestore.rules"
+    ]
+  },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
     rules: {

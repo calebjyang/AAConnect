@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import { onAuthStateChanged, User, signOut as firebaseSignOut } from "firebase/auth";
-import { auth } from "./firebase";
-import { doc, setDoc, getDoc } from "firebase/firestore";
-import { db } from "./firebase";
+import { signOutUser, addAuthStateListener } from "./auth";
+import { setDoc, getDoc } from "@/lib/firestore";
+import { Capacitor } from '@capacitor/core';
 
 interface AuthState {
-  user: User | null;
+  user: any | null;
   loading: boolean;
   isAdmin: boolean;
   error: string | null;
@@ -60,7 +59,7 @@ export function useAuth() {
     error: null,
     signOut: async () => {
       try {
-        await firebaseSignOut(auth);
+        await signOutUser();
       } catch (error) {
         console.error("Error signing out:", error);
         throw error;
@@ -69,88 +68,63 @@ export function useAuth() {
   });
 
   useEffect(() => {
-    /**
-     * Firebase auth state change listener
-     * 
-     * This function is called whenever the Firebase authentication state changes.
-     * It handles both login and logout events, and performs admin verification
-     * for authenticated users using Firestore.
-     * 
-     * @param {User|null} firebaseUser - Firebase user object or null
-     */
-    const unsubscribe = onAuthStateChanged(
-      auth, 
-      async (firebaseUser) => {
-        if (firebaseUser) {
-          // --- Automatic user doc creation ---
-          try {
-            const userRef = doc(db, "users", firebaseUser.uid);
-            const userSnap = await getDoc(userRef);
-            if (!userSnap.exists()) {
-              await setDoc(userRef, {
-                displayName: firebaseUser.displayName,
-                email: firebaseUser.email,
-                photoURL: firebaseUser.photoURL,
-                createdAt: new Date(),
-              });
-            }
-          } catch (err) {
-            console.error("Error creating user doc:", err);
-          }
-          // --- End user doc creation ---
+    let unsubscribe: (() => void) | undefined;
 
-          // Check if user is admin using Firestore
+    const initializeAuth = async () => {
+      try {
+        unsubscribe = await addAuthStateListener(async (event: any) => {
+          const user = event.user || null;
           let isAdmin = false;
-          try {
-            const adminRef = doc(db, "admins", firebaseUser.email || '');
-            const adminSnap = await getDoc(adminRef);
-            isAdmin = adminSnap.exists();
-          } catch (error) {
-            console.error("Error checking admin status:", error instanceof Error ? error.message : 'Unknown error');
-            // If we can't verify admin status, assume not admin for security
-            isAdmin = false;
+          
+          if (user) {
+            try {
+              const userSnap = await getDoc(`users/${user.uid}`);
+              if (!userSnap) {
+                await setDoc(`users/${user.uid}`, {
+                  displayName: user.displayName,
+                  email: user.email,
+                  photoURL: user.photoURL,
+                  createdAt: new Date(),
+                });
+              }
+            } catch (err) {
+              console.error("Error creating user doc:", err);
+            }
+            
+            try {
+              const adminSnap = await getDoc(`admins/${user.email || ''}`);
+              isAdmin = !!adminSnap;
+            } catch (error) {
+              console.error("Error checking admin status:", error instanceof Error ? error.message : 'Unknown error');
+              isAdmin = false;
+            }
           }
-
+          
           setAuthState({
-            user: firebaseUser,
+            user,
             loading: false,
             isAdmin,
             error: null,
             signOut: async () => {
               try {
-                await firebaseSignOut(auth);
+                await signOutUser();
               } catch (error) {
                 console.error("Error signing out:", error);
                 throw error;
               }
             }
           });
-        } else {
-          setAuthState({
-            user: null,
-            loading: false,
-            isAdmin: false,
-            error: null,
-            signOut: async () => {
-              try {
-                await firebaseSignOut(auth);
-              } catch (error) {
-                console.error("Error signing out:", error);
-                throw error;
-              }
-            }
-          });
-        }
-      },
-      (error) => {
+        });
+      } catch (error) {
+        console.error("Error initializing auth:", error);
         setAuthState({
           user: null,
           loading: false,
           isAdmin: false,
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Authentication initialization failed',
           signOut: async () => {
             try {
-              await firebaseSignOut(auth);
+              await signOutUser();
             } catch (error) {
               console.error("Error signing out:", error);
               throw error;
@@ -158,9 +132,15 @@ export function useAuth() {
           }
         });
       }
-    );
+    };
 
-    return () => unsubscribe();
+    initializeAuth();
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, []);
 
   return authState;

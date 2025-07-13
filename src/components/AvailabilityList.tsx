@@ -1,5 +1,6 @@
 "use client";
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import React from 'react';
 import type { AvailabilitySlot } from '@/types/apartment';
 
 interface AvailabilityListProps {
@@ -10,7 +11,7 @@ interface AvailabilityListProps {
   title?: string;
 }
 
-export default function AvailabilityList({
+const AvailabilityList = React.memo(function AvailabilityList({
   slots,
   loading = false,
   onDelete,
@@ -19,6 +20,14 @@ export default function AvailabilityList({
 }: AvailabilityListProps) {
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all');
   const [sortBy, setSortBy] = useState<'time' | 'apartment'>('time');
+
+  const handleFilterChange = useCallback((newFilter: 'all' | 'upcoming' | 'past') => {
+    setFilter(newFilter);
+  }, []);
+
+  const handleSortChange = useCallback((newSortBy: 'time' | 'apartment') => {
+    setSortBy(newSortBy);
+  }, []);
 
   const filteredAndSortedSlots = useMemo(() => {
     const now = new Date();
@@ -108,7 +117,7 @@ export default function AvailabilityList({
         <div className="flex items-center space-x-2">
           <select
             value={filter}
-            onChange={(e) => setFilter(e.target.value as 'all' | 'upcoming' | 'past')}
+            onChange={(e) => handleFilterChange(e.target.value as 'all' | 'upcoming' | 'past')}
             className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="all">All</option>
@@ -117,7 +126,7 @@ export default function AvailabilityList({
           </select>
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as 'time' | 'apartment')}
+            onChange={(e) => handleSortChange(e.target.value as 'time' | 'apartment')}
             className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="time">Sort by Time</option>
@@ -205,4 +214,6 @@ export default function AvailabilityList({
       )}
     </div>
   );
-} 
+});
+
+export default AvailabilityList; 

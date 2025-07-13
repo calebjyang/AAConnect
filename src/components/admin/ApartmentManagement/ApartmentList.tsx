@@ -1,5 +1,6 @@
 "use client";
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import type { Apartment, ApartmentMember } from '@/types/apartment';
 
@@ -12,7 +13,7 @@ interface ApartmentListProps {
   loading?: boolean;
 }
 
-export default function ApartmentList({
+const ApartmentList = React.memo(function ApartmentList({
   apartments,
   members,
   onEdit,
@@ -22,11 +23,11 @@ export default function ApartmentList({
 }: ApartmentListProps) {
   const [expandedApartment, setExpandedApartment] = useState<string | null>(null);
 
-  const getApartmentMembers = (apartmentId: string) => {
-    return members.filter(member => member.apartmentId === apartmentId);
-  };
+  const toggleExpanded = useCallback((apartmentId: string) => {
+    setExpandedApartment(expandedApartment === apartmentId ? null : apartmentId);
+  }, [expandedApartment]);
 
-  const formatDate = (timestamp: any) => {
+  const formatDate = useCallback((timestamp: any) => {
     if (!timestamp) return 'N/A';
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     return date.toLocaleDateString('en-US', {
@@ -34,11 +35,23 @@ export default function ApartmentList({
       month: 'short',
       day: 'numeric',
     });
-  };
+  }, []);
 
-  const toggleExpanded = (apartmentId: string) => {
-    setExpandedApartment(expandedApartment === apartmentId ? null : apartmentId);
-  };
+  // Memoize apartment members lookup
+  const apartmentMembersMap = useMemo(() => {
+    const map = new Map<string, ApartmentMember[]>();
+    members.forEach(member => {
+      if (!map.has(member.apartmentId)) {
+        map.set(member.apartmentId, []);
+      }
+      map.get(member.apartmentId)!.push(member);
+    });
+    return map;
+  }, [members]);
+
+  const getApartmentMembers = useCallback((apartmentId: string) => {
+    return apartmentMembersMap.get(apartmentId) || [];
+  }, [apartmentMembersMap]);
 
   if (loading) {
     return (
@@ -162,4 +175,6 @@ export default function ApartmentList({
       })}
     </div>
   );
-} 
+});
+
+export default ApartmentList; 

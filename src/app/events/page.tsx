@@ -1,17 +1,17 @@
 "use client";
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { getCollection, orderByQuery } from "@/lib/firestore";
 import React from "react";
 import { useAuth } from "@/lib/useAuth";
 import UserProfile from "@/components/UserProfile";
 import Image from "next/image";
 import Link from "next/link";
+import { parseEventDate } from '@/lib/utils';
 
 type Event = {
   id: string;
   title: string;
-  date: { seconds: number; nanoseconds: number }; // Firestore Timestamp
+  date?: Date;
   location: string;
   description?: string;
   rsvpUrl?: string;
@@ -35,7 +35,7 @@ function EventDetailModal({ event, onClose }: { event: Event; onClose: () => voi
 
   const hasRSVP = !!event.rsvpUrl;
   const hasRides = !!event.ridesUrl;
-  const eventDate = new Date(event.date.seconds * 1000);
+  const eventDate = parseEventDate(event.date) ?? new Date(); // Use Date object directly
 
   // Google Calendar integration
   const createGoogleCalendarEvent = () => {
@@ -73,21 +73,25 @@ function EventDetailModal({ event, onClose }: { event: Event; onClose: () => voi
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            <span className="font-medium">{eventDate.toLocaleDateString('en-US', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}</span>
+            <span className="font-medium">
+              {event.date ? eventDate.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              }) : 'Date TBD'}
+            </span>
           </div>
           <div className="flex items-center gap-2 text-gray-600 mb-2">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>{eventDate.toLocaleTimeString('en-US', { 
-              hour: 'numeric', 
-              minute: '2-digit' 
-            })}</span>
+            <span>
+              {event.date ? eventDate.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit' 
+              }) : 'Time TBD'}
+            </span>
           </div>
           <div className="flex items-center gap-2 text-gray-600">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,7 +162,7 @@ function CalendarView({ events }: { events: Event[] }) {
 
   // Group events by date
   const eventsByDate = events.reduce((acc, event) => {
-    const date = new Date(event.date.seconds * 1000);
+    const date = parseEventDate(event.date) ?? new Date(); // Use Date object directly
     const dateKey = date.toDateString();
     if (!acc[dateKey]) acc[dateKey] = [];
     acc[dateKey].push(event);
@@ -229,8 +233,8 @@ function CalendarView({ events }: { events: Event[] }) {
 
 function ListView({ events, onEventClick }: { events: Event[]; onEventClick: () => void }) {
   const now = new Date();
-  const upcomingEvents = events.filter(e => new Date(e.date.seconds * 1000) >= now);
-  const pastEvents = events.filter(e => new Date(e.date.seconds * 1000) < now);
+  const upcomingEvents = events.filter(e => (parseEventDate(e.date) ?? new Date()) >= now);
+  const pastEvents = events.filter(e => (parseEventDate(e.date) ?? new Date()) < now);
 
   return (
     <div className="space-y-6">
@@ -260,7 +264,7 @@ function ListView({ events, onEventClick }: { events: Event[]; onEventClick: () 
 }
 
 function EventCard({ event, onClick, isPast = false }: { event: Event; onClick: () => void; isPast?: boolean }) {
-  const eventDate = new Date(event.date.seconds * 1000);
+  const eventDate = parseEventDate(event.date) ?? new Date(); // Use Date object directly
   const hasRSVP = !!event.rsvpUrl;
   const hasRides = !!event.ridesUrl;
 
@@ -288,11 +292,11 @@ function EventCard({ event, onClick, isPast = false }: { event: Event; onClick: 
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
           <span className="text-sm">
-            {eventDate.toLocaleDateString('en-US', { 
+            {event.date ? eventDate.toLocaleDateString('en-US', { 
               weekday: 'short', 
               month: 'short', 
               day: 'numeric' 
-            })}
+            }) : 'Date TBD'}
           </span>
         </div>
         <div className="flex items-center gap-1">
@@ -300,10 +304,10 @@ function EventCard({ event, onClick, isPast = false }: { event: Event; onClick: 
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <span className="text-sm">
-            {eventDate.toLocaleTimeString('en-US', { 
+            {event.date ? eventDate.toLocaleTimeString('en-US', { 
               hour: 'numeric', 
               minute: '2-digit' 
-            })}
+            }) : 'Time TBD'}
           </span>
         </div>
         <div className="flex items-center gap-1">
@@ -347,14 +351,10 @@ export default function EventsPage() {
   useEffect(() => {
     async function fetchEvents() {
       try {
-        const q = query(collection(db, "events"), orderBy("date", "asc"));
-        const querySnapshot = await getDocs(q);
-        const data = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Event[];
+        const data = await getCollection("events", [orderByQuery("date", "asc")]) as Event[];
         console.log("Fetched events:", data);
-        setEvents(data);
+        // Parse event dates on load
+        setEvents(data.map(e => ({ ...e, date: parseEventDate(e.date) ?? new Date() })));
       } catch (error) {
         console.error("Error fetching events:", error instanceof Error ? error.message : error);
       } finally {

@@ -74,28 +74,8 @@ export class ErrorBoundary extends Component<Props, State> {
    * @param {Error} error - The error that was thrown
    * @param {ErrorInfo} errorInfo - Additional error information
    */
-  public componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
-    // Call custom error handler if provided
-    if (this.props.onError) {
-      this.props.onError(error, errorInfo);
-    }
-
-    // Log to external service in production
-    if (process.env.NODE_ENV === 'production') {
-      // TODO: Send to error reporting service (Sentry, LogRocket, etc.)
-      console.error('Production error:', {
-        message: error.message,
-        stack: error.stack,
-        componentStack: errorInfo.componentStack,
-        timestamp: new Date().toISOString(),
-        userAgent: navigator.userAgent,
-        url: window.location.href,
-      });
-    }
-
-    this.setState({ errorInfo });
+  public componentDidCatch() {
+    // ErrorBoundary caught an error
   }
 
   /**

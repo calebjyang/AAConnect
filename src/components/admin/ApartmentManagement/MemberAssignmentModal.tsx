@@ -1,8 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { collection, getDocs, query } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getCollection } from '@/lib/firestore';
 
 interface User {
   uid: string;
@@ -40,11 +39,10 @@ export default function MemberAssignmentModal({
     const fetchUsers = async () => {
       setLoadingUsers(true);
       try {
-        const usersQuery = query(collection(db, 'users'));
-        const usersSnapshot = await getDocs(usersQuery);
-        const usersData: User[] = usersSnapshot.docs.map(doc => ({
-          uid: doc.id,
-          ...doc.data(),
+        const usersCollection = await getCollection('users');
+        const usersData: User[] = usersCollection.map((user: any) => ({
+          uid: user.id,
+          ...user,
         } as User));
         setUsers(usersData);
       } catch (error) {

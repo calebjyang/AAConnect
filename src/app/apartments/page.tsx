@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 
 export default function ApartmentsPage() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const { userApartment, loading: userLoading } = useUserApartment();
   const {
     slots,
@@ -45,11 +45,11 @@ export default function ApartmentsPage() {
     if (!user || !userApartment) return;
     
     await createAvailabilitySlot(
-      availabilityData,
-      userApartment.name,
-      user.uid,
-      user.email || '',
-      user.displayName || 'Unknown User'
+      {
+        ...availabilityData,
+        apartmentId: userApartment.id,
+      },
+      user.uid
     );
     setIsPostModalOpen(false);
   };

@@ -1,6 +1,5 @@
 "use client";
 import { useState } from 'react';
-import { Timestamp } from 'firebase/firestore';
 import type { EventData } from '@/hooks/admin/useEventManagement';
 
 interface EventFormProps {
@@ -25,14 +24,17 @@ export default function EventForm({ onSubmit, loading = false }: EventFormProps)
       return;
     }
 
-    const eventData: EventData = {
-      title: formData.title,
-      date: Timestamp.fromDate(new Date(formData.date)),
-      location: formData.location,
-      description: formData.description || undefined,
-      rsvpUrl: formData.rsvpUrl || undefined,
-      ridesUrl: formData.ridesUrl || undefined,
-    };
+    // Only include fields with non-empty values
+    const eventData: EventData = Object.fromEntries(
+      Object.entries({
+        title: formData.title,
+        date: formData.date ? new Date(formData.date).toISOString() : undefined,
+        location: formData.location,
+        description: formData.description,
+        rsvpUrl: formData.rsvpUrl,
+        ridesUrl: formData.ridesUrl,
+      }).filter(([_, v]) => v !== undefined && v !== "")
+    ) as unknown as EventData;
 
     await onSubmit(eventData);
     

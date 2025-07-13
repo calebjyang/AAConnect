@@ -1,6 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
-import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { useState, useEffect } from 'react';
+import { getCollection, getDoc } from '@/lib/firestore';
 import { useAuth } from '@/lib/useAuth';
 import type { 
   Apartment, 
@@ -22,7 +21,7 @@ export function useUserApartment() {
   /**
    * Fetches the user's apartment membership
    */
-  const fetchUserApartment = useCallback(async () => {
+  const fetchUserApartment = async () => {
     if (!user) {
       setState(prev => ({ ...prev, userApartment: null, userMembership: null, loading: false }));
       return;
@@ -31,14 +30,10 @@ export function useUserApartment() {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
       // Find user's apartment membership
-      const membershipQuery = query(
-        collection(db, 'apartmentMembers'),
-        where('userId', '==', user.uid),
-        where('isActive', '==', true)
-      );
-      const membershipSnapshot = await getDocs(membershipQuery);
+      const allMemberships = await getCollection('apartmentMembers');
+      const activeMemberships = allMemberships.filter((m: any) => m.userId === user.uid && m.isActive);
 
-      if (membershipSnapshot.empty) {
+      if (activeMemberships.length === 0) {
         setState(prev => ({ 
           ...prev, 
           userApartment: null, 
@@ -48,14 +43,12 @@ export function useUserApartment() {
         return;
       }
 
-      const membership = membershipSnapshot.docs[0].data() as ApartmentMember;
-      membership.id = membershipSnapshot.docs[0].id;
+      const membership = activeMemberships[0] as ApartmentMember;
 
       // Fetch apartment details by document ID
-      const apartmentRef = doc(db, 'apartments', membership.apartmentId);
-      const apartmentSnap = await getDoc(apartmentRef);
+      const apartmentSnap = await getDoc(`apartments/${membership.apartmentId}`);
 
-      if (!apartmentSnap.exists() || !apartmentSnap.data().isActive) {
+      if (!apartmentSnap || !apartmentSnap.isActive) {
         setState(prev => ({ 
           ...prev, 
           userApartment: null, 
@@ -65,7 +58,7 @@ export function useUserApartment() {
         return;
       }
 
-      const apartment = { id: apartmentSnap.id, ...apartmentSnap.data() } as Apartment;
+      const apartment = { id: membership.apartmentId, ...apartmentSnap } as Apartment;
 
       setState(prev => ({ 
         ...prev, 
@@ -77,12 +70,13 @@ export function useUserApartment() {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch user apartment';
       setState(prev => ({ ...prev, error: errorMessage, loading: false }));
     }
-  }, [user]);
+  };
 
   // Load user apartment data when user changes
   useEffect(() => {
     fetchUserApartment();
-  }, [fetchUserApartment]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   return {
     ...state,

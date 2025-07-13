@@ -1,4 +1,5 @@
 "use client";
+import React from 'react';
 import { DndContext, DragOverlay } from '@dnd-kit/core';
 import type { AssignmentResult, CarpoolAssignment, RideSignup } from '@/lib/carpoolAlgorithm';
 import CarDroppable from './CarDroppable';
@@ -21,7 +22,7 @@ interface CarpoolListProps {
   onExport: () => void;
 }
 
-export default function CarpoolList({
+const CarpoolList = React.memo(function CarpoolList({
   assignments,
   editingAssignments,
   isEditing,
@@ -264,4 +265,6 @@ export default function CarpoolList({
       )}
     </div>
   );
-} 
+});
+
+export default CarpoolList; 

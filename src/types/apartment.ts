@@ -89,4 +89,37 @@ export interface GlobalAvailabilityState {
   allSlots: AvailabilitySlot[];
   loading: boolean;
   error: string | null;
+}
+
+// Carpool ride signup (admin view)
+export interface RideSignupAdmin {
+  id: string;
+  name: string;
+  phone: string;
+  canDrive: string;
+  location: string;
+  aftereventWeek: string;
+  submittedAt: string;
+  capacity?: string;
+  grade?: string;
+  gender?: string;
+}
+
+// Carpool assignment structure
+export interface CarpoolAssignment {
+  id: string;
+  week: string;
+  assignments: any; // Replace 'any' with a more specific type if available
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+}
+
+// Carpool management state
+export interface CarpoolManagementState {
+  signups: RideSignupAdmin[];
+  assignments: CarpoolAssignment[];
+  loading: boolean;
+  error: string | null;
+  success: string | null;
 } 

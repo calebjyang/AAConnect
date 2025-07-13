@@ -5,6 +5,8 @@ const config: CapacitorConfig = {
   appName: 'AAConnect',
   webDir: 'out',
   server: {
+    hostname: 'localhost',
+    iosScheme: 'https',
     androidScheme: 'https'
   }
 };

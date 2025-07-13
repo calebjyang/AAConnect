@@ -1,13 +1,15 @@
 "use client";
+import React from 'react';
 import type { Event } from '@/hooks/admin/useEventManagement';
+import { parseEventDate } from '@/lib/utils';
 
 interface EventListProps {
   events: Event[];
-  onDelete: (_id: string) => Promise<void>;
+  onDelete: (eventId: string) => Promise<void>;
   loading?: boolean;
 }
 
-export default function EventList({ events, onDelete, loading = false }: EventListProps) {
+const EventList = React.memo(function EventList({ events, onDelete, loading = false }: EventListProps) {
   const handleDelete = async (eventId: string) => {
     if (confirm('Are you sure you want to delete this event?')) {
       await onDelete(eventId);
@@ -51,17 +53,17 @@ export default function EventList({ events, onDelete, loading = false }: EventLi
       </div>
     </div>
   );
-}
+});
+
+export default EventList;
 
 interface EventCardProps {
   event: Event;
   onDelete: () => void;
 }
 
-function EventCard({ event, onDelete }: EventCardProps) {
-  const eventDate = event.date ? 
-    ('seconds' in event.date ? new Date(event.date.seconds * 1000) : new Date()) : 
-    new Date();
+const EventCard = React.memo(function EventCard({ event, onDelete }: EventCardProps) {
+  const eventDate = parseEventDate(event.date) ?? new Date();
 
   return (
     <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -136,4 +138,4 @@ function EventCard({ event, onDelete }: EventCardProps) {
       </div>
     </div>
   );
-} 
+}); 

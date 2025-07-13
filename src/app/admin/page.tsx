@@ -2,8 +2,7 @@
 import AdminRoute from '@/components/AdminRoute';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getDoc, setDoc } from '@/lib/firestore';
 import { signOutUser } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import CarpoolManagement from '@/components/admin/CarpoolManagement/CarpoolManagement';
@@ -106,12 +105,10 @@ function AftereventWeekConfig() {
       setLoading(true);
       setError("");
       try {
-        const docRef = doc(db, "config", "afterevent");
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setCurrentWeek(data.currentWeek || "");
-          const parsed = parseCurrentWeek(data.currentWeek || "");
+        const docSnap = await getDoc('config/afterevent');
+        if (docSnap && docSnap.currentWeek) {
+          setCurrentWeek(docSnap.currentWeek || "");
+          const parsed = parseCurrentWeek(docSnap.currentWeek || "");
           setQuarter(parsed.quarter);
           setWeek(parsed.week);
         } else {
@@ -140,8 +137,7 @@ function AftereventWeekConfig() {
     setError("");
     setSuccess("");
     try {
-      const docRef = doc(db, "config", "afterevent");
-      await setDoc(docRef, { currentWeek: combinedWeek });
+      await setDoc('config/afterevent', { currentWeek: combinedWeek });
       setCurrentWeek(combinedWeek);
       setSuccess("Afterevent week updated!");
     } catch (err: unknown) {

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { AvailabilityFormData } from '@/types/apartment';
 
 interface AvailabilityFormProps {
-  onSubmit: (_data: AvailabilityFormData) => Promise<void>;
+  onSubmit: (data: AvailabilityFormData) => Promise<void>;
   loading?: boolean;
   apartmentId: string;
   apartmentName: string;

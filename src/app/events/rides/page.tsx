@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { addDoc, collection, doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { addDocToCollection, getDoc } from "@/lib/firestore";
 
 // Define RideSignup type
 interface RideSignup {
@@ -56,10 +55,9 @@ export default function RidesFormPage() {
       setWeekLoading(true);
       setWeekError("");
       try {
-        const docRef = doc(db, "config", "afterevent");
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setAftereventWeek(docSnap.data().currentWeek || null);
+        const docSnap = await getDoc("config/afterevent");
+        if (docSnap) {
+          setAftereventWeek(docSnap.currentWeek || null);
         } else {
           setAftereventWeek(null);
         }
@@ -103,7 +101,7 @@ export default function RidesFormPage() {
         grade,
       };
       if (canDrive === "Yes" && capacity) data.capacity = capacity;
-      await addDoc(collection(db, "rides"), data);
+      await addDocToCollection("rides", data);
       setSuccess("Thanks for signing up! We'll be in touch soon.");
       setName("");
       setPhone("");
