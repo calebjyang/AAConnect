@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import GlobalNavigation from "@/components/GlobalNavigation";
-import PwaServiceWorker from "@/components/PwaServiceWorker";
+import AppShell from "@/app/AppShell";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,22 +23,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  if (typeof window !== 'undefined') {
-    console.log('window.location.origin', window.location.origin);
-  }
   return (
     <html lang="en">
       <head>
         <link rel="manifest" href="/manifest.json" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <PwaServiceWorker />
-        <GlobalNavigation />
-        <main>
-          {children}
-        </main>
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

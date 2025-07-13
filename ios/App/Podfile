@@ -15,6 +15,7 @@ def capacitor_pods
   pod 'CapacitorFirebaseApp', :path => '../../node_modules/@capacitor-firebase/app'
   pod 'CapacitorFirebaseAuthentication', :path => '../../node_modules/@capacitor-firebase/authentication'
   pod 'CapacitorFirebaseFirestore', :path => '../../node_modules/@capacitor-firebase/firestore'
+  pod 'CapacitorDevice', :path => '../../node_modules/@capacitor/device'
 end
 
 target 'App' do

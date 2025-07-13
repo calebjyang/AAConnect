@@ -10,6 +10,10 @@ android {
 apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"
 dependencies {
     implementation project(':capacitor-community-http')
+    implementation project(':capacitor-firebase-app')
+    implementation project(':capacitor-firebase-authentication')
+    implementation project(':capacitor-firebase-firestore')
+    implementation project(':capacitor-device')
 
 }
 

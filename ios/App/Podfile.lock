@@ -1156,6 +1156,8 @@ PODS:
   - CapacitorCommunityHttp (1.4.1):
     - Capacitor
   - CapacitorCordova (7.4.1)
+  - CapacitorDevice (7.0.1):
+    - Capacitor
   - CapacitorFirebaseApp (7.2.0):
     - Capacitor
     - FirebaseCore (~> 11.7.0)
@@ -1333,6 +1335,7 @@ DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorCommunityHttp (from `../../node_modules/@capacitor-community/http`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorDevice (from `../../node_modules/@capacitor/device`)"
   - "CapacitorFirebaseApp (from `../../node_modules/@capacitor-firebase/app`)"
   - "CapacitorFirebaseAuthentication (from `../../node_modules/@capacitor-firebase/authentication`)"
   - "CapacitorFirebaseFirestore (from `../../node_modules/@capacitor-firebase/firestore`)"
@@ -1365,6 +1368,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor-community/http"
   CapacitorCordova:
     :path: "../../node_modules/@capacitor/ios"
+  CapacitorDevice:
+    :path: "../../node_modules/@capacitor/device"
   CapacitorFirebaseApp:
     :path: "../../node_modules/@capacitor-firebase/app"
   CapacitorFirebaseAuthentication:
@@ -1378,6 +1383,7 @@ SPEC CHECKSUMS:
   Capacitor: 4738747ece274c45e4d9bec9ae394a6269169e64
   CapacitorCommunityHttp: 7be90668527ef14ee10d08135b0e00fac9cf8247
   CapacitorCordova: 34618fa1b14b6b091fd60a7658f7654044ae8d8a
+  CapacitorDevice: fe3f190e1d718f4607bdc6b73993433d1c84f409
   CapacitorFirebaseApp: 8ad55ca159d6f238c0dc5f90ec68fa7142c3fd6d
   CapacitorFirebaseAuthentication: 7043f8e03813762af1b037da82c67963fa5768e0
   CapacitorFirebaseFirestore: 6f04b3a567901fe941dd1f6214e36dc4211d21ed
@@ -1398,6 +1404,6 @@ SPEC CHECKSUMS:
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
 
-PODFILE CHECKSUM: d106a8c16e5d5add711a34e9c5a187a70ed42220
+PODFILE CHECKSUM: b24b634bc4d6accfb0654df6bc88e690fa63c82b
 
 COCOAPODS: 1.12.1
