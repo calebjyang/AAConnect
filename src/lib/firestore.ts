@@ -3,8 +3,8 @@ import { firebaseDebugger, validateNotPromiseLike } from './firebase-debug';
 
 const isNative = Capacitor.isNativePlatform();
 
-// Web: statically import query helpers (these will be excluded from native build by next.config.ts alias)
-import { orderBy as orderByWeb, limit as limitWeb, where as whereWeb } from 'firebase/firestore';
+// Web: dynamically import query helpers to handle cases where Firebase Web SDK might not be available
+// These will be excluded from native build by next.config.ts alias when BUILD_FOR_NATIVE=true
 
 // Singleton pattern to ensure plugins are loaded only once
 class FirestoreManager {
@@ -76,18 +76,23 @@ class FirestoreManager {
 
   async getDocument(path: string): Promise<any> {
     if (!isNative) {
-      const { getFirestore, doc, getDoc: getDocWeb } = await import('firebase/firestore');
-      const { getApp } = await import('firebase/app');
-      const db = getFirestore(getApp());
-      const docRef = doc(db, path);
-      const snapshot = await getDocWeb(docRef);
-      const result = snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } as any : null;
-      // Convert date ISO string to Date object
-      if (result && typeof result.date === 'string') {
-        result.date = new Date(result.date);
+      try {
+        const { getFirestore, doc, getDoc: getDocWeb } = await import('firebase/firestore');
+        const { getApp } = await import('firebase/app');
+        const db = getFirestore(getApp());
+        const docRef = doc(db, path);
+        const snapshot = await getDocWeb(docRef);
+        const result = snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } as any : null;
+        // Convert date ISO string to Date object
+        if (result && typeof result.date === 'string') {
+          result.date = new Date(result.date);
+        }
+        validateNotPromiseLike(result, 'getDocument result');
+        return result;
+      } catch (error) {
+        console.error('Firebase Web SDK not available for getDocument:', error);
+        throw new Error('Firebase Web SDK not available. Please check your configuration.');
       }
-      validateNotPromiseLike(result, 'getDocument result');
-      return result;
     }
 
     const plugin = await this.loadCapacitorPlugin();
@@ -113,12 +118,17 @@ class FirestoreManager {
 
   async setDocument(path: string, data: any): Promise<void> {
     if (!isNative) {
-      const { getFirestore, doc, setDoc: setDocWeb } = await import('firebase/firestore');
-      const { getApp } = await import('firebase/app');
-      const db = getFirestore(getApp());
-      const docRef = doc(db, path);
-      await setDocWeb(docRef, data);
-      return;
+      try {
+        const { getFirestore, doc, setDoc: setDocWeb } = await import('firebase/firestore');
+        const { getApp } = await import('firebase/app');
+        const db = getFirestore(getApp());
+        const docRef = doc(db, path);
+        await setDocWeb(docRef, data);
+        return;
+      } catch (error) {
+        console.error('Firebase Web SDK not available for setDocument:', error);
+        throw new Error('Firebase Web SDK not available. Please check your configuration.');
+      }
     }
 
     const plugin = await this.loadCapacitorPlugin();
@@ -137,12 +147,17 @@ class FirestoreManager {
 
   async updateDocument(path: string, data: any): Promise<void> {
     if (!isNative) {
-      const { getFirestore, doc, updateDoc: updateDocWeb } = await import('firebase/firestore');
-      const { getApp } = await import('firebase/app');
-      const db = getFirestore(getApp());
-      const docRef = doc(db, path);
-      await updateDocWeb(docRef, data);
-      return;
+      try {
+        const { getFirestore, doc, updateDoc: updateDocWeb } = await import('firebase/firestore');
+        const { getApp } = await import('firebase/app');
+        const db = getFirestore(getApp());
+        const docRef = doc(db, path);
+        await updateDocWeb(docRef, data);
+        return;
+      } catch (error) {
+        console.error('Firebase Web SDK not available for updateDocument:', error);
+        throw new Error('Firebase Web SDK not available. Please check your configuration.');
+      }
     }
 
     const plugin = await this.loadCapacitorPlugin();
@@ -161,12 +176,17 @@ class FirestoreManager {
 
   async deleteDocument(path: string): Promise<void> {
     if (!isNative) {
-      const { getFirestore, doc, deleteDoc: deleteDocWeb } = await import('firebase/firestore');
-      const { getApp } = await import('firebase/app');
-      const db = getFirestore(getApp());
-      const docRef = doc(db, path);
-      await deleteDocWeb(docRef);
-      return;
+      try {
+        const { getFirestore, doc, deleteDoc: deleteDocWeb } = await import('firebase/firestore');
+        const { getApp } = await import('firebase/app');
+        const db = getFirestore(getApp());
+        const docRef = doc(db, path);
+        await deleteDocWeb(docRef);
+        return;
+      } catch (error) {
+        console.error('Firebase Web SDK not available for deleteDocument:', error);
+        throw new Error('Firebase Web SDK not available. Please check your configuration.');
+      }
     }
 
     const plugin = await this.loadCapacitorPlugin();
@@ -185,21 +205,26 @@ class FirestoreManager {
 
   async getCollection(path: string, constraints: any[] = []): Promise<any[]> {
     if (!isNative) {
-      const { getFirestore, collection, query, getDocs: getDocsWeb } = await import('firebase/firestore');
-      const { getApp } = await import('firebase/app');
-      const db = getFirestore(getApp());
-      const colRef = collection(db, path);
-      const q = constraints.length ? query(colRef, ...constraints) : colRef;
-      const snapshot = await getDocsWeb(q);
-      const result = snapshot.docs.map((doc: any) => {
-        const data = { ...doc.data(), id: doc.id };
-        if (typeof data.date === 'string') {
-          data.date = new Date(data.date);
-        }
-        return data;
-      });
-      validateNotPromiseLike(result, 'getCollection result');
-      return result;
+      try {
+        const { getFirestore, collection, query, getDocs: getDocsWeb } = await import('firebase/firestore');
+        const { getApp } = await import('firebase/app');
+        const db = getFirestore(getApp());
+        const colRef = collection(db, path);
+        const q = constraints.length ? query(colRef, ...constraints) : colRef;
+        const snapshot = await getDocsWeb(q);
+        const result = snapshot.docs.map((doc: any) => {
+          const data = { ...doc.data(), id: doc.id };
+          if (typeof data.date === 'string') {
+            data.date = new Date(data.date);
+          }
+          return data;
+        });
+        validateNotPromiseLike(result, 'getCollection result');
+        return result;
+      } catch (error) {
+        console.error('Firebase Web SDK not available for getCollection:', error);
+        throw new Error('Firebase Web SDK not available. Please check your configuration.');
+      }
     }
 
     const plugin = await this.loadCapacitorPlugin();
@@ -260,14 +285,17 @@ class FirestoreManager {
 
   async addDocument(path: string, data: any): Promise<string> {
     if (!isNative) {
-      const { getFirestore, collection, addDoc: addDocWeb } = await import('firebase/firestore');
-      const { getApp } = await import('firebase/app');
-      const db = getFirestore(getApp());
-      const colRef = collection(db, path);
-      const docRef = await addDocWeb(colRef, data);
-      const result = docRef.id;
-      validateNotPromiseLike(result, 'addDocument result');
-      return result;
+      try {
+        const { getFirestore, collection, addDoc: addDocWeb } = await import('firebase/firestore');
+        const { getApp } = await import('firebase/app');
+        const db = getFirestore(getApp());
+        const colRef = collection(db, path);
+        const docRef = await addDocWeb(colRef, data);
+        return docRef.id;
+      } catch (error) {
+        console.error('Firebase Web SDK not available for addDocument:', error);
+        throw new Error('Firebase Web SDK not available. Please check your configuration.');
+      }
     }
 
     const plugin = await this.loadCapacitorPlugin();
@@ -277,7 +305,6 @@ class FirestoreManager {
 
     try {
       const { id } = await plugin.addDocument({ reference: path, data });
-      validateNotPromiseLike(id, 'addDocument result');
       return id;
     } catch (error) {
       console.error('Native addDocument error:', error);
@@ -290,7 +317,7 @@ class FirestoreManager {
 // Create singleton instance
 const firestoreManager = FirestoreManager.getInstance();
 
-// Exported Firestore API functions (never return the plugin)
+// Export functions that use the singleton
 export const getDoc = async (path: string): Promise<any> => {
   return firestoreManager.getDocument(path);
 };
@@ -315,24 +342,42 @@ export const addDocToCollection = async (path: string, data: any): Promise<strin
   return firestoreManager.addDocument(path, data);
 };
 
-// Query helpers (web only)
-export const orderByQuery = (field: string, direction: 'asc' | 'desc' = 'asc') => {
+// Query helper functions that dynamically import Firebase Web SDK
+export const orderByQuery = async (field: string, direction: 'asc' | 'desc' = 'asc') => {
   if (isNative) {
     return { __type: 'orderBy', field, direction };
   }
-  return orderByWeb(field, direction);
+  try {
+    const { orderBy } = await import('firebase/firestore');
+    return orderBy(field, direction);
+  } catch (error) {
+    console.error('Firebase Web SDK not available for orderByQuery:', error);
+    throw new Error('Firebase Web SDK not available. Please check your configuration.');
+  }
 };
 
-export const limitQuery = (count: number) => {
+export const limitQuery = async (count: number) => {
   if (isNative) {
     return { __type: 'limit', count };
   }
-  return limitWeb(count);
+  try {
+    const { limit } = await import('firebase/firestore');
+    return limit(count);
+  } catch (error) {
+    console.error('Firebase Web SDK not available for limitQuery:', error);
+    throw new Error('Firebase Web SDK not available. Please check your configuration.');
+  }
 };
 
-export const whereQuery = (...args: Parameters<typeof whereWeb>) => {
+export const whereQuery = async (fieldPath: string, opStr: any, value: any) => {
   if (isNative) {
-    throw new Error('whereQuery is not implemented for native. Use only basic getCollection(path) or implement JS-side filtering.');
+    throw new Error('whereQuery not supported in native mode');
   }
-  return whereWeb(...args);
+  try {
+    const { where } = await import('firebase/firestore');
+    return where(fieldPath, opStr, value);
+  } catch (error) {
+    console.error('Firebase Web SDK not available for whereQuery:', error);
+    throw new Error('Firebase Web SDK not available. Please check your configuration.');
+  }
 }; 

@@ -25,9 +25,11 @@ export default function Home() {
     async function fetchUpcomingEvents() {
       try {
         const now = new Date();
+        const orderByConstraint = await orderByQuery("date", "asc");
+        const limitConstraint = await limitQuery(3);
         const allEvents = await getCollection("events", [
-          orderByQuery("date", "asc"),
-          limitQuery(3)
+          orderByConstraint,
+          limitConstraint
         ]) as Event[];
         console.log("Fetched home events:", allEvents);
         const futureEvents = allEvents.filter((event: Event) => 

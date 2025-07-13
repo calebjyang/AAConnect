@@ -11,8 +11,13 @@ const firebaseConfig = {
 };
 
 export function getFirebaseApp() {
-  if (!getApps().length) {
-    initializeApp(firebaseConfig);
+  try {
+    if (!getApps().length) {
+      initializeApp(firebaseConfig);
+    }
+    return getApp();
+  } catch (error) {
+    console.error('Firebase Web SDK not available for getFirebaseApp:', error);
+    throw new Error('Firebase Web SDK not available. Please check your configuration.');
   }
-  return getApp();
 } 

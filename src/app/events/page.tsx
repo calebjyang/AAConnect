@@ -351,7 +351,8 @@ export default function EventsPage() {
   useEffect(() => {
     async function fetchEvents() {
       try {
-        const data = await getCollection("events", [orderByQuery("date", "asc")]) as Event[];
+        const orderByConstraint = await orderByQuery("date", "asc");
+        const data = await getCollection("events", [orderByConstraint]) as Event[];
         console.log("Fetched events:", data);
         // Parse event dates on load
         setEvents(data.map(e => ({ ...e, date: parseEventDate(e.date) ?? new Date() })));

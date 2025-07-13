@@ -65,11 +65,16 @@ class AuthManager {
 
   async signOut(): Promise<void> {
     if (!isNative) {
-      const { getAuth, signOut } = await import('firebase/auth');
-      const { getFirebaseApp } = await import('./firebaseClient');
-      const auth = getAuth(getFirebaseApp());
-      await signOut(auth);
-      return;
+      try {
+        const { getAuth, signOut } = await import('firebase/auth');
+        const { getFirebaseApp } = await import('./firebaseClient');
+        const auth = getAuth(getFirebaseApp());
+        await signOut(auth);
+        return;
+      } catch (error) {
+        console.error('Firebase Web SDK not available for signOut:', error);
+        throw new Error('Firebase Web SDK not available. Please check your configuration.');
+      }
     }
 
     const plugin = await this.loadCapacitorPlugin();
@@ -90,22 +95,32 @@ class AuthManager {
       throw new Error('Google sign-in is not implemented for native. Use native UI or implement with Capacitor plugin.');
     }
 
-    const { GoogleAuthProvider, signInWithPopup, getAuth, browserLocalPersistence, setPersistence } = await import('firebase/auth');
-    const { getFirebaseApp } = await import('./firebaseClient');
-    const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: 'select_account' });
-    const auth = getAuth(getFirebaseApp());
-    await setPersistence(auth, browserLocalPersistence);
-    return signInWithPopup(auth, provider);
+    try {
+      const { GoogleAuthProvider, signInWithPopup, getAuth, browserLocalPersistence, setPersistence } = await import('firebase/auth');
+      const { getFirebaseApp } = await import('./firebaseClient');
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      const auth = getAuth(getFirebaseApp());
+      await setPersistence(auth, browserLocalPersistence);
+      return signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error('Firebase Web SDK not available for signInWithGoogle:', error);
+      throw new Error('Firebase Web SDK not available. Please check your configuration.');
+    }
   }
 
   async addAuthStateListener(callback: (event: any) => void): Promise<() => void> {
     if (!isNative) {
-      const { onAuthStateChanged, getAuth } = await import('firebase/auth');
-      const { getFirebaseApp } = await import('./firebaseClient');
-      const auth = getAuth(getFirebaseApp());
-      // Wrap callback to always provide { user }
-      return onAuthStateChanged(auth, (user) => callback({ user }));
+      try {
+        const { onAuthStateChanged, getAuth } = await import('firebase/auth');
+        const { getFirebaseApp } = await import('./firebaseClient');
+        const auth = getAuth(getFirebaseApp());
+        // Wrap callback to always provide { user }
+        return onAuthStateChanged(auth, (user) => callback({ user }));
+      } catch (error) {
+        console.error('Firebase Web SDK not available for addAuthStateListener:', error);
+        throw new Error('Firebase Web SDK not available. Please check your configuration.');
+      }
     }
 
     const plugin = await this.loadCapacitorPlugin();
