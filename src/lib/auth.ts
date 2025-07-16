@@ -19,7 +19,9 @@ class AuthManager {
   async signInWithGoogle(): Promise<any> {
     if (isNative) {
       try {
+        console.log('Starting native Google sign-in...');
         const result = await FirebaseAuthentication.signInWithGoogle();
+        console.log('Native Google sign-in result:', result);
         return result;
       } catch (error) {
         console.error('Native Google Sign-In error:', error);
@@ -112,6 +114,7 @@ class AuthManager {
       
       // Set up the auth state listener
       const listener = await FirebaseAuthentication.addListener('authStateChange', (result) => {
+        console.log('Native auth state change:', result);
         callback({ user: result.user || null });
       });
       

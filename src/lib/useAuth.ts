@@ -91,8 +91,10 @@ export function useAuth() {
           let isAdmin = false;
           
           if (user) {
+            const userEmail = user.email || '';
+            
             // Only check user doc if it's a new user or user changed
-            if (user.uid !== lastUserEmail.current) {
+            if (userEmail !== lastUserEmail.current) {
               try {
                 const userSnap = await getDoc(`users/${user.uid}`);
                 if (!userSnap) {
@@ -109,7 +111,6 @@ export function useAuth() {
             }
             
             // Only check admin status if email changed or not cached
-            const userEmail = user.email || '';
             if (userEmail !== lastUserEmail.current || !adminCache.current.has(userEmail)) {
               try {
                 const adminSnap = await getDoc(`admins/${userEmail}`);
