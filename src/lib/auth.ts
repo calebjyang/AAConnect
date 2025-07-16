@@ -100,24 +100,47 @@ class AuthManager {
       }
     }
 
-    // For native, we'll use a simple polling approach since we don't have real-time auth state
-    let isListening = true;
-    const pollInterval = setInterval(async () => {
-      if (!isListening) return;
+    // For native, use the Capacitor Firebase Authentication listener
+    try {
+      const { FirebaseAuthentication } = await import('@capacitor-firebase/authentication');
       
-      try {
-        const user = await this.getCurrentUser();
-        callback({ user });
-      } catch (error) {
-        console.error('Error polling auth state:', error);
+      // Get initial user state
+      const initialUser = await this.getCurrentUser();
+      if (initialUser) {
+        callback({ user: initialUser });
       }
-    }, 1000); // Poll every second
-    
-    // Return cleanup function
-    return () => {
-      isListening = false;
-      clearInterval(pollInterval);
-    };
+      
+      // Set up the auth state listener
+      const listener = await FirebaseAuthentication.addListener('authStateChange', (result) => {
+        callback({ user: result.user || null });
+      });
+      
+      // Return cleanup function
+      return () => {
+        listener.remove();
+      };
+    } catch (error) {
+      console.error('Native auth state listener error:', error);
+      
+      // Fallback to polling if listener fails
+      let isListening = true;
+      const pollInterval = setInterval(async () => {
+        if (!isListening) return;
+        
+        try {
+          const user = await this.getCurrentUser();
+          callback({ user });
+        } catch (error) {
+          console.error('Error polling auth state:', error);
+        }
+      }, 5000); // Poll every 5 seconds instead of 1 second
+      
+      // Return cleanup function
+      return () => {
+        isListening = false;
+        clearInterval(pollInterval);
+      };
+    }
   }
 }
 

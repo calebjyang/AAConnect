@@ -100,8 +100,20 @@ class FirestoreManager {
     }
 
     try {
-      const { document } = await plugin.getDocument({ reference: path });
+      const response = await plugin.getDocument({ reference: path });
+      
+      // Handle different response structures
+      let document;
+      if (response.document) {
+        document = response.document;
+      } else if (response.snapshot) {
+        document = response.snapshot;
+      } else {
+        document = response;
+      }
+      
       const result = document ? { ...document.data, id: document.id } as any : null;
+      
       // Convert date ISO string to Date object
       if (result && typeof result.date === 'string') {
         result.date = new Date(result.date);

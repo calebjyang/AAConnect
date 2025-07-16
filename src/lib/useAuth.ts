@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { signOutUser, addAuthStateListener } from "./auth";
 import { setDoc, getDoc } from "@/lib/firestore";
 import { Capacitor } from '@capacitor/core';
@@ -67,6 +67,20 @@ export function useAuth() {
     }
   });
 
+  // Cache for admin status to prevent repeated Firestore calls
+  const adminCache = useRef<Map<string, boolean>>(new Map());
+  const lastUserEmail = useRef<string | null>(null);
+
+  // Memoized signOut function
+  const signOut = useCallback(async () => {
+    try {
+      await signOutUser();
+    } catch (error) {
+      console.error("Error signing out:", error);
+      throw error;
+    }
+  }, []);
+
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
 
@@ -77,27 +91,44 @@ export function useAuth() {
           let isAdmin = false;
           
           if (user) {
-            try {
-              const userSnap = await getDoc(`users/${user.uid}`);
-              if (!userSnap) {
-                await setDoc(`users/${user.uid}`, {
-                  displayName: user.displayName,
-                  email: user.email,
-                  photoURL: user.photoURL,
-                  createdAt: new Date(),
-                });
+            // Only check user doc if it's a new user or user changed
+            if (user.uid !== lastUserEmail.current) {
+              try {
+                const userSnap = await getDoc(`users/${user.uid}`);
+                if (!userSnap) {
+                  await setDoc(`users/${user.uid}`, {
+                    displayName: user.displayName,
+                    email: user.email,
+                    photoURL: user.photoURL,
+                    createdAt: new Date(),
+                  });
+                }
+              } catch (err) {
+                console.error("Error creating user doc:", err);
               }
-            } catch (err) {
-              console.error("Error creating user doc:", err);
             }
             
-            try {
-              const adminSnap = await getDoc(`admins/${user.email || ''}`);
-              isAdmin = !!adminSnap;
-            } catch (error) {
-              console.error("Error checking admin status:", error instanceof Error ? error.message : 'Unknown error');
-              isAdmin = false;
+            // Only check admin status if email changed or not cached
+            const userEmail = user.email || '';
+            if (userEmail !== lastUserEmail.current || !adminCache.current.has(userEmail)) {
+              try {
+                const adminSnap = await getDoc(`admins/${userEmail}`);
+                // Check if document exists AND has isAdmin field set to true
+                isAdmin = !!(adminSnap && adminSnap.isAdmin === true);
+                adminCache.current.set(userEmail, isAdmin);
+              } catch (error) {
+                console.error("Error checking admin status:", error instanceof Error ? error.message : 'Unknown error');
+                isAdmin = false;
+                adminCache.current.set(userEmail, false);
+              }
+              lastUserEmail.current = userEmail;
+            } else {
+              isAdmin = adminCache.current.get(userEmail) || false;
             }
+          } else {
+            // User signed out, clear cache
+            adminCache.current.clear();
+            lastUserEmail.current = null;
           }
           
           setAuthState({
@@ -105,14 +136,7 @@ export function useAuth() {
             loading: false,
             isAdmin,
             error: null,
-            signOut: async () => {
-              try {
-                await signOutUser();
-              } catch (error) {
-                console.error("Error signing out:", error);
-                throw error;
-              }
-            }
+            signOut
           });
         });
       } catch (error) {
@@ -122,14 +146,7 @@ export function useAuth() {
           loading: false,
           isAdmin: false,
           error: error instanceof Error ? error.message : 'Authentication initialization failed',
-          signOut: async () => {
-            try {
-              await signOutUser();
-            } catch (error) {
-              console.error("Error signing out:", error);
-              throw error;
-            }
-          }
+          signOut
         });
       }
     };
@@ -141,7 +158,7 @@ export function useAuth() {
         unsubscribe();
       }
     };
-  }, []);
+  }, [signOut]);
 
   return authState;
 } 
