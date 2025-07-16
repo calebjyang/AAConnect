@@ -1,5 +1,4 @@
 import { Capacitor } from '@capacitor/core';
-import { firebaseDebugger, validateNotPromiseLike } from './firebase-debug';
 
 const isNative = Capacitor.isNativePlatform();
 
@@ -33,8 +32,6 @@ class FirestoreManager {
 
     this.pluginLoadPromise = (async () => {
       try {
-        firebaseDebugger.logOperation('loadCapacitorPlugin');
-        
         // Import the plugin module
         const firestoreModule = await import('@capacitor-firebase/firestore');
         
@@ -63,7 +60,6 @@ class FirestoreManager {
         return this.capacitorFirestore;
       } catch (error) {
         console.warn('Capacitor Firestore plugin not available:', error);
-        firebaseDebugger.logOperation('loadCapacitorPlugin', undefined, error as Error);
         this.capacitorFirestore = null;
         this.isPluginLoaded = true;
         return null;
@@ -86,7 +82,6 @@ class FirestoreManager {
         if (result && typeof result.date === 'string') {
           result.date = new Date(result.date);
         }
-        validateNotPromiseLike(result, 'getDocument result');
         return result;
       } catch (error) {
         console.error('Firebase Web SDK not available for getDocument:', error);
@@ -118,11 +113,9 @@ class FirestoreManager {
       if (result && typeof result.date === 'string') {
         result.date = new Date(result.date);
       }
-      validateNotPromiseLike(result, 'getDocument result');
       return result;
     } catch (error) {
       console.error('Native getDocument error:', error);
-      firebaseDebugger.logOperation('getDocument', path, error as Error);
       throw error;
     }
   }
@@ -151,7 +144,6 @@ class FirestoreManager {
       await plugin.setDocument({ reference: path, data });
     } catch (error) {
       console.error('Native setDocument error:', error);
-      firebaseDebugger.logOperation('setDocument', path, error as Error);
       throw error;
     }
   }
@@ -180,7 +172,6 @@ class FirestoreManager {
       await plugin.updateDocument({ reference: path, data });
     } catch (error) {
       console.error('Native updateDocument error:', error);
-      firebaseDebugger.logOperation('updateDocument', path, error as Error);
       throw error;
     }
   }
@@ -209,7 +200,6 @@ class FirestoreManager {
       await plugin.deleteDocument({ reference: path });
     } catch (error) {
       console.error('Native deleteDocument error:', error);
-      firebaseDebugger.logOperation('deleteDocument', path, error as Error);
       throw error;
     }
   }
@@ -230,7 +220,6 @@ class FirestoreManager {
           }
           return data;
         });
-        validateNotPromiseLike(result, 'getCollection result');
         return result;
       } catch (error) {
         console.error('Firebase Web SDK not available for getCollection:', error);
@@ -283,11 +272,9 @@ class FirestoreManager {
         docs = docs.slice(0, limitCount);
       }
       
-      validateNotPromiseLike(docs, 'getCollection result');
       return docs;
     } catch (error) {
       console.error('Native getCollection error:', error);
-      firebaseDebugger.logOperation('getCollection', path, error as Error);
       throw error;
     }
   }
@@ -317,7 +304,6 @@ class FirestoreManager {
       return id;
     } catch (error) {
       console.error('Native addDocument error:', error);
-      firebaseDebugger.logOperation('addDocument', path, error as Error);
       throw error;
     }
   }
