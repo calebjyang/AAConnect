@@ -102,7 +102,6 @@ export interface RideSignupAdmin {
   submittedAt: string;
   capacity?: string;
   grade?: string;
-  gender?: string;
 }
 
 // Carpool assignment structure

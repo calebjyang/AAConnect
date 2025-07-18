@@ -3,8 +3,6 @@ import { useState } from 'react';
 import { useCarpoolManagement } from '@/hooks/admin/useCarpoolManagement';
 import CarpoolList from './CarpoolList';
 import CarpoolForm from './CarpoolForm';
-import { addDocToCollection, updateDoc, deleteDoc } from '@/lib/firestore';
-import type { RideSignupAdmin } from '@/hooks/admin/useCarpoolManagement';
 import CarpoolSignupsList from './CarpoolSignupsList';
 
 export default function CarpoolManagement() {
@@ -30,60 +28,10 @@ export default function CarpoolManagement() {
     handleDragEnd,
     getAssignmentStats,
     signups,
-    fetchSignups,
+    deleteSignup,
   } = useCarpoolManagement();
 
   const [showForm, setShowForm] = useState(false);
-  const [formLoading, setFormLoading] = useState(false);
-  const [editingSignup, setEditingSignup] = useState<RideSignupAdmin | null>(null);
-
-  // Add Signup handler
-  async function handleAddSignup(values: Omit<RideSignupAdmin, 'id'>) {
-    setFormLoading(true);
-    try {
-      await addDocToCollection('rides', values);
-      setShowForm(false);
-      await fetchSignups();
-    } finally {
-      setFormLoading(false);
-    }
-  }
-
-  // Edit Signup handler
-  async function handleEditSignup(values: Omit<RideSignupAdmin, 'id'>) {
-    if (!editingSignup) return;
-    setFormLoading(true);
-    try {
-      const update: any = {
-        name: values.name,
-        phone: values.phone,
-        canDrive: values.canDrive,
-        location: values.location,
-        aftereventWeek: values.aftereventWeek,
-        submittedAt: values.submittedAt,
-        grade: values.grade,
-        gender: values.gender,
-      };
-      if (values.canDrive === 'yes' && values.capacity) {
-        update.capacity = values.capacity;
-      } else {
-        update.capacity = null; // Use null for deletion
-      }
-      await updateDoc(`rides/${editingSignup.id}`, update);
-      setEditingSignup(null);
-      setShowForm(false);
-      await fetchSignups();
-    } finally {
-      setFormLoading(false);
-    }
-  }
-
-  // Delete Signup handler
-  async function handleDeleteSignup(id: string) {
-    if (!window.confirm('Are you sure you want to delete this signup?')) return;
-    await deleteDoc(`rides/${id}`);
-    await fetchSignups();
-  }
 
   return (
     <div className="bg-white rounded-xl shadow p-6 border border-gray-100 flex flex-col gap-4">
@@ -115,32 +63,27 @@ export default function CarpoolManagement() {
         </button>
         <button
           className="py-2 px-4 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow transition"
-          onClick={() => { setShowForm(v => !v); setEditingSignup(null); }}
+          onClick={() => setShowForm(v => !v)}
         >
           {showForm ? 'Close Form' : 'Add Signup'}
         </button>
       </div>
+
       {/* Signups Section */}
       <CarpoolSignupsList
         signups={signups}
-        onEdit={signup => { setEditingSignup(signup); setShowForm(true); }}
-        onDelete={handleDeleteSignup}
+        onDelete={deleteSignup}
         loading={loading}
       />
-      <button
-        className="mb-4 py-2 px-4 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow transition w-max"
-        onClick={() => { setShowForm(true); setEditingSignup(null); }}
-      >
-        Add Signup
-      </button>
+
+      {/* Add Signup Form */}
       {showForm && (
         <CarpoolForm
-          aftereventWeeks={weeks}
-          onSubmit={editingSignup ? handleEditSignup : handleAddSignup}
-          loading={formLoading}
-          initialValues={editingSignup || undefined}
+          onSuccess={() => setShowForm(false)}
         />
       )}
+
+      {/* Carpool Assignments */}
       {loading ? (
         <div className="text-gray-500">Loading ride signups...</div>
       ) : error ? (

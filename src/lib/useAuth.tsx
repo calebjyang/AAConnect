@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+"use client";
+import { useEffect, useState, useCallback, useRef, createContext, useContext } from "react";
 import { signOutUser, addAuthStateListener } from "./auth";
 import { setDoc, getDoc } from "@/lib/firestore";
 import { Capacitor } from '@capacitor/core';
@@ -11,47 +12,11 @@ interface AuthState {
   signOut: () => Promise<void>;
 }
 
-/**
- * Custom hook for managing Firebase authentication state
- * 
- * This hook provides comprehensive authentication functionality including:
- * - Real-time authentication state monitoring
- * - Automatic admin status verification via Firestore
- * - Loading states for async operations
- * - Error handling for auth failures
- * - Secure admin verification using Firestore security rules
- * 
- * The hook automatically:
- * - Listens for Firebase auth state changes
- * - Verifies admin status when user logs in
- * - Handles authentication errors gracefully
- * - Provides loading states during verification
- * 
- * @returns {AuthState} Object containing authentication state and user info
- * @returns {User|null} returns.user - Firebase user object or null if not authenticated
- * @returns {boolean} returns.loading - Whether auth state is being determined
- * @returns {boolean} returns.isAdmin - Whether the current user has admin privileges
- * @returns {string|null} returns.error - Error message if authentication failed
- * 
- * @example
- * ```tsx
- * function MyComponent() {
- *   const { user, loading, isAdmin, error } = useAuth();
- *   
- *   if (loading) return <div>Loading...</div>;
- *   if (error) return <div>Error: {error}</div>;
- *   if (!user) return <div>Please log in</div>;
- *   
- *   return (
- *     <div>
- *       Welcome, {user.email}!
- *       {isAdmin && <AdminPanel />}
- *     </div>
- *   );
- * }
- * ```
- */
-export function useAuth() {
+// Create a context for the auth state
+const AuthContext = createContext<AuthState | null>(null);
+
+// Provider component that wraps the app and makes auth state available to any child component
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     loading: true,
@@ -70,6 +35,7 @@ export function useAuth() {
   // Cache for admin status to prevent repeated Firestore calls
   const adminCache = useRef<Map<string, boolean>>(new Map());
   const lastUserEmail = useRef<string | null>(null);
+  const listenerInitialized = useRef(false);
 
   // Memoized signOut function
   const signOut = useCallback(async () => {
@@ -82,10 +48,18 @@ export function useAuth() {
   }, []);
 
   useEffect(() => {
+    // Prevent multiple listeners from being created
+    if (listenerInitialized.current) {
+      return;
+    }
+
     let unsubscribe: (() => void) | undefined;
 
     const initializeAuth = async () => {
       try {
+        console.log('Initializing auth state listener...');
+        listenerInitialized.current = true;
+        
         unsubscribe = await addAuthStateListener(async (event: any) => {
           const user = event.user || null;
           let isAdmin = false;
@@ -156,10 +130,64 @@ export function useAuth() {
 
     return () => {
       if (unsubscribe) {
+        console.log('Cleaning up auth state listener...');
         unsubscribe();
+        listenerInitialized.current = false;
       }
     };
-  }, [signOut]);
+  }, []); // Empty dependency array to ensure this only runs once
 
-  return authState;
+  return (
+    <AuthContext.Provider value={authState}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+/**
+ * Custom hook for accessing Firebase authentication state
+ * 
+ * This hook provides comprehensive authentication functionality including:
+ * - Real-time authentication state monitoring
+ * - Automatic admin status verification via Firestore
+ * - Loading states for async operations
+ * - Error handling for auth failures
+ * - Secure admin verification using Firestore security rules
+ * 
+ * The hook automatically:
+ * - Listens for Firebase auth state changes
+ * - Verifies admin status when user logs in
+ * - Handles authentication errors gracefully
+ * - Provides loading states during verification
+ * 
+ * @returns {AuthState} Object containing authentication state and user info
+ * @returns {User|null} returns.user - Firebase user object or null if not authenticated
+ * @returns {boolean} returns.loading - Whether auth state is being determined
+ * @returns {boolean} returns.isAdmin - Whether the current user has admin privileges
+ * @returns {string|null} returns.error - Error message if authentication failed
+ * 
+ * @example
+ * ```tsx
+ * function MyComponent() {
+ *   const { user, loading, isAdmin, error } = useAuth();
+ *   
+ *   if (loading) return <div>Loading...</div>;
+ *   if (error) return <div>Error: {error}</div>;
+ *   if (!user) return <div>Please log in</div>;
+ *   
+ *   return (
+ *     <div>
+ *       Welcome, {user.email}!
+ *       {isAdmin && <AdminPanel />}
+ *     </div>
+ *   );
+ * }
+ * ```
+ */
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === null) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 } 

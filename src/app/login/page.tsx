@@ -22,15 +22,24 @@ export default function LoginPage() {
   }, [user, loading, isAdmin, router]);
 
   const handleSignIn = async () => {
+    console.log('Sign-in button clicked');
     setSigningIn(true);
     setError(null);
     
     try {
-      await signInWithGoogle();
+      console.log('Calling signInWithGoogle...');
+      const result = await signInWithGoogle();
+      console.log('Sign-in result:', result);
     } catch (err: any) {
       console.error("Sign-in error:", err);
+      console.error("Error details:", {
+        message: err.message,
+        code: err.code,
+        stack: err.stack
+      });
       setError(getAuthErrorMessage(err));
     } finally {
+      console.log('Sign-in process completed, setting signingIn to false');
       setSigningIn(false);
     }
   };

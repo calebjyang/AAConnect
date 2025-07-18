@@ -1029,6 +1029,84 @@ async signInWithGoogle(): Promise<any> {
 
 ---
 
+## [2024-07-15] Complete Removal of Gender Field from Carpool System
+
+### Problem
+The carpool system had an inconsistent implementation of the gender field:
+- Gender field was removed from the public signup form (`/events/rides`)
+- Gender field still existed in admin forms and interfaces
+- Carpool algorithm still attempted to optimize for gender balance
+- This created data inconsistency and confusion
+
+### Solution
+Completely removed the gender field from all parts of the carpool system:
+
+1. **Carpool Algorithm** (`src/lib/carpoolAlgorithm.ts`):
+   - Removed `gender?: string` from `RideSignup` interface
+   - Removed `countFemales()` helper function
+   - Removed all gender balance optimization logic from `optimizeAssignments()`
+   - Updated algorithm comments to reflect grade-only optimization
+
+2. **Admin Forms** (`src/components/admin/CarpoolManagement/CarpoolForm.tsx`):
+   - Removed gender field from form state and validation
+   - Updated form interface to exclude gender
+   - Simplified form submission data structure
+
+3. **Admin Display** (`src/components/admin/CarpoolManagement/CarpoolSignupsList.tsx`):
+   - Removed gender column from signups table
+   - Updated table headers and data display
+
+4. **Type Definitions** (`src/types/apartment.ts`):
+   - Removed `gender?: string` from `RideSignupAdmin` interface
+   - Ensured type consistency across the system
+
+5. **Admin Management** (`src/components/admin/CarpoolManagement/CarpoolManagement.tsx`):
+   - Updated form handling to exclude gender field
+   - Simplified component interfaces
+
+### Result
+- ✅ Consistent data structure across all carpool components
+- ✅ Simplified carpool algorithm focusing on grade mixing and location matching
+- ✅ Cleaner admin interface without unused gender fields
+- ✅ No more data inconsistency between public and admin forms
+
+### Lessons Learned
+- **Data Consistency**: When removing fields, ensure they're removed from ALL related components and interfaces
+- **Algorithm Simplification**: Removing complex constraints can make algorithms more maintainable and predictable
+- **Type Safety**: Always update TypeScript interfaces when changing data structures
+- **Systematic Approach**: Methodically go through all related files when making structural changes
+
+---
+
+## [2024-07-15] iOS Native Authentication Infinite Loading Bug
+
+### Problem
+- On iOS, the sign-in button would spin forever and the Google sign-in popup would not appear.
+- Console logs showed repeated cycles of `FirebaseAuthentication addListener` and `removeListener`.
+- The auth state listener was being created and destroyed repeatedly, causing infinite loading and no sign-in.
+
+### Root Cause
+- Multiple components (e.g., GlobalNavigation, LoginPage, etc.) were using the `useAuth` hook directly.
+- Each usage of `useAuth` created a new auth state listener, leading to repeated add/remove cycles and race conditions.
+
+### Solution
+- Refactored `useAuth` to use a global React Context (`AuthProvider`).
+- Wrapped the app in `<AuthProvider>` in `layout.tsx` so only one listener is created for the entire app.
+- All components now consume the same global auth state, preventing repeated listeners and infinite loading.
+- Renamed `useAuth.ts` to `useAuth.tsx` and added the `"use client"` directive to support React hooks in the Next.js app directory.
+
+### Result
+- Only a single auth state listener is created for the app.
+- The sign-in button now works as expected on iOS and web.
+- No more infinite loading or repeated listener logs.
+
+### Lessons Learned
+- Always use a global context/provider for shared state that relies on listeners or subscriptions, especially in React/Next.js app directory.
+- Avoid creating hooks that set up listeners in multiple components without a context.
+- Use the `"use client"` directive for any file using React hooks in the Next.js app directory.
+
+---
+
 **Document Version**: 1.2  
 **Last Updated**: July 2025  
 **Contributors**: Development Team  

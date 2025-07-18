@@ -9,7 +9,6 @@ export interface RideSignup {
   submittedAt: string;
   capacity?: string;
   grade?: string;
-  gender?: string;
 }
 
 export interface CarpoolAssignment {
@@ -50,18 +49,12 @@ function areLocationsCompatible(location1: string, location2: string): boolean {
   return getLocationGroup(location1) === getLocationGroup(location2);
 }
 
-// Helper function to count females in a car
-function countFemales(riders: RideSignup[]): number {
-  return riders.filter(rider => rider.gender === 'Female').length;
-}
-
 /**
  * Enhanced carpool assignment algorithm
- * Priority: Departure > Capacity > Grade Mixing > Gender Balance > Friend-Group mixing
+ * Priority: Departure > Capacity > Grade Mixing > Friend-Group mixing
  * 
- * New features:
+ * Features:
  * - Grade-based matching (mix of grades in each car)
- * - Gender balance (ensure at least 2 females per car when possible)
  * - Maintains existing location-based matching
  */
 export function assignCarpools(signups: RideSignup[], week: string): AssignmentResult {
@@ -137,7 +130,7 @@ export function assignCarpools(signups: RideSignup[], week: string): AssignmentR
     assignments.push(assignment);
   }
   
-  // Post-processing: Optimize grade and gender distribution
+  // Post-processing: Optimize grade distribution
   optimizeAssignments(assignments, availableRiders);
   
   // Any remaining riders are unassigned
@@ -158,39 +151,9 @@ export function assignCarpools(signups: RideSignup[], week: string): AssignmentR
 }
 
 /**
- * Optimize assignments for better grade and gender distribution
+ * Optimize assignments for better grade distribution
  */
 function optimizeAssignments(assignments: CarpoolAssignment[], availableRiders: RideSignup[]) {
-  // Try to improve gender balance by swapping riders between cars
-  for (let i = 0; i < assignments.length; i++) {
-    const car1 = assignments[i];
-    const femaleCount1 = countFemales(car1.riders);
-    
-    // If this car has less than 2 females, try to get more
-    if (femaleCount1 < 2) {
-      for (let j = 0; j < assignments.length; j++) {
-        if (i === j) continue;
-        
-        const car2 = assignments[j];
-        const femaleCount2 = countFemales(car2.riders);
-        
-        // If car2 has more than 2 females, try to swap
-        if (femaleCount2 > 2) {
-          // Find a female in car2 to swap with a male in car1
-          const femaleInCar2 = car2.riders.find(r => r.gender === 'Female');
-          const maleInCar1 = car1.riders.find(r => r.gender === 'Male');
-          
-          if (femaleInCar2 && maleInCar1) {
-            // Perform the swap
-            car1.riders = car1.riders.map(r => r.id === maleInCar1.id ? femaleInCar2 : r);
-            car2.riders = car2.riders.map(r => r.id === femaleInCar2.id ? maleInCar1 : r);
-            break;
-          }
-        }
-      }
-    }
-  }
-  
   // Try to improve grade distribution
   for (let i = 0; i < assignments.length; i++) {
     const car1 = assignments[i];
@@ -198,47 +161,29 @@ function optimizeAssignments(assignments: CarpoolAssignment[], availableRiders: 
     
     // If this car has too many of the same grade, try to diversify
     if (grades1.length > 0) {
-      const gradeCounts = grades1.reduce((acc, grade) => {
-        acc[grade!] = (acc[grade!] || 0) + 1;
-        return acc;
-      }, {} as { [key: string]: number });
+      const mostCommonGrade = grades1.sort((a, b) => 
+        grades1.filter(v => v === a).length - grades1.filter(v => v === b).length
+      ).pop();
       
-      const maxGradeCount = Math.max(...Object.values(gradeCounts));
-      
-      // If more than half the riders are the same grade, try to swap
-      if (maxGradeCount > grades1.length / 2) {
+      if (mostCommonGrade && grades1.filter(g => g === mostCommonGrade).length > 1) {
+        // Try to swap with another car that has different grades
         for (let j = 0; j < assignments.length; j++) {
           if (i === j) continue;
           
           const car2 = assignments[j];
           const grades2 = car2.riders.map(r => r.grade).filter(Boolean);
           
-          if (grades2.length > 0) {
-            const gradeCounts2 = grades2.reduce((acc, grade) => {
-              acc[grade!] = (acc[grade!] || 0) + 1;
-              return acc;
-            }, {} as { [key: string]: number });
-            
-            const maxGradeCount2 = Math.max(...Object.values(gradeCounts2));
-            
-            // If car2 also has grade concentration, try to swap
-            if (maxGradeCount2 > grades2.length / 2) {
-              // Find riders with different grades to swap
-              const dominantGrade1 = Object.keys(gradeCounts).find(grade => gradeCounts[grade] === maxGradeCount);
-              const dominantGrade2 = Object.keys(gradeCounts2).find(grade => gradeCounts2[grade] === maxGradeCount2);
-              
-              if (dominantGrade1 !== dominantGrade2) {
-                const rider1 = car1.riders.find(r => r.grade === dominantGrade1);
-                const rider2 = car2.riders.find(r => r.grade === dominantGrade2);
-                
-                if (rider1 && rider2) {
-                  // Perform the swap
-                  car1.riders = car1.riders.map(r => r.id === rider1.id ? rider2 : r);
-                  car2.riders = car2.riders.map(r => r.id === rider2.id ? rider1 : r);
-                  break;
-                }
-              }
-            }
+          // Find a rider in car1 with the most common grade
+          const riderToSwap = car1.riders.find(r => r.grade === mostCommonGrade);
+          
+          // Find a rider in car2 with a different grade
+          const differentGradeRider = car2.riders.find(r => r.grade && r.grade !== mostCommonGrade);
+          
+          if (riderToSwap && differentGradeRider) {
+            // Perform the swap
+            car1.riders = car1.riders.map(r => r.id === riderToSwap.id ? differentGradeRider : r);
+            car2.riders = car2.riders.map(r => r.id === differentGradeRider.id ? riderToSwap : r);
+            break;
           }
         }
       }

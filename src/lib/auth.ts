@@ -20,11 +20,31 @@ class AuthManager {
     if (isNative) {
       try {
         console.log('Starting native Google sign-in...');
+        console.log('Checking if FirebaseAuthentication is available...');
+        
+        // Check if the plugin is properly loaded
+        if (!FirebaseAuthentication) {
+          throw new Error('FirebaseAuthentication plugin not available');
+        }
+        
+        console.log('FirebaseAuthentication plugin is available, calling signInWithGoogle...');
         const result = await FirebaseAuthentication.signInWithGoogle();
         console.log('Native Google sign-in result:', result);
+        
+        if (!result.user) {
+          console.warn('Sign-in completed but no user returned');
+        } else {
+          console.log('User successfully signed in:', result.user.email);
+        }
+        
         return result;
       } catch (error) {
         console.error('Native Google Sign-In error:', error);
+        console.error('Error details:', {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          code: (error as any)?.code || 'unknown',
+          stack: error instanceof Error ? error.stack : 'No stack trace'
+        });
         throw error;
       }
     }
@@ -124,25 +144,7 @@ class AuthManager {
       };
     } catch (error) {
       console.error('Native auth state listener error:', error);
-      
-      // Fallback to polling if listener fails
-      let isListening = true;
-      const pollInterval = setInterval(async () => {
-        if (!isListening) return;
-        
-        try {
-          const user = await this.getCurrentUser();
-          callback({ user });
-        } catch (error) {
-          console.error('Error polling auth state:', error);
-        }
-      }, 5000); // Poll every 5 seconds instead of 1 second
-      
-      // Return cleanup function
-      return () => {
-        isListening = false;
-        clearInterval(pollInterval);
-      };
+      throw error; // Don't fall back to polling - let the error bubble up
     }
   }
 }

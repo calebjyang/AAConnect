@@ -1,66 +1,58 @@
 "use client";
-import { useState, useEffect, useCallback, memo } from 'react';
-import type { RideSignupAdmin } from '@/hooks/admin/useCarpoolManagement';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { addDocToCollection } from '@/lib/firestore';
+import { useToast } from '@/components/ui/use-toast';
 
-interface CarpoolFormProps {
-  initialValues?: Partial<RideSignupAdmin>;
-  onSubmit: (_formData: Omit<RideSignupAdmin, 'id'>) => Promise<void>;
-  loading?: boolean;
-  aftereventWeeks: string[];
+interface CarpoolFormData {
+  name: string;
+  phone: string;
+  location: string;
+  aftereventWeek: string;
+  canDrive: string;
+  capacity: string;
+  grade: string;
+  notes?: string;
 }
 
-const defaultForm = {
-  name: '',
-  phone: '',
-  canDrive: 'no',
-  capacity: '',
-  location: '',
-  aftereventWeek: '',
-  submittedAt: '',
-  grade: '',
-};
+interface CarpoolFormProps {
+  onSuccess?: () => void;
+  initialData?: Partial<CarpoolFormData>;
+}
 
-/**
- * Form component for adding and editing carpool ride signups
- * 
- * This component provides a comprehensive form interface for managing ride signups
- * with the following features:
- * - Add new signups with validation
- * - Edit existing signups with pre-populated data
- * - Real-time form validation
- * - Dynamic capacity field based on driving ability
- * - Loading states and error handling
- * - Success feedback
- * - Grade and gender fields for enhanced matching
- * 
- * @param {CarpoolFormProps} props - Component props
- * @param {Partial<RideSignupAdmin>} [props.initialValues] - Pre-populated form data for editing
- * @param {Function} props.onSubmit - Async function called when form is submitted
- * @param {boolean} [props.loading=false] - Whether the form is in a loading state
- * @param {string[]} props.aftereventWeeks - Available afterevent weeks for selection
- * 
- * @example
- * // Add new signup
- * <CarpoolForm 
- *   onSubmit={handleSubmit} 
- *   aftereventWeeks={['Fall Week 1', 'Fall Week 2']} 
- * />
- * 
- * // Edit existing signup
- * <CarpoolForm 
- *   initialValues={existingSignup}
- *   onSubmit={handleUpdate}
- *   aftereventWeeks={['Fall Week 1', 'Fall Week 2']}
- * />
- */
-const CarpoolForm = memo<CarpoolFormProps>(({ initialValues, onSubmit, loading = false, aftereventWeeks }) => {
-  const [form, setForm] = useState({ ...defaultForm, ...initialValues });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+export default function CarpoolForm({ onSuccess, initialData }: CarpoolFormProps) {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  
+  const [form, setForm] = useState<CarpoolFormData>({
+    name: initialData?.name || '',
+    phone: initialData?.phone || '',
+    location: initialData?.location || '',
+    aftereventWeek: initialData?.aftereventWeek || '',
+    canDrive: initialData?.canDrive || '',
+    capacity: initialData?.capacity || '',
+    grade: initialData?.grade || '',
+    notes: initialData?.notes || '',
+  });
+
+  const locationOptions = [
+    "Middle Earth",
+    "Mesa Court", 
+    "Berk",
+    "Cornell",
+    "Other UTC (NOT Berk/Cornell)",
+    "Plaza",
+    "Other ACC (NOT Plaza)",
+    "Other"
+  ];
 
   const gradeOptions = [
     "First Year",
-    "Second Year",
+    "Second Year", 
     "Third Year",
     "Fourth Year",
     "Fifth Year",
@@ -68,128 +60,206 @@ const CarpoolForm = memo<CarpoolFormProps>(({ initialValues, onSubmit, loading =
     "Staff"
   ];
 
-  /**
-   * Updates form when initialValues change (for edit mode)
-   * 
-   * This effect ensures the form is properly reset when switching between
-   * add and edit modes, or when editing different signups.
-   */
-  useEffect(() => {
-    setForm({ ...defaultForm, ...initialValues });
-  }, [initialValues]);
-
-  /**
-   * Handles form field changes and updates local state
-   * 
-   * @param {string} field - The form field name to update
-   * @param {string} value - The new value for the field
-   */
-  const handleChange = useCallback((field: string, value: string) => {
+  const handleChange = (field: keyof CarpoolFormData, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
-  }, []);
+  };
 
-  /**
-   * Handles form submission with validation and error handling
-   * 
-   * This function performs comprehensive validation before submission:
-   * - Validates all required fields are filled
-   * - Ensures capacity is provided for drivers
-   * - Handles async submission with loading states
-   * - Provides user feedback for success/error states
-   * - Resets form on successful submission
-   * 
-   * @param {React.FormEvent} e - Form submission event
-   * @throws {Error} When validation fails or submission errors occur
-   */
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-    let localError = '';
-    
-    // Validation
-    if (!form.name || !form.phone || !form.location || !form.aftereventWeek || !form.grade) {
-      localError = 'Please fill in all required fields.';
-    } else if (form.canDrive === 'yes' && (!form.capacity || isNaN(Number(form.capacity)))) {
-      localError = 'Please enter a valid capacity for drivers.';
-    }
-    
-    if (localError) {
-      setError(localError);
-      return;
-    }
-    
+    setLoading(true);
+
     try {
-      await onSubmit({
+      // Validate required fields
+      if (!form.name || !form.phone || !form.location || !form.aftereventWeek || !form.grade) {
+        toast({
+          title: "Missing required fields",
+          description: "Please fill out all required fields.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const carpoolData = {
         name: form.name,
         phone: form.phone,
-        canDrive: form.canDrive,
-        capacity: form.canDrive === 'yes' ? form.capacity : undefined,
         location: form.location,
         aftereventWeek: form.aftereventWeek,
-        submittedAt: form.submittedAt || new Date().toISOString(),
+        canDrive: form.canDrive,
+        capacity: form.canDrive === "Yes" ? form.capacity : undefined,
         grade: form.grade,
+        notes: form.notes || undefined,
+        submittedAt: new Date().toISOString(),
+      };
+
+      await addDocToCollection("rides", carpoolData);
+      
+      toast({
+        title: "Success",
+        description: "Carpool signup added successfully!",
       });
-      setSuccess('Signup saved!');
-      setForm(defaultForm);
-    } catch (err: any) {
-      setError(err.message || 'Failed to save signup.');
+
+      // Reset form
+      setForm({
+        name: '',
+        phone: '',
+        location: '',
+        aftereventWeek: '',
+        canDrive: '',
+        capacity: '',
+        grade: '',
+        notes: '',
+      });
+
+      onSuccess?.();
+    } catch (error) {
+      console.error('Error adding carpool signup:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add carpool signup. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-  }, [form, onSubmit]);
+  };
 
   return (
-    <form onSubmit={handleSubmit} data-testid="carpool-form" className="bg-white rounded-xl shadow p-6 border border-gray-100 flex flex-col gap-4 max-w-xl">
-      <h3 className="text-lg font-semibold text-gray-800 mb-2">{initialValues ? 'Edit Signup' : 'Add Signup'}</h3>
-      {error && <div className="text-red-600 font-medium text-sm" data-testid="error-message">{error}</div>}
-      {success && <div className="text-green-600 font-medium text-sm" data-testid="success-message">{success}</div>}
-      <div className="flex flex-col gap-1">
-        <label htmlFor="name" className="font-semibold text-gray-800 mb-1">Name<span className="text-red-500 ml-1">*</span></label>
-        <input id="name" type="text" className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900" value={form.name} onChange={e => handleChange('name', e.target.value)} />
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="name" className="font-semibold text-gray-800 mb-1">Name (First & Last)<span className="text-red-500 ml-1">*</span></Label>
+          <Input
+            id="name"
+            type="text"
+            value={form.name}
+            onChange={(e) => handleChange('name', e.target.value)}
+            placeholder="Enter full name"
+            required
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="phone" className="font-semibold text-gray-800 mb-1">Phone Number<span className="text-red-500 ml-1">*</span></Label>
+          <Input
+            id="phone"
+            type="tel"
+            value={form.phone}
+            onChange={(e) => handleChange('phone', e.target.value)}
+            placeholder="Enter phone number"
+            required
+          />
+        </div>
       </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="phone" className="font-semibold text-gray-800 mb-1">Phone<span className="text-red-500 ml-1">*</span></label>
-        <input id="phone" type="tel" className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900" value={form.phone} onChange={e => handleChange('phone', e.target.value)} />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="grade" className="font-semibold text-gray-800 mb-1">Grade/Year<span className="text-red-500 ml-1">*</span></Label>
+          <Select value={form.grade} onValueChange={(value) => handleChange('grade', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select grade/year" />
+            </SelectTrigger>
+            <SelectContent>
+              {gradeOptions.map(option => (
+                <SelectItem key={option} value={option}>{option}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="aftereventWeek" className="font-semibold text-gray-800 mb-1">Afterevent Week<span className="text-red-500 ml-1">*</span></Label>
+          <Input
+            id="aftereventWeek"
+            type="text"
+            value={form.aftereventWeek}
+            onChange={(e) => handleChange('aftereventWeek', e.target.value)}
+            placeholder="e.g., Fall Week 1"
+            required
+          />
+        </div>
       </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="grade" className="font-semibold text-gray-800 mb-1">Grade/Year<span className="text-red-500 ml-1">*</span></label>
-        <select id="grade" className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900" value={form.grade} onChange={e => handleChange('grade', e.target.value)}>
-          <option value="">Select grade/year</option>
-          {gradeOptions.map(option => (
-            <option key={option} value={option}>{option}</option>
-          ))}
-        </select>
+
+      <div>
+        <Label htmlFor="location" className="font-semibold text-gray-800 mb-1">Location<span className="text-red-500 ml-1">*</span></Label>
+        <Select value={form.location} onValueChange={(value) => handleChange('location', value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select location" />
+          </SelectTrigger>
+          <SelectContent>
+            {locationOptions.map(option => (
+              <SelectItem key={option} value={option}>{option}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="canDrive" className="font-semibold text-gray-800 mb-1">Can Drive?<span className="text-red-500 ml-1">*</span></label>
-        <select id="canDrive" className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900" value={form.canDrive} onChange={e => handleChange('canDrive', e.target.value)}>
-          <option value="no">No</option>
-          <option value="yes">Yes</option>
-        </select>
+
+      <div>
+        <Label className="font-semibold text-gray-800 mb-1">Can Drive?<span className="text-red-500 ml-1">*</span></Label>
+        <div className="flex gap-4 mt-1">
+          <label className="flex items-center gap-2 font-medium text-gray-700">
+            <input
+              type="radio"
+              name="canDrive"
+              value="Yes"
+              checked={form.canDrive === "Yes"}
+              onChange={(e) => handleChange('canDrive', e.target.value)}
+              required
+            />
+            Yes
+          </label>
+          <label className="flex items-center gap-2 font-medium text-gray-700">
+            <input
+              type="radio"
+              name="canDrive"
+              value="No"
+              checked={form.canDrive === "No"}
+              onChange={(e) => handleChange('canDrive', e.target.value)}
+              required
+            />
+            No
+          </label>
+          <label className="flex items-center gap-2 font-medium text-gray-700">
+            <input
+              type="radio"
+              name="canDrive"
+              value="Self"
+              checked={form.canDrive === "Self"}
+              onChange={(e) => handleChange('canDrive', e.target.value)}
+              required
+            />
+            Self Drive
+          </label>
+        </div>
       </div>
-      {form.canDrive === 'yes' && (
-        <div className="flex flex-col gap-1">
-          <label htmlFor="capacity" className="font-semibold text-gray-800 mb-1">Capacity<span className="text-red-500 ml-1">*</span></label>
-          <input id="capacity" type="number" min="1" className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900" value={form.capacity} onChange={e => handleChange('capacity', e.target.value)} />
+
+      {form.canDrive === "Yes" && (
+        <div>
+          <Label htmlFor="capacity" className="font-semibold text-gray-800 mb-1">Passenger Capacity</Label>
+          <Input
+            id="capacity"
+            type="number"
+            min="1"
+            value={form.capacity}
+            onChange={(e) => handleChange('capacity', e.target.value)}
+            placeholder="Number of passengers you can take"
+          />
         </div>
       )}
-      <div className="flex flex-col gap-1">
-        <label htmlFor="location" className="font-semibold text-gray-800 mb-1">Location<span className="text-red-500 ml-1">*</span></label>
-        <input id="location" type="text" className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900" value={form.location} onChange={e => handleChange('location', e.target.value)} />
+
+      <div>
+        <Label htmlFor="notes" className="font-semibold text-gray-800 mb-1">Notes (Optional)</Label>
+        <Textarea
+          id="notes"
+          value={form.notes}
+          onChange={(e) => handleChange('notes', e.target.value)}
+          placeholder="Any additional notes or preferences"
+          rows={3}
+        />
       </div>
-      <div className="flex flex-col gap-1">
-        <label htmlFor="aftereventWeek" className="font-semibold text-gray-800 mb-1">Afterevent Week<span className="text-red-500 ml-1">*</span></label>
-        <select id="aftereventWeek" className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900" value={form.aftereventWeek} onChange={e => handleChange('aftereventWeek', e.target.value)}>
-          <option value="">Select week</option>
-          {aftereventWeeks.map(week => (
-            <option key={week} value={week}>{week}</option>
-          ))}
-        </select>
-      </div>
-      <button type="submit" className="mt-2 py-2 px-4 rounded-md bg-aacf-blue hover:bg-aacf-blue-700 text-white font-semibold shadow transition disabled:opacity-60 disabled:cursor-not-allowed" disabled={loading}>{loading ? (initialValues ? 'Saving...' : 'Adding...') : (initialValues ? 'Save Changes' : 'Add Signup')}</button>
+
+      <Button type="submit" disabled={loading} className="w-full">
+        {loading ? "Adding..." : "Add Carpool Signup"}
+      </Button>
     </form>
   );
-});
-
-CarpoolForm.displayName = 'CarpoolForm';
-
-export default CarpoolForm; 
+} 
