@@ -157,11 +157,11 @@ const CarpoolList = React.memo(function CarpoolList({
                       🚗 {assignment.driver.name} ({assignment.driver.location})
                     </h5>
                     <span className={`text-sm font-medium ${
-                      assignment.usedCapacity >= assignment.totalCapacity 
+                      assignment.riders.length + 1 >= assignment.totalCapacity 
                         ? 'text-red-600' 
                         : 'text-gray-600'
                     }`}>
-                      {assignment.usedCapacity}/{assignment.totalCapacity} spots
+                      {assignment.riders.length + 1}/{assignment.totalCapacity} spots
                     </span>
                   </div>
                   <div className="text-sm text-gray-600 mb-3">
@@ -218,7 +218,7 @@ const CarpoolList = React.memo(function CarpoolList({
                   🚗 {assignment.driver.name} ({assignment.driver.location})
                 </h4>
                 <span className="text-sm text-gray-600">
-                  {assignment.usedCapacity}/{assignment.totalCapacity} spots
+                  {assignment.riders.length + 1}/{assignment.totalCapacity} spots
                 </span>
               </div>
               <div className="text-sm text-gray-600 mb-2">

@@ -91,10 +91,10 @@ export function assignCarpools(signups: RideSignup[], week: string): AssignmentR
       totalCapacity: parseInt(driver.capacity || "0"),
       location: driver.location,
     };
-    
+    const maxRiders = assignment.totalCapacity - 1;
     // First pass: Try to match by exact location
     for (let i = 0; i < availableRiders.length; ) {
-      if (assignment.usedCapacity >= assignment.totalCapacity) break;
+      if (assignment.usedCapacity >= maxRiders) break;
       const rider = availableRiders[i];
       if (rider.location === driver.location) {
         assignment.riders.push(rider);
@@ -104,10 +104,9 @@ export function assignCarpools(signups: RideSignup[], week: string): AssignmentR
         i++;
       }
     }
-    
     // Second pass: Try to match by location group (friend-group mixing)
     for (let i = 0; i < availableRiders.length; ) {
-      if (assignment.usedCapacity >= assignment.totalCapacity) break;
+      if (assignment.usedCapacity >= maxRiders) break;
       const rider = availableRiders[i];
       if (areLocationsCompatible(rider.location, driver.location)) {
         assignment.riders.push(rider);
@@ -117,16 +116,14 @@ export function assignCarpools(signups: RideSignup[], week: string): AssignmentR
         i++;
       }
     }
-    
     // Third pass: Fill remaining spots with any available riders
     for (let i = 0; i < availableRiders.length; ) {
-      if (assignment.usedCapacity >= assignment.totalCapacity) break;
+      if (assignment.usedCapacity >= maxRiders) break;
       const rider = availableRiders[i];
       assignment.riders.push(rider);
       assignment.usedCapacity++;
       availableRiders.splice(i, 1);
     }
-    
     assignments.push(assignment);
   }
   
