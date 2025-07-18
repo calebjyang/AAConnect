@@ -1,13 +1,18 @@
 "use client";
+import { useState } from 'react';
 import type { RideSignupAdmin } from '@/hooks/admin/useCarpoolManagement';
+import EditSignupModal from './EditSignupModal';
 
 interface CarpoolSignupsListProps {
   signups: RideSignupAdmin[];
   onDelete?: (id: string) => void;
+  onEdit?: (id: string, updates: Partial<RideSignupAdmin>) => void;
   loading?: boolean;
 }
 
-export default function CarpoolSignupsList({ signups, onDelete, loading = false }: CarpoolSignupsListProps) {
+export default function CarpoolSignupsList({ signups, onDelete, onEdit, loading = false }: CarpoolSignupsListProps) {
+  const [editingSignup, setEditingSignup] = useState<RideSignupAdmin | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   if (loading) {
     return (
       <div className="bg-white rounded-xl shadow p-6 border border-gray-100">
@@ -45,7 +50,7 @@ export default function CarpoolSignupsList({ signups, onDelete, loading = false 
               <th className="px-3 py-2 border text-gray-800 font-bold">Grade</th>
               <th className="px-3 py-2 border text-gray-800 font-bold">Week</th>
               <th className="px-3 py-2 border text-gray-800 font-bold">Submitted</th>
-              {onDelete && <th className="px-3 py-2 border text-gray-800 font-bold">Actions</th>}
+              {(onDelete || onEdit) && <th className="px-3 py-2 border text-gray-800 font-bold">Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -61,14 +66,29 @@ export default function CarpoolSignupsList({ signups, onDelete, loading = false 
                 <td className="px-3 py-2 border text-gray-700">
                   {new Date(signup.submittedAt).toLocaleDateString()}
                 </td>
-                {onDelete && (
+                {(onDelete || onEdit) && (
                   <td className="px-3 py-2 border text-gray-700">
-                    <button
-                      onClick={() => onDelete(signup.id)}
-                      className="text-red-600 hover:text-red-800 font-medium text-sm"
-                    >
-                      Delete
-                    </button>
+                    <div className="flex gap-2">
+                      {onEdit && (
+                        <button
+                          onClick={() => {
+                            setEditingSignup(signup);
+                            setIsModalOpen(true);
+                          }}
+                          className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                        >
+                          Edit
+                        </button>
+                      )}
+                      {onDelete && (
+                        <button
+                          onClick={() => onDelete(signup.id)}
+                          className="text-red-600 hover:text-red-800 font-medium text-sm"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
                   </td>
                 )}
               </tr>
@@ -76,6 +96,21 @@ export default function CarpoolSignupsList({ signups, onDelete, loading = false 
           </tbody>
         </table>
       </div>
+      
+      {/* Edit Modal */}
+      <EditSignupModal
+        signup={editingSignup}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingSignup(null);
+        }}
+        onSave={(id, updates) => {
+          onEdit?.(id, updates);
+          setIsModalOpen(false);
+          setEditingSignup(null);
+        }}
+      />
     </div>
   );
 } 

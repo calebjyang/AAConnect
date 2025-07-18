@@ -32,6 +32,8 @@ export default function CarpoolManagement() {
     getAssignmentStats,
     signups,
     deleteAssignments,
+    deleteSignup,
+    updateSignup,
   } = useCarpoolManagement();
 
   const [showForm, setShowForm] = useState(false);
@@ -75,7 +77,8 @@ export default function CarpoolManagement() {
       {/* Signups Section */}
       <CarpoolSignupsList
         signups={signups}
-        onDelete={() => {}} // TODO: Implement delete signup functionality
+        onDelete={deleteSignup}
+        onEdit={updateSignup}
         loading={loading}
       />
 

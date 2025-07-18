@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getCollection, setDoc, deleteDoc } from '@/lib/firestore';
+import { getCollection, setDoc, deleteDoc, updateDoc } from '@/lib/firestore';
 import { assignCarpools, getAssignmentStats, exportAssignmentsCSV, type RideSignup, type AssignmentResult } from '@/lib/carpoolAlgorithm';
 import { PointerSensor, KeyboardSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
@@ -463,6 +463,56 @@ export function useCarpoolManagement() {
     }
   }, [selectedWeek]);
 
+  /**
+   * Deletes a specific ride signup from Firestore
+   * 
+   * @param {string} signupId - The ID of the signup to delete
+   * @async
+   * @throws {Error} When Firestore delete operation fails
+   */
+  const deleteSignup = useCallback(async (signupId: string) => {
+    try {
+      await deleteDoc(`rides/${signupId}`);
+      
+      // Update local state
+      setSignups(prev => prev.filter(s => s.id !== signupId));
+      setError(null);
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to delete signup';
+      setError(errorMessage);
+      console.error('Error deleting signup:', err);
+    }
+  }, []);
+
+  /**
+   * Updates a specific ride signup in Firestore
+   * 
+   * @param {string} signupId - The ID of the signup to update
+   * @param {Partial<RideSignupAdmin>} updates - The fields to update
+   * @async
+   * @throws {Error} When Firestore update operation fails
+   */
+  const updateSignup = useCallback(async (signupId: string, updates: Partial<RideSignupAdmin>) => {
+    try {
+      const updatedData = {
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      };
+      
+      await updateDoc(`rides/${signupId}`, updatedData);
+      
+      // Update local state
+      setSignups(prev => prev.map(s => 
+        s.id === signupId ? { ...s, ...updates } : s
+      ));
+      setError(null);
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to update signup';
+      setError(errorMessage);
+      console.error('Error updating signup:', err);
+    }
+  }, []);
+
   return {
     signups,
     loading,
@@ -485,6 +535,8 @@ export function useCarpoolManagement() {
     cancelEditing,
     saveAssignments,
     deleteAssignments,
+    deleteSignup,
+    updateSignup,
     loadAssignments,
     handleDragStart,
     handleDragEnd,
