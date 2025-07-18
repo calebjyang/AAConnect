@@ -56,7 +56,7 @@ export default function CarpoolSignupsList({ signups, onDelete, loading = false 
                 <td className="px-3 py-2 border text-gray-700">{signup.location}</td>
                 <td className="px-3 py-2 border text-gray-700">{signup.canDrive}</td>
                 <td className="px-3 py-2 border text-gray-700">{signup.capacity || '-'}</td>
-                <td className="px-3 py-2 border text-gray-700">{signup.grade ?? ''}</td>
+                <td className="px-3 py-2 border text-gray-700">-</td>
                 <td className="px-3 py-2 border text-gray-700">{signup.aftereventWeek}</td>
                 <td className="px-3 py-2 border text-gray-700">
                   {new Date(signup.submittedAt).toLocaleDateString()}
