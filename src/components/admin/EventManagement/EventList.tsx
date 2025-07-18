@@ -2,6 +2,7 @@
 import React from 'react';
 import type { Event } from '@/hooks/admin/useEventManagement';
 import { parseEventDate } from '@/lib/utils';
+import { format } from 'date-fns';
 
 interface EventListProps {
   events: Event[];
@@ -79,11 +80,7 @@ const EventCard = React.memo(function EventCard({ event, onDelete }: EventCardPr
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <span>
-                {eventDate.toLocaleDateString('en-US', { 
-                  weekday: 'short', 
-                  month: 'short', 
-                  day: 'numeric' 
-                })}
+                {format(eventDate, 'EEE, MMM d')}
               </span>
             </div>
             <div className="flex items-center gap-1">
@@ -91,10 +88,7 @@ const EventCard = React.memo(function EventCard({ event, onDelete }: EventCardPr
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span>
-                {eventDate.toLocaleTimeString('en-US', { 
-                  hour: 'numeric', 
-                  minute: '2-digit' 
-                })}
+                {format(eventDate, 'h:mm a')}
               </span>
             </div>
             <div className="flex items-center gap-1">

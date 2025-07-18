@@ -3,6 +3,7 @@ import { useState, useCallback, useMemo } from 'react';
 import React from 'react';
 import Image from 'next/image';
 import type { Apartment, ApartmentMember } from '@/types/apartment';
+import { format } from 'date-fns';
 
 interface ApartmentListProps {
   apartments: Apartment[];
@@ -30,11 +31,7 @@ const ApartmentList = React.memo(function ApartmentList({
   const formatDate = useCallback((timestamp: any) => {
     if (!timestamp) return 'N/A';
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    return format(date, 'MMM d, yyyy');
   }, []);
 
   // Memoize apartment members lookup
