@@ -35,6 +35,8 @@ const initialState: ExtendedCarpoolManagementState = {
 
 export function useCarpoolManagement() {
   const [state, setState] = useState<ExtendedCarpoolManagementState>(initialState);
+  const [testAssignments, setTestAssignments] = useState<AssignmentResult | null>(null);
+  const [isTesting, setIsTesting] = useState(false);
 
   const fetchSignups = useCallback(async () => {
     setState((prev: ExtendedCarpoolManagementState) => ({ ...prev, loading: true, error: null }));
@@ -57,9 +59,22 @@ export function useCarpoolManagement() {
     console.log('Export CSV functionality not implemented yet');
   }, []);
 
+  // Filter signups by selected week
+  const filteredSignups = useMemo(() => {
+    if (!state.selectedWeek) return state.signups;
+    return state.signups.filter(signup => signup.aftereventWeek === state.selectedWeek);
+  }, [state.signups, state.selectedWeek]);
+
   const testAssignment = useCallback(() => {
-    // TODO: Implement test assignment
-    console.log('Test assignment functionality not implemented yet');
+    if (!state.selectedWeek || filteredSignups.length === 0) return;
+    const result = assignCarpools(filteredSignups, state.selectedWeek);
+    setTestAssignments(result);
+    setIsTesting(true);
+  }, [filteredSignups, state.selectedWeek]);
+
+  const clearTestAssignment = useCallback(() => {
+    setTestAssignments(null);
+    setIsTesting(false);
   }, []);
 
   const startEditing = useCallback(() => {
@@ -102,12 +117,6 @@ export function useCarpoolManagement() {
     return Array.from(uniqueWeeks).sort();
   }, [state.signups]);
 
-  // Filter signups by selected week
-  const filteredSignups = useMemo(() => {
-    if (!state.selectedWeek) return state.signups;
-    return state.signups.filter(signup => signup.aftereventWeek === state.selectedWeek);
-  }, [state.signups, state.selectedWeek]);
-
   // Compute assignments for the selected week
   const assignments: AssignmentResult | null = useMemo(() => {
     if (!state.selectedWeek || filteredSignups.length === 0) return null;
@@ -123,6 +132,10 @@ export function useCarpoolManagement() {
     weeks,
     filteredSignups,
     assignments,
+    testAssignments,
+    isTesting,
+    testAssignment,
+    clearTestAssignment,
     fetchSignups,
     createSignup: async (signupData: Omit<RideSignupAdmin, 'id'>) => {
       setState((prev: ExtendedCarpoolManagementState) => ({ ...prev, loading: true, error: null, success: null }));
@@ -171,7 +184,6 @@ export function useCarpoolManagement() {
     },
     setSelectedWeek,
     exportCSV,
-    testAssignment,
     startEditing,
     cancelEditing,
     saveAssignments,

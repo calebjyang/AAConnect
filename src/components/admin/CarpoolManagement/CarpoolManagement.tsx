@@ -15,6 +15,9 @@ export default function CarpoolManagement() {
     exportCSV,
     testAssignment,
     assignments,
+    testAssignments,
+    isTesting,
+    clearTestAssignment,
     isEditing,
     startEditing,
     cancelEditing,
@@ -91,21 +94,34 @@ export default function CarpoolManagement() {
       ) : filteredSignups.length === 0 ? (
         <div className="text-gray-500">No ride signups found.</div>
       ) : (
-        <CarpoolList
-          assignments={assignments}
-          editingAssignments={null}
-          isEditing={isEditing}
-          saving={saving}
-          activeId={activeId}
-          sensors={sensors}
-          onEdit={startEditing}
-          onSave={saveAssignments}
-          onCancel={cancelEditing}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          getAssignmentStats={getAssignmentStats}
-          onExport={exportAssignments}
-        />
+        <>
+          {isTesting && (
+            <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center justify-between">
+              <span className="text-emerald-800 font-medium">Viewing Test Assignment (not saved)</span>
+              <button
+                className="px-3 py-1 rounded bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition"
+                onClick={clearTestAssignment}
+              >
+                Clear Test
+              </button>
+            </div>
+          )}
+          <CarpoolList
+            assignments={isTesting ? testAssignments : assignments}
+            editingAssignments={null}
+            isEditing={isEditing}
+            saving={saving}
+            activeId={activeId}
+            sensors={sensors}
+            onEdit={startEditing}
+            onSave={saveAssignments}
+            onCancel={cancelEditing}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            getAssignmentStats={getAssignmentStats}
+            onExport={exportAssignments}
+          />
+        </>
       )}
     </div>
   );
