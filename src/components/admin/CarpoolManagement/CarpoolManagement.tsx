@@ -15,6 +15,9 @@ export default function CarpoolManagement() {
     exportCSV,
     testAssignment,
     assignments,
+    showAssignments,
+    setShowAssignments,
+    editingAssignments,
     isEditing,
     startEditing,
     cancelEditing,
@@ -28,7 +31,7 @@ export default function CarpoolManagement() {
     handleDragEnd,
     getAssignmentStats,
     signups,
-    deleteSignup,
+    deleteAssignments,
   } = useCarpoolManagement();
 
   const [showForm, setShowForm] = useState(false);
@@ -72,7 +75,7 @@ export default function CarpoolManagement() {
       {/* Signups Section */}
       <CarpoolSignupsList
         signups={signups}
-        onDelete={deleteSignup}
+        onDelete={() => {}} // TODO: Implement delete signup functionality
         loading={loading}
       />
 
@@ -91,21 +94,25 @@ export default function CarpoolManagement() {
       ) : filteredSignups.length === 0 ? (
         <div className="text-gray-500">No ride signups found.</div>
       ) : (
-        <CarpoolList
-          assignments={assignments}
-          editingAssignments={null}
-          isEditing={isEditing}
-          saving={saving}
-          activeId={activeId}
-          sensors={sensors}
-          onEdit={startEditing}
-          onSave={saveAssignments}
-          onCancel={cancelEditing}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          getAssignmentStats={getAssignmentStats}
-          onExport={exportAssignments}
-        />
+        <>
+          {showAssignments && assignments && (
+            <CarpoolList
+              assignments={assignments}
+              editingAssignments={editingAssignments}
+              isEditing={isEditing}
+              saving={saving}
+              activeId={activeId}
+              sensors={sensors}
+              onEdit={startEditing}
+              onSave={saveAssignments}
+              onCancel={cancelEditing}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              getAssignmentStats={getAssignmentStats}
+              onExport={exportAssignments}
+            />
+          )}
+        </>
       )}
     </div>
   );

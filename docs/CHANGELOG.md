@@ -1,5 +1,31 @@
 # 🕘 Changelog
 
+## v1.0.7 – July 2025
+- **Critical Bug Fix: Carpool Management Restoration** 🔧
+  - Restored working carpool management functionality from commit 01f1d3d
+  - Fixed "Edit Assignments" button not activating drag-and-drop mode
+  - Resolved "Test Assignment" button functionality
+  - Updated Firebase imports to use abstraction layer instead of direct SDK
+  - Fixed type errors in CarpoolSignupsList component
+  - All carpool features now fully functional: test assignments, edit assignments, drag-and-drop, save/load, export
+
+## v1.0.6 – July 2025
+- **Cross-Platform Native Deployment** 📱
+  - **iOS/Android Native Support**: Added Capacitor integration for native mobile deployment
+  - **Cross-Platform Firebase Integration**: Resolved CORS issues by implementing platform-specific Firebase APIs
+  - **Firebase Abstraction Layer**: Created unified interface for web and native platforms
+  - **iOS Firebase Initialization**: Fixed timing issues in AppDelegate for proper Firebase setup
+  - **Capacitor Firebase Plugins**: Integrated @capacitor-firebase/app, @capacitor-firebase/firestore, @capacitor-firebase/authentication
+  - **Platform Detection**: Automatic detection of web vs native environment
+  - **In-Memory Filtering**: Advanced queries handled with client-side filtering on native platforms
+  - **Static Export Compatibility**: Removed server-side dependencies for static deployment
+
+### 🛠 Technical Improvements
+- **CORS Resolution**: Eliminated CORS issues on native platforms through cross-platform Firebase integration
+- **Bundle Optimization**: Reduced bundle size by removing server-side Firebase Admin SDK
+- **Build System**: Updated for Capacitor build process with 8318 build targets
+- **Error Handling**: Robust error handling for missing Firebase Web SDK or native plugins
+
 ## v1.0.5 – July 2025
 - **UI/UX Enhancements**
   - Apartment availability tag selector redesigned: now uses a 3x2 grid with 6 tags (Snacks, Games, Study, Yap, Quiet, Prayer)
@@ -23,18 +49,7 @@
   - Improved code consistency and maintainability
   - Enhanced error handling for Firestore operations
 
-### 🛠 Technical Improvements
-- **Collection Consistency**: Standardized on `rides` collection across all components
-- **Import Cleanup**: Removed unused Firestore imports to reduce bundle size
-- **Merge Resolution**: Successfully resolved conflicts between feature branch and main
-- **Code Quality**: Improved ESLint compliance and TypeScript type safety
 
-### 🐛 Bug Fixes
-- **Admin Dashboard**: Now correctly displays all ride signups including "Fall Week 1"
-- **Data Visibility**: Fixed issue where new signups weren't visible in admin interface
-- **Collection Access**: Ensured consistent data access patterns across the application
-
----
 
 ## v1.0.3 – July 2025
 - **Google OAuth Authentication System** 🔐
