@@ -153,9 +153,9 @@ export default function CarpoolForm({ onSuccess, initialData }: CarpoolFormProps
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="grade" className="font-semibold text-gray-800 mb-1">Grade/Year<span className="text-red-500 ml-1">*</span></Label>
+          <Label id="grade-label" htmlFor="grade" className="font-semibold text-gray-800 mb-1">Grade/Year<span className="text-red-500 ml-1">*</span></Label>
           <Select value={form.grade} onValueChange={(value) => handleChange('grade', value)}>
-            <SelectTrigger>
+            <SelectTrigger aria-labelledby="grade-label">
               <SelectValue placeholder="Select grade/year" />
             </SelectTrigger>
             <SelectContent>
@@ -180,9 +180,9 @@ export default function CarpoolForm({ onSuccess, initialData }: CarpoolFormProps
       </div>
 
       <div>
-        <Label htmlFor="location" className="font-semibold text-gray-800 mb-1">Location<span className="text-red-500 ml-1">*</span></Label>
+        <Label id="location-label" htmlFor="location" className="font-semibold text-gray-800 mb-1">Location<span className="text-red-500 ml-1">*</span></Label>
         <Select value={form.location} onValueChange={(value) => handleChange('location', value)}>
-          <SelectTrigger>
+          <SelectTrigger aria-labelledby="location-label">
             <SelectValue placeholder="Select location" />
           </SelectTrigger>
           <SelectContent>
