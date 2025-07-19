@@ -2,31 +2,36 @@
 
 ## Overview
 
-This document outlines the refactoring changes made to the admin functionality to ensure compatibility with native deployment using Capacitor, including the recent Firebase native integration.
+This document outlines the refactoring changes made to the admin functionality to ensure compatibility with native deployment using Capacitor, including the recent Firebase native integration and the critical iOS authentication fix.
 
 ## Problem
 
-The original admin implementation relied on Next.js API routes (`/api/admin/verify`) for admin verification, which are not available in static exports required for Capacitor native deployment. Additionally, the Firebase Web SDK caused CORS issues when running natively on iOS/Android.
+The original admin implementation relied on Next.js API routes (`/api/admin/verify`) for admin verification, which are not available in static exports required for Capacitor native deployment. Additionally, the Firebase Web SDK caused CORS issues when running natively on iOS/Android. A critical iOS authentication bug caused infinite loading due to multiple auth state listeners.
 
 ## Solution
 
 1. **Refactored admin authentication** to use client-side Firebase operations instead of server-side API routes
 2. **Integrated Capacitor Firebase plugins** for native platform compatibility
 3. **Created cross-platform Firestore abstraction** layer for seamless web/native operation
+4. **Fixed iOS authentication infinite loading** by implementing global React Context (`AuthProvider`)
 
 ## Changes Made
 
-### 1. Updated `useAuth` Hook (`src/lib/useAuth.ts`)
+### 1. Updated `useAuth` Hook (`src/lib/useAuth.tsx`)
 
 **Before:**
 - Used API route `/api/admin/verify` for admin verification
 - Required server-side Firebase Admin SDK
 - Made HTTP requests to verify admin status
+- Multiple components created separate auth listeners causing iOS infinite loading
 
 **After:**
 - Direct Firestore query to check admin status using cross-platform abstraction
 - Uses `doc(db, "admins", firebaseUser.email)` to verify admin privileges
 - Fully client-side implementation compatible with native platforms
+- **Global React Context (`AuthProvider`)** ensures single auth state listener for entire app
+- **Admin status caching** prevents repeated Firestore calls
+- **Platform-specific error handling** for robust cross-platform operation
 
 ```typescript
 // Old implementation (removed)
@@ -36,49 +41,86 @@ const response = await fetch('/api/admin/verify', {
   body: JSON.stringify({ idToken }),
 });
 
-// New implementation using cross-platform abstraction
-const adminRef = doc(db, "admins", firebaseUser.email || '');
-const adminSnap = await getDoc(adminRef);
-isAdmin = adminSnap.exists();
+// New implementation using cross-platform abstraction and global context
+const adminSnap = await getDoc(`admins/${userEmail}`);
+isAdmin = !!(adminSnap && adminSnap.isAdmin === true);
 ```
 
 ### 2. Created Cross-Platform Firestore Abstraction (`src/lib/firestore.ts`)
 
 **New Implementation:**
+- **Singleton pattern** for plugin management to prevent multiple plugin instances
 - Automatic platform detection (web vs native)
 - Uses Firebase Web SDK on web platforms
 - Uses Capacitor Firebase plugins on native platforms
 - Unified API for all Firestore operations
-- Handles platform-specific limitations (e.g., in-memory filtering for advanced queries)
+- **Dynamic imports** for web SDK to handle build-time exclusions
+- **Robust error handling** for platform-specific limitations
 
 ```typescript
-// Cross-platform Firestore abstraction
-export const getDoc = async (path: string): Promise<any> => {
-  if (isNativePlatform()) {
-    // Use Capacitor Firebase plugin
-    const result = await FirebaseFirestore.getDocument({ reference: path });
-    return result.snapshot;
-  } else {
-    // Use Firebase Web SDK
-    const docRef = doc(getFirestore(), path);
-    const docSnap = await getDoc(docRef);
-    return docSnap.data();
+// Cross-platform Firestore abstraction with singleton pattern
+class FirestoreManager {
+  private static instance: FirestoreManager;
+  private capacitorFirestore: any = null;
+  private isPluginLoaded = false;
+  
+  static getInstance(): FirestoreManager {
+    if (!FirestoreManager.instance) {
+      FirestoreManager.instance = new FirestoreManager();
+    }
+    return FirestoreManager.instance;
   }
-};
+  
+  async getDocument(path: string): Promise<any> {
+    if (!isNative) {
+      // Dynamic import for web SDK
+      const { getFirestore, doc, getDoc: getDocWeb } = await import('firebase/firestore');
+      // ... web implementation
+    }
+    // ... native implementation
+  }
+}
 ```
 
-## Additional Note (July 2025)
+### 3. Implemented Global Auth Context (`src/lib/useAuth.tsx`)
 
-- All advanced Firestore queries now use async query helpers (e.g., orderByQuery, limitQuery, whereQuery) for dynamic import and robust error handling.
-- The abstraction layer ensures that errors related to missing Firebase Web SDK or native plugins are caught and reported clearly.
+**Critical iOS Fix:**
+- **Single auth state listener** for entire app prevents infinite loading
+- **AuthProvider** wraps app in `layout.tsx` ensuring global state
+- **Admin status caching** with `useRef` prevents repeated Firestore calls
+- **Listener initialization guard** prevents multiple listeners
+- **Platform-specific error handling** for robust operation
 
-### 3. Removed API Route
+```typescript
+// Global auth context implementation
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [authState, setAuthState] = useState<AuthState>({...});
+  const adminCache = useRef<Map<string, boolean>>(new Map());
+  const listenerInitialized = useRef(false);
+  
+  useEffect(() => {
+    // Prevent multiple listeners from being created
+    if (listenerInitialized.current) {
+      return;
+    }
+    // ... single listener implementation
+  }, []);
+  
+  return (
+    <AuthContext.Provider value={authState}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+```
+
+### 4. Removed API Route
 
 **Deleted:**
-- `src/app/api/admin/verify/route.ts` - No longer needed
+- `src/app/api/admin/verify/route.ts` - No longer needed (directory exists but is empty)
 - `src/lib/firebase-admin.ts` - Server-side Firebase Admin SDK
 
-### 4. Updated Dependencies
+### 5. Updated Dependencies
 
 **Added:**
 - `@capacitor-firebase/app@7.2.0` - Core Firebase functionality
@@ -88,12 +130,6 @@ export const getDoc = async (path: string): Promise<any> => {
 **Removed:**
 - `firebase-admin` package from `package.json`
 - All server-side Firebase Admin SDK imports
-
-### 5. Updated Constants
-
-**Modified:**
-- `src/lib/constants.ts` - Removed unused API endpoint references
-- Added comments explaining the change
 
 ### 6. iOS Native Configuration
 
@@ -160,6 +196,8 @@ This rule ensures:
 - Cross-platform Firestore abstraction
 - Automatic platform detection and appropriate API usage
 - Enhanced error handling for platform differences
+- **Single auth state listener** preventing iOS infinite loading
+- **Admin status caching** for improved performance
 
 ## Testing
 
@@ -189,6 +227,7 @@ npm run dev
 # Native platform
 npx cap run ios
 # ✅ Capacitor Firebase plugins work correctly
+# ✅ No infinite loading on iOS authentication
 ```
 
 ## Migration Notes
@@ -199,6 +238,8 @@ npx cap run ios
 3. All admin operations use cross-platform Firestore abstraction
 4. Security is maintained through Firestore rules
 5. Platform-specific code is abstracted away
+6. **Use `useAuth()` hook within `AuthProvider` context only**
+7. **Admin status is automatically cached and updated**
 
 ### For Deployment
 1. No server-side dependencies required
@@ -212,12 +253,13 @@ npx cap run ios
 2. `GoogleService-Info.plist` must be added to Xcode project
 3. All Firestore operations work seamlessly across platforms
 4. Advanced queries are handled with in-memory filtering on native
+5. **Single auth listener prevents iOS infinite loading issues**
 
 ## Future Considerations
 
 ### Potential Enhancements
 1. **Custom Claims**: Could implement Firebase Auth custom claims for admin status
-2. **Caching**: Could add client-side caching for admin status
+2. **Caching**: Could add client-side caching for admin status (partially implemented)
 3. **Real-time Updates**: Could add real-time listeners for admin status changes
 4. **Offline Support**: Enhanced offline capabilities for native platforms
 
@@ -226,7 +268,8 @@ npx cap run ios
 - Consider implementing admin status caching if needed
 - Watch for any performance impacts from client-side verification
 - Monitor native vs web platform performance differences
+- **Monitor auth listener behavior on iOS for any regression**
 
 ## Conclusion
 
-The refactoring successfully removes all server-side dependencies while maintaining security and functionality. The admin system now works seamlessly with native deployment while preserving all existing features and security measures. The addition of cross-platform Firebase integration ensures consistent behavior across web and native platforms without CORS issues. 
+The refactoring successfully removes all server-side dependencies while maintaining security and functionality. The admin system now works seamlessly with native deployment while preserving all existing features and security measures. The addition of cross-platform Firebase integration ensures consistent behavior across web and native platforms without CORS issues. The critical iOS authentication fix with global React Context prevents infinite loading and ensures robust authentication across all platforms. 

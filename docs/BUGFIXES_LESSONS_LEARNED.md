@@ -49,6 +49,13 @@ export const getDoc = async (path: string) => {
 - **Solution**: Always use Firebase project domain (e.g., `project.firebaseapp.com`)
 - **Prevention**: Never set auth domain to deployment URLs
 
+**🔥 iOS Native Authentication Infinite Loading**
+- **Problem**: iOS sign-in button spinning forever, Google popup not appearing due to repeated `FirebaseAuthentication addListener`/`removeListener` cycles
+- **Root Cause**: Multiple components using `useAuth` hook directly, creating multiple auth state listeners causing race conditions
+- **Solution**: Refactored to global React Context (`AuthProvider`), wrapped app in `<AuthProvider>`, single listener for entire app
+- **Key Changes**: Renamed `useAuth.ts` to `useAuth.tsx` with `"use client"` directive, all components consume global auth state
+- **Prevention**: Use global context for shared state with listeners, avoid multiple hook instances with subscriptions
+
 ### **React State Management**
 
 **🟡 Deep Copy for Drag Operations**
