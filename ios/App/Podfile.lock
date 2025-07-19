@@ -1157,9 +1157,9 @@ PODS:
   - BoringSSL-GRPC/Implementation (0.0.36):
     - BoringSSL-GRPC/Interface (= 0.0.36)
   - BoringSSL-GRPC/Interface (0.0.36)
-  - Capacitor (7.4.1):
+  - Capacitor (7.4.2):
     - CapacitorCordova
-  - CapacitorCordova (7.4.1)
+  - CapacitorCordova (7.4.2)
   - CapacitorDevice (7.0.1):
     - Capacitor
   - CapacitorFirebaseApp (7.2.0):
@@ -1398,8 +1398,8 @@ SPEC CHECKSUMS:
   abseil: d121da9ef7e2ff4cab7666e76c5a3e0915ae08c3
   AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
   BoringSSL-GRPC: ca6a8e5d04812fce8ffd6437810c2d46f925eaeb
-  Capacitor: 4738747ece274c45e4d9bec9ae394a6269169e64
-  CapacitorCordova: 34618fa1b14b6b091fd60a7658f7654044ae8d8a
+  Capacitor: 156d98aba46ec01dde72c4bbb92fa626837cad29
+  CapacitorCordova: 5e58d04631bc5094894ac106e2bf1da18a9e6151
   CapacitorDevice: fe3f190e1d718f4607bdc6b73993433d1c84f409
   CapacitorFirebaseApp: 8ad55ca159d6f238c0dc5f90ec68fa7142c3fd6d
   CapacitorFirebaseAuthentication: 7043f8e03813762af1b037da82c67963fa5768e0
