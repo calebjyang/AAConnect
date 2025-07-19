@@ -61,14 +61,14 @@ export default function CarpoolSignupsList({ signups, onDelete, onEdit, loading 
                 <td className="px-3 py-2 border text-gray-700">{signup.location}</td>
                 <td className="px-3 py-2 border text-gray-700">{signup.canDrive}</td>
                 <td className="px-3 py-2 border text-gray-700">{signup.capacity || '-'}</td>
-                <td className="px-3 py-2 border text-gray-700">-</td>
+                <td className="px-3 py-2 border text-gray-700">{signup.grade || '-'}</td>
                 <td className="px-3 py-2 border text-gray-700">{signup.aftereventWeek}</td>
                 <td className="px-3 py-2 border text-gray-700">
                   {new Date(signup.submittedAt).toLocaleDateString()}
                 </td>
                 {(onDelete || onEdit) && (
                   <td className="px-3 py-2 border text-gray-700">
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-1">
                       {onEdit && (
                         <button
                           onClick={() => {

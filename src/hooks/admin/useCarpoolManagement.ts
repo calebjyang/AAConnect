@@ -13,6 +13,7 @@ export interface RideSignupAdmin {
   aftereventWeek: string;
   submittedAt: string;
   capacity?: string;
+  grade?: string;
 }
 
 /**
