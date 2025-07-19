@@ -44,6 +44,11 @@ export const getDoc = async (path: string) => {
 - **Solution**: Use same collection names everywhere
 - **Prevention**: Use constants for collection names
 
+**🔥 Firebase Auth Domain Configuration**
+- **Problem**: `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` set to Vercel domain instead of Firebase project domain
+- **Solution**: Always use Firebase project domain (e.g., `project.firebaseapp.com`)
+- **Prevention**: Never set auth domain to deployment URLs
+
 ### **React State Management**
 
 **🟡 Deep Copy for Drag Operations**

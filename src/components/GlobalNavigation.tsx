@@ -140,7 +140,10 @@ export default function GlobalNavigation({ safeAreaStyle }: GlobalNavigationProp
             <UserProfile />
           ) : (
             <Link href="/login">
-              <Button variant="outline" size="sm">
+              <Button 
+                className="bg-aacf-blue text-white border-aacf-blue hover:bg-blue-800 hover:border-blue-800 shadow-md"
+                size="sm"
+              >
                 Sign In
               </Button>
             </Link>

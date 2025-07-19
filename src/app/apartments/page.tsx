@@ -49,7 +49,9 @@ export default function ApartmentsPage() {
         ...availabilityData,
         apartmentId: userApartment.id,
       },
-      user.uid
+      user.uid,
+      user.displayName || user.email?.split('@')[0] || 'Anonymous',
+      user.email || ''
     );
     setIsPostModalOpen(false);
   };
@@ -237,7 +239,7 @@ export default function ApartmentsPage() {
                           <div className="flex items-start justify-between mb-4">
                             <div className="flex items-start space-x-4 flex-1">
                               <div className="h-12 w-12 border-2 border-slate-200 group-hover:border-blue-300 transition-colors rounded-full bg-gradient-to-r from-blue-400 to-purple-400 text-white flex items-center justify-center font-semibold text-lg">
-                                {slot.postedByName.charAt(0)}
+                                {slot.postedByName?.charAt(0) || '?'}
                               </div>
 
                               <div className="flex-1">
@@ -303,7 +305,7 @@ export default function ApartmentsPage() {
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center text-sm text-slate-500">
                                     <span>
-                                      Posted by {slot.postedByName} • {slot.createdAt.toDate().toLocaleDateString()}
+                                      Posted by {slot.postedByName || 'Anonymous'} • {slot.createdAt.toDate().toLocaleDateString()}
                                     </span>
                                   </div>
                                   <div className="flex items-center space-x-2">

@@ -28,11 +28,7 @@ A Next.js PWA for Asian American Christian Fellowship chapters that centralizes 
    npm install
    ```
 
-2. **Environment Setup**
-   ```bash
-   cp .env.example .env.local
-   # Add your Firebase config to .env.local
-   ```
+
 
 3. **Development**
    ```bash
@@ -42,16 +38,7 @@ A Next.js PWA for Asian American Christian Fellowship chapters that centralizes 
    npx cap open ios     # Open in Xcode
    ```
 
-## Environment Variables
 
-```env
-NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-```
 
 ## Architecture Highlights
 

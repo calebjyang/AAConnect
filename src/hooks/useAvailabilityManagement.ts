@@ -34,13 +34,15 @@ export function useAvailabilityManagement() {
   /**
    * Creates a new availability slot
    */
-  const createAvailabilitySlot = useCallback(async (slotData: AvailabilityFormData, postedBy: string) => {
+  const createAvailabilitySlot = useCallback(async (slotData: AvailabilityFormData, postedBy: string, postedByName?: string, postedByEmail?: string) => {
     setState(prev => ({ ...prev, loading: true, error: null, success: null }));
     try {
       const now = Timestamp.now();
       const slotDoc = {
         ...slotData,
         postedBy,
+        postedByName: postedByName || 'Anonymous',
+        postedByEmail: postedByEmail || '',
         createdAt: now,
         updatedAt: now,
         isActive: true,

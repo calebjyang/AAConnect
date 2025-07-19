@@ -40,7 +40,7 @@ export default function UserProfile() {
               className="rounded-full"
             />
           ) : (
-            user.displayName?.charAt(0) || user.email?.charAt(0) || "U"
+            user.displayName?.charAt(0) || user.email?.charAt(0) || "?"
           )}
         </div>
         <div className="hidden sm:block text-left">

@@ -193,7 +193,7 @@ const AvailabilityList = React.memo(function AvailabilityList({
                       </div>
                       
                       <div className="mt-2 text-xs text-gray-400">
-                        Posted by {slot.postedByName} on {formatDateTime(slot.createdAt)}
+                        Posted by {slot.postedByName || 'Anonymous'} on {formatDateTime(slot.createdAt)}
                       </div>
                     </div>
                     
