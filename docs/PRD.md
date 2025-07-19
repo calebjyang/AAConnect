@@ -240,13 +240,18 @@ The carpool system provides comprehensive ride coordination for afterevents with
 - **Event Detail Modal**: Comprehensive event information with Google Calendar integration
 - **Past Events Display**: Historical event viewing with visual distinction
 
-### 🛠 Admin Dashboard - COMPLETED ✅
+### 🛠 Admin Dashboard - PARTIALLY COMPLETED ✅
 - Protected `/admin` route
 - CRUD access for events
 - **Advanced Carpool Management**: Drag-and-drop interface with real-time validation
 - **Assignment Statistics**: Live metrics and success rates
 - **Export Functionality**: CSV export for assignments and raw data
-- Apartment assignment tools
+- **Apartment Management**: Create, edit, and assign apartments to members
+- **Afterevent Week Configuration**: Set and manage current afterevent week
+
+#### 🚧 In Progress / Planned Features:
+- **User Management**: Tools to manage users, assign roles, and view user data (placeholder implemented)
+- **Analytics Dashboard**: Data visualization, metrics, and reporting tools (placeholder implemented)
 
 ### 🏠 Apartment Availability Wall - COMPLETED ✅
 
@@ -321,6 +326,8 @@ The apartment availability system enables members to post and discover open time
 - "I want to manage apartment membership." ✅
 - "I want to keep the hangout wall clean and up-to-date." ✅
 - "I want better carpool matching that considers grade and gender for community building." ✅
+- "I want to manage user accounts and roles." 🚧 (planned)
+- "I want to view analytics and usage statistics." 🚧 (planned)
 
 ---
 
