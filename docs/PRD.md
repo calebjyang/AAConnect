@@ -1,6 +1,6 @@
 # 📘 AAConnect – Product Requirements Document (PRD)
 
-**Version:** 1.9  
+**Version:** 2.0  
 **Last Updated:** July 2025
 
 ---
@@ -350,13 +350,16 @@ The apartment availability system enables members to post and discover open time
 - **Next.js 15**: React framework with App Router
 - **TypeScript**: Type-safe development
 - **Tailwind CSS**: Utility-first styling
+- **Shadcn UI**: Modern component library with Radix UI primitives
 - **@dnd-kit**: Modern drag-and-drop library
 - **Vercel**: Deployment platform with native Next.js support
+- **Capacitor**: Cross-platform native deployment (iOS/Android)
 - **Firebase SDK**: Real-time database integration
 
 ### Backend
-- **Firebase Auth**: Google OAuth authentication
+- **Firebase Auth**: Google OAuth authentication with cross-platform support
 - **Firestore**: NoSQL database for events and user data
+- **Cross-Platform Firebase**: Unified abstraction layer for web and native platforms
 - **Cloud Functions**: Serverless backend logic (future)
 
 ### Development Tools
@@ -369,4 +372,5 @@ The apartment availability system enables members to post and discover open time
 - **Accessibility**: WCAG 2.2 AA compliance
 - **Performance**: Fast loading with optimized bundles
 - **Code Quality**: Comprehensive linting and type safety
-- **Deployment**: Vercel with automatic Git integration and preview deployments
+- **Cross-Platform Testing**: Comprehensive testing across web, iOS, and Android
+- **Deployment**: Vercel (web) with automatic Git integration and Capacitor (native) deployment
