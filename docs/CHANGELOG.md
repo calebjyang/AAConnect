@@ -1,199 +1,103 @@
 # 🕘 Changelog
 
+## v1.0.11 – July 2025
+- **Carpool Management Restoration** 🔧
+  - Restored working carpool management from commit 01f1d3d
+  - Fixed "Edit Assignments" and "Test Assignment" buttons
+  - Updated Firebase imports to use abstraction layer
+  - Resolved type errors in CarpoolSignupsList
+
+## v1.0.10 – July 2025
+- **Cross-Platform Native Deployment** 📱
+  - Added Capacitor integration for iOS/Android native apps
+  - Implemented cross-platform Firebase abstraction layer
+  - Resolved CORS issues on native platforms
+  - Fixed Firebase initialization timing in iOS AppDelegate
+  - Removed server-side dependencies for static deployment
+
+## v1.0.9 – July 2025
+- **UI/UX Enhancements**
+  - Redesigned apartment availability tag selector (3x2 grid, 6 tags)
+  - Integrated Shadcn UI component library
+  - Fixed import paths and cleaned up unused code
+  - All tests passing, linter warnings only
+
+## v1.0.8 – July 2025
+- **Collection Name Mismatch Fix** 🔧
+  - Fixed admin dashboard not showing ride signups
+  - Unified collection usage: both public and admin use `rides` collection
+  - Resolved merge conflicts and cleaned up imports
+
 ## v1.0.7 – July 2025
-- **Critical Bug Fix: Carpool Management Restoration** 🔧
-  - Restored working carpool management functionality from commit 01f1d3d
-  - Fixed "Edit Assignments" button not activating drag-and-drop mode
-  - Resolved "Test Assignment" button functionality
-  - Updated Firebase imports to use abstraction layer instead of direct SDK
-  - Fixed type errors in CarpoolSignupsList component
-  - All carpool features now fully functional: test assignments, edit assignments, drag-and-drop, save/load, export
+- **Authentication & Styling Fixes** 🔐
+  - Fixed sign in button styling with proper brand colors and contrast
+  - Resolved apartment availability posting errors (charAt undefined)
+  - Add null safety for postedByName fields across components
+  - Update Firebase auth domain configuration lesson in docs
+  - Clean up README environment setup section
+  - Ensure proper user data handling in availability management
 
 ## v1.0.6 – July 2025
-- **Cross-Platform Native Deployment** 📱
-  - **iOS/Android Native Support**: Added Capacitor integration for native mobile deployment
-  - **Cross-Platform Firebase Integration**: Resolved CORS issues by implementing platform-specific Firebase APIs
-  - **Firebase Abstraction Layer**: Created unified interface for web and native platforms
-  - **iOS Firebase Initialization**: Fixed timing issues in AppDelegate for proper Firebase setup
-  - **Capacitor Firebase Plugins**: Integrated @capacitor-firebase/app, @capacitor-firebase/firestore, @capacitor-firebase/authentication
-  - **Platform Detection**: Automatic detection of web vs native environment
-  - **In-Memory Filtering**: Advanced queries handled with client-side filtering on native platforms
-  - **Static Export Compatibility**: Removed server-side dependencies for static deployment
-
-### 🛠 Technical Improvements
-- **CORS Resolution**: Eliminated CORS issues on native platforms through cross-platform Firebase integration
-- **Bundle Optimization**: Reduced bundle size by removing server-side Firebase Admin SDK
-- **Build System**: Updated for Capacitor build process with 8318 build targets
-- **Error Handling**: Robust error handling for missing Firebase Web SDK or native plugins
+- **Authentication Redirect Fix** 🔧
+  - Fixed Firebase auth domain configuration issue
+  - Resolved localhost authentication redirect problems
+  - Simplified Firebase configuration for better reliability
+  - Added comprehensive error handling for authentication flow
 
 ## v1.0.5 – July 2025
-- **UI/UX Enhancements**
-  - Apartment availability tag selector redesigned: now uses a 3x2 grid with 6 tags (Snacks, Games, Study, Yap, Quiet, Prayer)
-  - Tag selector buttons are visually balanced, centered, and accessible
-  - Apartment cards now display only selected tags with correct icons
-  - Improved modal and card layouts for clarity and compactness
-- **Technical Improvements**
-  - Integrated Shadcn UI component library for modern, reusable UI primitives
-  - Removed legacy/temp files and unused code from apartment-hosting integration
-  - Fixed import path for use-toast to resolve module errors
-  - Cleaned up unused npm processes and ensured clean workspace
-- **Testing & Linting**
-  - All unit tests pass
-  - Linter warnings remain (mostly unused variables), but no critical errors
+- **Documentation & Code Quality** 📚
+  - Updated CHANGELOG formatting and version numbering
+  - Added Firebase auth domain configuration lesson to bugfixes
+  - Improved code documentation and error handling
+  - Enhanced development workflow consistency
 
 ## v1.0.4 – July 2025
-- **Critical Bug Fix: Collection Name Mismatch** 🔧
-  - Fixed admin dashboard not displaying ride signups due to collection name mismatch
-  - Unified collection usage: both public form and admin dashboard now use `rides` collection
-  - Resolved merge conflicts and cleaned up unused imports
-  - Improved code consistency and maintainability
-  - Enhanced error handling for Firestore operations
+- **Development Environment Cleanup** 🧹
+  - Killed all active local deployments for clean state
+  - Ensured consistent development server management
+  - Improved build and deployment processes
+  - Enhanced development workflow reliability
 
+## v1.0.3 – June 2025
+- **Google OAuth Authentication** 🔐
+  - Enhanced Firebase Auth with Google OAuth
+  - Admin role verification with Firestore
+  - Protected routes for users and admins
+  - User profile component with sign out
+  - Loading states and improved UX
 
+## v1.0.2 – June 2025
+- **Landing Page (v1)** ✨
+  - Hero section with dual CTAs (View Events, Find Rides)
+  - Social media links (Instagram, Facebook, Discord, Linktree)
+  - Email subscription form
+  - Quick Actions section with Events, Rides, Community cards
+  - Upcoming Events from Firebase
+  - Mobile-first responsive design
 
-## v1.0.3 – July 2025
-- **Google OAuth Authentication System** 🔐
-  - Enhanced Firebase Auth integration with Google OAuth
-  - Improved error handling and user feedback
-  - Admin role verification with Firestore integration
-  - User profile component with sign out functionality
-  - Protected routes for both regular users and admins
-  - Loading states and better UX throughout auth flow
-  - AdminRoute component for admin-only page protection
-  - AuthTest component for debugging authentication
+## v1.0.1 – June 2025
+- **Core Features Implementation**
+  - Event Details page
+  - Carpool Algorithm (v1)
+  - Admin Dashboard for carpooling
 
-## v1.0.2 – July 2025
-- **Landing Page (v1) Completed** ✨
-  - Hero section with "Welcome to AAConnect 👋" headline
-  - Centered card layout with dual CTAs (View Events, Find Rides)
-  - Social media links section with Instagram, Facebook, Discord, and Linktree
-  - Email subscription form for community updates
-  - Quick Actions section with Events Calendar, Rides, and Community cards
-  - Upcoming Events section with dynamic loading from Firebase
-  - Responsive design optimized for mobile-first PWA
-  - Accessibility improvements (WCAG 2.2 AA compliant)
+## v1.0.0 – June 2025
+- **Initial Project Setup**
+  - Initial PRD and MVP scope
+  - Scaffolding: event calendar, admin dashboard, carpool rides form
 
-## v1.0.1 – July 2025
-- Event Details page implemented
-- Carpool Algorithm (v1) implemented
-- Admin Dashboard updated for carpooling
+---
 
-## v1.0 – June 2025
-- Initial PRD and MVP scope defined
-- Scaffolding:
-    - event calendar
-    - admin dashboard
-    - carpool rides form
+## ✨ New Features
+- Apartment Availability Wall
+- iOS Deployment
+- Admin Dashboard Improvements
 
-## Upcoming
-- Apartment Availability Wall feature
-  - Admins can seed apartment names and assign members
-  - Members can join one apartment and post hangout windows
-- Carpool Rides Manual Editing
-- Unit Tests
-- Deploy to Vercel
+## 🚀 Upcoming Features
 - Weekly Recap
-
-### 🚀 New Features
-- **Interactive Carpool Editing**: Added drag-and-drop interface for admins to manually adjust carpool assignments
-- **Real-time Assignment Statistics**: Live metrics showing assignment success rates and capacity utilization
-- **Enhanced Admin Controls**: Save/cancel operations for carpool editing with visual feedback
-- **Capacity Validation**: Prevents overloading vehicles during manual assignment adjustments
-
-### 🛠 Technical Improvements
-- **Modern Drag-and-Drop**: Upgraded to @dnd-kit for React 19 compatibility
-- **Type Safety**: Improved TypeScript types for carpool assignment operations
-- **Performance**: Optimized drag-and-drop operations with proper state management
-
-### 🎨 UI/UX Enhancements
-- **Visual Feedback**: Clear indicators for full cars and valid/invalid drop zones
-- **Intuitive Interface**: Drag-and-drop between cars and unassigned riders
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
+- Android Deployment
 
 ---
 
-## [v1.3] - January 2025
-
-### 🚀 New Features
-- **Enhanced Events Page**: Added calendar view toggle with monthly calendar display
-- **Event Detail Modal**: Improved event information display with better formatting
-- **Google Calendar Integration**: Added "Add to Calendar" functionality for events
-- **Better Navigation**: Improved event filtering and display options
-
-### 🛠 Technical Improvements
-- **Image Optimization**: Fixed Google profile image loading with proper domain configuration
-- **Type Safety**: Resolved TypeScript errors and improved type definitions
-- **Code Quality**: Fixed ESLint warnings and improved code consistency
-
-### 🎨 UI/UX Enhancements
-- **Calendar View**: Monthly calendar with event indicators and today highlighting
-- **Responsive Design**: Better mobile experience for calendar and list views
-- **Visual Polish**: Improved spacing, colors, and overall visual consistency
-
----
-
-## [v1.2] - January 2025
-
-### 🚀 New Features
-- **Complete Authentication System**: Google OAuth integration with admin role management
-- **Protected Routes**: Automatic redirection and admin-only access control
-- **User Profile Management**: Profile display and sign out functionality
-- **Admin Dashboard**: Comprehensive admin interface with event and ride management
-- **Carpool Algorithm**: Smart assignment system with location-based optimization
-- **Assignment Statistics**: Real-time metrics and CSV export functionality
-
-### 🛠 Technical Improvements
-- **Firebase Integration**: Complete backend setup with Firestore and Auth
-- **Type Safety**: Full TypeScript implementation with proper type definitions
-- **Error Handling**: Comprehensive error management and user feedback
-- **State Management**: Proper React state handling with loading states
-
-### 🎨 UI/UX Enhancements
-- **Admin Interface**: Clean, intuitive admin dashboard with tabbed navigation
-- **Assignment Display**: Clear visual representation of carpool assignments
-- **Responsive Design**: Mobile-first approach with consistent styling
-- **Loading States**: Smooth user experience with proper loading indicators
-
----
-
-## [v1.1] - January 2025
-
-### 🚀 New Features
-- **Enhanced Hero Section**: New welcoming design with dual call-to-action buttons
-- **Social Media Integration**: Direct links to Instagram, Facebook, Discord, and Linktree
-- **Email Subscription**: Community newsletter signup form
-- **Quick Actions**: Three main action cards for easy navigation
-- **Upcoming Events**: Dynamic display of upcoming events from Firebase
-
-### 🎨 UI/UX Enhancements
-- **Modern Design**: Clean, centered card layout with improved visual hierarchy
-- **Brand Consistency**: Consistent use of AACF brand colors throughout
-- **Mobile Optimization**: Enhanced mobile experience with better responsive design
-- **Accessibility**: WCAG 2.2 AA compliant with proper ARIA labels
-
-### 🛠 Technical Improvements
-- **Performance**: Optimized loading and rendering for better user experience
-- **Code Quality**: Improved component structure and reusability
-- **SEO**: Better meta tags and semantic HTML structure
-
----
-
-## [v1.0] - January 2025
-
-### 🚀 Initial Release
-- **Landing Page**: Basic homepage with hero section and navigation
-- **Events System**: Event listing and calendar functionality
-- **Basic Authentication**: Google OAuth integration
-- **Admin Interface**: Initial admin dashboard structure
-- **Carpool System**: Basic ride signup and assignment functionality
-
-### 🛠 Technical Foundation
-- **Next.js Setup**: React-based PWA with TypeScript
-- **Firebase Backend**: Firestore database and authentication
-- **Tailwind CSS**: Utility-first styling framework
-- **Responsive Design**: Mobile-first approach
-
-### 📱 PWA Features
-- **Progressive Web App**: Installable on mobile devices
-- **Offline Support**: Basic offline functionality
-- **Fast Loading**: Optimized performance and caching
+**Document Version**: 2.0 (Condensed)  
+**Focus**: Key changes and specific fixes
