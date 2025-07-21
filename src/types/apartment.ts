@@ -40,6 +40,7 @@ export interface AvailabilitySlot {
   createdAt: Timestamp;
   updatedAt: Timestamp;
   isActive: boolean;
+  joinedUsers?: string[]; // Optional RSVP/Join support
 }
 
 // Form data for creating/editing apartments
@@ -57,6 +58,8 @@ export interface AvailabilityFormData {
   description: string;
   maxGuests?: number | null;
   tags?: string[];
+  apartmentName?: string; // Allow apartmentName for slot creation
+  joinedUsers?: string[]; // Allow initializing joinedUsers array
 }
 
 // Admin apartment management state

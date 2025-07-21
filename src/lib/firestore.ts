@@ -1,4 +1,6 @@
 import { Capacitor } from '@capacitor/core';
+import { getFirestore, doc } from 'firebase/firestore';
+import { getFirebaseApp } from './firebaseClient';
 
 const isNative = Capacitor.isNativePlatform();
 
@@ -73,8 +75,9 @@ class FirestoreManager {
     if (!isNative) {
       try {
         const { getFirestore, doc, getDoc: getDocWeb } = await import('firebase/firestore');
-        const { getApp } = await import('firebase/app');
-        const db = getFirestore(getApp());
+        const app = getFirebaseApp();
+        if (!app) throw new Error('Firebase app is not initialized. Please check your Firebase config.');
+        const db = getFirestore(app);
         const docRef = doc(db, path);
         const snapshot = await getDocWeb(docRef);
         const result = snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } as any : null;
@@ -124,8 +127,9 @@ class FirestoreManager {
     if (!isNative) {
       try {
         const { getFirestore, doc, setDoc: setDocWeb } = await import('firebase/firestore');
-        const { getApp } = await import('firebase/app');
-        const db = getFirestore(getApp());
+        const app = getFirebaseApp();
+        if (!app) throw new Error('Firebase app is not initialized. Please check your Firebase config.');
+        const db = getFirestore(app);
         const docRef = doc(db, path);
         await setDocWeb(docRef, data);
         return;
@@ -151,15 +155,30 @@ class FirestoreManager {
   async updateDocument(path: string, data: any): Promise<void> {
     if (!isNative) {
       try {
-        const { getFirestore, doc, updateDoc: updateDocWeb } = await import('firebase/firestore');
-        const { getApp } = await import('firebase/app');
-        const db = getFirestore(getApp());
+        const { getFirestore, doc, updateDoc: updateDocWeb, arrayUnion } = await import('firebase/firestore');
+        const app = getFirebaseApp();
+        if (!app) throw new Error('Firebase app is not initialized. Please check your Firebase config.');
+        const db = getFirestore(app);
         const docRef = doc(db, path);
-        await updateDocWeb(docRef, data);
+        
+        // Handle arrayUnion operations
+        const processedData = { ...data };
+        for (const [key, value] of Object.entries(processedData)) {
+          if (value && typeof value === 'object' && 'arrayUnion' in value && Array.isArray(value.arrayUnion)) {
+            processedData[key] = arrayUnion(...value.arrayUnion);
+          }
+        }
+        
+        await updateDocWeb(docRef, processedData);
         return;
       } catch (error) {
         console.error('Firebase Web SDK not available for updateDocument:', error);
-        throw new Error('Firebase Web SDK not available. Please check your configuration.');
+        // Log the actual error details for debugging
+        if (error instanceof Error) {
+          console.error('Actual error message:', error.message);
+          console.error('Error name:', error.name);
+        }
+        throw new Error(`Firestore update failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     }
 
@@ -180,8 +199,9 @@ class FirestoreManager {
     if (!isNative) {
       try {
         const { getFirestore, doc, deleteDoc: deleteDocWeb } = await import('firebase/firestore');
-        const { getApp } = await import('firebase/app');
-        const db = getFirestore(getApp());
+        const app = getFirebaseApp();
+        if (!app) throw new Error('Firebase app is not initialized. Please check your Firebase config.');
+        const db = getFirestore(app);
         const docRef = doc(db, path);
         await deleteDocWeb(docRef);
         return;
@@ -208,8 +228,9 @@ class FirestoreManager {
     if (!isNative) {
       try {
         const { getFirestore, collection, query, getDocs: getDocsWeb } = await import('firebase/firestore');
-        const { getApp } = await import('firebase/app');
-        const db = getFirestore(getApp());
+        const app = getFirebaseApp();
+        if (!app) throw new Error('Firebase app is not initialized. Please check your Firebase config.');
+        const db = getFirestore(app);
         const colRef = collection(db, path);
         const q = constraints.length ? query(colRef, ...constraints) : colRef;
         const snapshot = await getDocsWeb(q);
@@ -283,8 +304,9 @@ class FirestoreManager {
     if (!isNative) {
       try {
         const { getFirestore, collection, addDoc: addDocWeb } = await import('firebase/firestore');
-        const { getApp } = await import('firebase/app');
-        const db = getFirestore(getApp());
+        const app = getFirebaseApp();
+        if (!app) throw new Error('Firebase app is not initialized. Please check your Firebase config.');
+        const db = getFirestore(app);
         const colRef = collection(db, path);
         const docRef = await addDocWeb(colRef, data);
         return docRef.id;
@@ -376,3 +398,13 @@ export const whereQuery = async (fieldPath: string, opStr: any, value: any) => {
     throw new Error('Firebase Web SDK not available. Please check your configuration.');
   }
 }; 
+
+/**
+ * Adds a user to the joinedUsers array for a given slot (hangout).
+ */
+export async function joinHangout(slotId: string, userId: string) {
+  // Use the exported updateDoc helper, which handles both web and native
+  await updateDoc(`availabilitySlots/${slotId}`, {
+    joinedUsers: { arrayUnion: [userId] },
+  });
+} 

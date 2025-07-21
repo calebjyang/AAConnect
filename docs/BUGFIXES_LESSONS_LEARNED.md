@@ -119,6 +119,11 @@ const cleanData = Object.fromEntries(
 
 ---
 
+**2025-07-29**
+*When adding new required fields to Firestore documents, always delete or migrate old documents that lack these fields. Leaving outdated documents can cause runtime errors and permission issues due to schema mismatches.*
+
+---
+
 ## 🚀 Best Practices Checklist
 
 ### **Before Deploying**

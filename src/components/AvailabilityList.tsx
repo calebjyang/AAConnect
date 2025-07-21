@@ -2,6 +2,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import React from 'react';
 import type { AvailabilitySlot } from '@/types/apartment';
+import { toDateSafe } from '@/lib/utils';
 
 interface AvailabilityListProps {
   slots: AvailabilitySlot[];
@@ -37,22 +38,22 @@ const AvailabilityList = React.memo(function AvailabilityList({
     // Apply time filter
     if (filter === 'upcoming') {
       filtered = slots.filter(slot => {
-        const startTime = slot.startTime.toDate ? slot.startTime.toDate() : new Date(slot.startTime.seconds * 1000);
-        return startTime > now;
+        const startTime = slot.startTime ? toDateSafe(slot.startTime) : null;
+        return startTime ? startTime > now : false;
       });
     } else if (filter === 'past') {
       filtered = slots.filter(slot => {
-        const endTime = slot.endTime.toDate ? slot.endTime.toDate() : new Date(slot.endTime.seconds * 1000);
-        return endTime < now;
+        const endTime = slot.endTime ? toDateSafe(slot.endTime) : null;
+        return endTime ? endTime < now : false;
       });
     }
 
     // Apply sorting
     return filtered.sort((a, b) => {
       if (sortBy === 'time') {
-        const aTime = a.startTime.toDate ? a.startTime.toDate() : new Date(a.startTime.seconds * 1000);
-        const bTime = b.startTime.toDate ? b.startTime.toDate() : new Date(b.startTime.seconds * 1000);
-        return aTime.getTime() - bTime.getTime();
+        const aTime = a.startTime ? toDateSafe(a.startTime) : null;
+        const bTime = b.startTime ? toDateSafe(b.startTime) : null;
+        return aTime ? bTime ? aTime.getTime() - bTime.getTime() : 0 : 0;
       } else {
         return a.apartmentName.localeCompare(b.apartmentName);
       }
@@ -61,40 +62,40 @@ const AvailabilityList = React.memo(function AvailabilityList({
 
   const formatDateTime = (timestamp: any) => {
     if (!timestamp) return 'N/A';
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleString('en-US', {
+    const date = timestamp ? toDateSafe(timestamp) : null;
+    return date ? date.toLocaleString('en-US', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
-    });
+    }) : 'N/A';
   };
 
   const formatTimeRange = (startTime: any, endTime: any) => {
-    const start = startTime.toDate ? startTime.toDate() : new Date(startTime);
-    const end = endTime.toDate ? endTime.toDate() : new Date(endTime);
+    const start = startTime ? toDateSafe(startTime) : null;
+    const end = endTime ? toDateSafe(endTime) : null;
     
-    const startStr = start.toLocaleTimeString('en-US', {
+    const startStr = start ? start.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
-    });
-    const endStr = end.toLocaleTimeString('en-US', {
+    }) : 'N/A';
+    const endStr = end ? end.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
-    });
+    }) : 'N/A';
     
     return `${startStr} - ${endStr}`;
   };
 
   const isUpcoming = (slot: AvailabilitySlot) => {
-    const startTime = slot.startTime.toDate ? slot.startTime.toDate() : new Date(slot.startTime.seconds * 1000);
-    return startTime > new Date();
+    const startTime = slot.startTime ? toDateSafe(slot.startTime) : null;
+    return startTime ? startTime > new Date() : false;
   };
 
   const isPast = (slot: AvailabilitySlot) => {
-    const endTime = slot.endTime.toDate ? slot.endTime.toDate() : new Date(slot.endTime.seconds * 1000);
-    return endTime < new Date();
+    const endTime = slot.endTime ? toDateSafe(slot.endTime) : null;
+    return endTime ? endTime < new Date() : false;
   };
 
   if (loading) {

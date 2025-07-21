@@ -27,6 +27,8 @@ import {
   Heart,
   Calendar,
 } from "lucide-react";
+import { toDateSafe } from '@/lib/utils';
+import { joinHangout } from '@/lib/firestore';
 
 export default function ApartmentsPage() {
   const { user } = useAuth();
@@ -40,6 +42,7 @@ export default function ApartmentsPage() {
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const [optimisticSlots, setOptimisticSlots] = useState<any[]>([]);
 
   const handleCreateAvailability = async (availabilityData: AvailabilityFormData) => {
     if (!user || !userApartment) return;
@@ -48,6 +51,8 @@ export default function ApartmentsPage() {
       {
         ...availabilityData,
         apartmentId: userApartment.id,
+        apartmentName: userApartment.name, // Ensure apartmentName is included
+        joinedUsers: [], // Always initialize joinedUsers as an empty array
       },
       user.uid,
       user.displayName || user.email?.split('@')[0] || 'Anonymous',
@@ -79,6 +84,9 @@ export default function ApartmentsPage() {
       </div>
     );
   }
+
+  // Use optimisticSlots if set, otherwise slots from useAvailabilityManagement
+  const displayedSlots = optimisticSlots.length > 0 ? optimisticSlots : slots;
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -221,129 +229,160 @@ export default function ApartmentsPage() {
               </TabsList>
 
               <TabsContent value="all" className="space-y-6">
-                {slots.length > 0 ? (
+                {displayedSlots.length > 0 ? (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between mb-4">
                       <p className="text-slate-600">
-                        <span className="font-semibold text-slate-900">{slots.length}</span> hangout spots
+                        <span className="font-semibold text-slate-900">{displayedSlots.length}</span> hangout spots
                         found
                       </p>
                     </div>
 
-                    {slots.map((slot) => (
-                      <Card
-                        key={slot.id}
-                        className="border-slate-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white overflow-hidden group"
-                      >
-                        <CardContent className="p-6">
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex items-start space-x-4 flex-1">
-                              <div className="h-12 w-12 border-2 border-slate-200 group-hover:border-blue-300 transition-colors rounded-full bg-gradient-to-r from-blue-400 to-purple-400 text-white flex items-center justify-center font-semibold text-lg">
-                                {slot.postedByName?.charAt(0) || '?'}
-                              </div>
-
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-2 mb-1">
-                                  <h3 className="font-bold text-lg text-slate-900">{slot.apartmentName}</h3>
-                                  <Badge className="bg-blue-100 text-blue-800 border-0">
-                                    😌 chill
-                                  </Badge>
-                                  <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
-                                    Upcoming
-                                  </Badge>
+                    {displayedSlots.map((slot) => {
+                      const hasJoined = slot.joinedUsers && user && slot.joinedUsers.includes(user.uid);
+                      const attendeeCount = slot.joinedUsers ? slot.joinedUsers.length : 0;
+                      return (
+                        <Card
+                          key={slot.id}
+                          className="border-slate-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white overflow-hidden group"
+                        >
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex items-start space-x-4 flex-1">
+                                <div className="h-12 w-12 border-2 border-slate-200 group-hover:border-blue-300 transition-colors rounded-full bg-gradient-to-r from-blue-400 to-purple-400 text-white flex items-center justify-center font-semibold text-lg">
+                                  {slot.postedByName?.charAt(0) || '?'}
                                 </div>
 
-                                <p className="text-slate-700 mb-3 text-base">{slot.description || "Come hang out and enjoy snacks and play games! 🎮🍕"}</p>
+                                <div className="flex-1">
+                                  <div className="flex items-center space-x-2 mb-1">
+                                    <h3 className="font-bold text-lg text-slate-900">{slot.apartmentName}</h3>
+                                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+                                      Upcoming
+                                    </Badge>
+                                  </div>
 
-                                <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600 mb-3">
-                                  <div className="flex items-center">
-                                    <Calendar className="h-4 w-4 mr-1 text-blue-500" />
-                                    <span className="font-medium">
-                                      {slot.startTime.toDate().toLocaleDateString()}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center">
-                                    <Clock className="h-4 w-4 mr-1 text-purple-500" />
-                                    <span>
-                                      {slot.startTime.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {slot.endTime.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center">
-                                    <Users className="h-4 w-4 mr-1 text-green-500" />
-                                    <span>
-                                      0/{slot.maxGuests || 8} people
-                                    </span>
-                                  </div>
-                                </div>
+                                  <p className="text-slate-700 mb-3 text-base">{slot.description || "Come hang out and enjoy snacks and play games! 🎮🍕"}</p>
 
-                                <div className="flex flex-wrap gap-2 mb-3">
-                                  {slot.tags && slot.tags.length > 0 && slot.tags.map((tag) => {
-                                    const tagMap = {
-                                      snacks: { icon: '🍿', label: 'snacks' },
-                                      games: { icon: '🎲', label: 'games' },
-                                      study: { icon: '📚', label: 'study' },
-                                      yap: { icon: '🗣️', label: 'yap' },
-                                      quiet: { icon: '🤫', label: 'quiet' },
-                                      prayer: { icon: '🙏', label: 'prayer' },
-                                      jam: { icon: '🎸', label: 'jam sesh' },
-                                    };
-                                    const tagInfo = (tag in tagMap)
-                                      ? tagMap[tag as keyof typeof tagMap]
-                                      : { icon: '🏠', label: tag };
-                                    return (
-                                      <Badge
-                                        key={tag}
-                                        variant="outline"
-                                        className="bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 flex items-center gap-1"
-                                      >
-                                        <span>{tagInfo.icon}</span> {tagInfo.label}
-                                      </Badge>
-                                    );
-                                  })}
-                                </div>
-
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center text-sm text-slate-500">
-                                    <span>
-                                      Posted by {slot.postedByName || 'Anonymous'} • {slot.createdAt.toDate().toLocaleDateString()}
-                                    </span>
+                                  <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600 mb-3">
+                                    <div className="flex items-center">
+                                      <Calendar className="h-4 w-4 mr-1 text-blue-500" />
+                                      <span className="font-medium">
+                                        {slot.startTime ? toDateSafe(slot.startTime)?.toLocaleDateString() ?? 'No date' : 'No date'}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center">
+                                      <Clock className="h-4 w-4 mr-1 text-purple-500" />
+                                      <span>
+                                        {slot.startTime && slot.endTime ? `${toDateSafe(slot.startTime)?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) ?? 'No time'} - ${toDateSafe(slot.endTime)?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) ?? 'No time'}` : 'No time'}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center">
+                                      <Users className="h-4 w-4 mr-1 text-green-500" />
+                                      <span>
+                                        {attendeeCount}/{slot.maxGuests || 8} people
+                                      </span>
+                                    </div>
                                   </div>
-                                  <div className="flex items-center space-x-2">
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="flex items-center gap-1 px-4 py-2 rounded-full font-semibold transition-colors border-pink-200 text-pink-600 hover:bg-pink-50"
-                                      disabled
-                                    >
-                                      <Heart className="h-4 w-4" />
-                                      Interested
-                                    </Button>
-                                    {slot.postedBy === user?.uid && (
+
+                                  <div className="flex flex-wrap gap-2 mb-3">
+                                    {slot.tags && slot.tags.length > 0 && slot.tags.map((tag: string) => {
+                                      const tagMap = {
+                                        snacks: { icon: '🍿', label: 'snacks' },
+                                        games: { icon: '🎲', label: 'games' },
+                                        study: { icon: '📚', label: 'study' },
+                                        yap: { icon: '🗣️', label: 'yap' },
+                                        quiet: { icon: '🤫', label: 'quiet' },
+                                        prayer: { icon: '🙏', label: 'prayer' },
+                                        jam: { icon: '🎸', label: 'jam sesh' },
+                                      };
+                                      const tagInfo = (tag in tagMap)
+                                        ? tagMap[tag as keyof typeof tagMap]
+                                        : { icon: '🏠', label: tag };
+                                      return (
+                                        <Badge
+                                          key={tag}
+                                          variant="outline"
+                                          className="bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 flex items-center gap-1"
+                                        >
+                                          <span>{tagInfo.icon}</span> {tagInfo.label}
+                                        </Badge>
+                                      );
+                                    })}
+                                  </div>
+
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center text-sm text-slate-500">
+                                      <span>
+                                        Posted by {slot.postedByName || 'Anonymous'} • {slot.createdAt ? toDateSafe(slot.createdAt)?.toLocaleDateString() ?? 'Unknown' : 'Unknown'}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
                                       <Button
-                                        variant="ghost"
+                                        variant="outline"
                                         size="sm"
-                                        className="text-red-500 hover:bg-red-50"
-                                        onClick={() => handleDeleteAvailability(slot.id)}
+                                        className="flex items-center gap-1 px-4 py-2 rounded-full font-semibold transition-colors border-pink-200 text-pink-600 hover:bg-pink-50"
+                                        disabled
                                       >
-                                        <X className="h-4 w-4" />
+                                        <Heart className="h-4 w-4" />
+                                        Interested
                                       </Button>
-                                    )}
+                                      {slot.postedBy === user?.uid && (
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="text-red-500 hover:bg-red-50"
+                                          onClick={() => handleDeleteAvailability(slot.id)}
+                                        >
+                                          <X className="h-4 w-4" />
+                                        </Button>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
 
-                          {slot.postedBy !== user?.uid && (
-                            <div className="mt-4 pt-4 border-t border-slate-100">
-                              <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold">
-                                🎉 Join This Hangout
-                              </Button>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
+                            {slot.postedBy !== user?.uid && (
+                              <div className="mt-4 pt-4 border-t border-slate-100">
+                                <Button
+                                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold"
+                                  onClick={async () => {
+                                    try {
+                                      console.log('Join button clicked!');
+                                      console.log('Current user:', user);
+                                      console.log('Slot before update:', slot);
+                                      const payload = { joinedUsers: { arrayUnion: [user.uid] } };
+                                      console.log('Update payload:', payload);
+                                      if (!hasJoined && user) {
+                                        await joinHangout(slot.id, user.uid);
+                                        // Optimistically update the slot in state
+                                        setOptimisticSlots((prev) =>
+                                          slots.map((s) =>
+                                            s.id === slot.id
+                                              ? { ...s, joinedUsers: [...(s.joinedUsers || []), user.uid] }
+                                              : s
+                                          )
+                                        );
+                                        toast({
+                                          title: '🎉 Joined Hangout!',
+                                          description: 'You’ve successfully joined this hangout. We\'ll let the host know!',
+                                          variant: 'default',
+                                        });
+                                      }
+                                    } catch (err) {
+                                      console.error('Error joining hangout:', err);
+                                    }
+                                  }}
+                                  disabled={hasJoined}
+                                >
+                                  {hasJoined ? 'Joined' : '🎉 Join This Hangout'}
+                                </Button>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="text-center py-16">
@@ -387,12 +426,12 @@ export default function ApartmentsPage() {
                               <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600 mb-3">
                                 <div className="flex items-center">
                                   <Calendar className="h-4 w-4 mr-1 text-blue-500" />
-                                  <span>{slot.startTime.toDate().toLocaleDateString()}</span>
+                                  <span>{slot.startTime ? toDateSafe(slot.startTime)?.toLocaleDateString() ?? 'No date' : 'No date'}</span>
                                 </div>
                                 <div className="flex items-center">
                                   <Clock className="h-4 w-4 mr-1 text-purple-500" />
                                   <span>
-                                    {slot.startTime.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {slot.endTime.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    {slot.startTime && slot.endTime ? `${toDateSafe(slot.startTime)?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) ?? 'No time'} - ${toDateSafe(slot.endTime)?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) ?? 'No time'}` : 'No time'}
                                   </span>
                                 </div>
                                 <div className="flex items-center">
@@ -405,7 +444,7 @@ export default function ApartmentsPage() {
 
                               <div className="flex items-center justify-between">
                                 <div className="text-sm text-slate-500">
-                                  Posted {slot.createdAt.toDate().toLocaleDateString()}
+                                  Posted {slot.createdAt ? toDateSafe(slot.createdAt)?.toLocaleDateString() ?? 'Unknown' : 'Unknown'}
                                 </div>
                                 <Button
                                   variant="ghost"
