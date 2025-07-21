@@ -4,6 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import type { Apartment, ApartmentMember } from '@/types/apartment';
 import { format } from 'date-fns';
+import { toDateSafe } from '@/lib/utils';
 
 interface ApartmentListProps {
   apartments: Apartment[];
@@ -29,8 +30,8 @@ const ApartmentList = React.memo(function ApartmentList({
   }, [expandedApartment]);
 
   const formatDate = useCallback((timestamp: any) => {
-    if (!timestamp) return 'N/A';
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const date = timestamp ? toDateSafe(timestamp) : null;
+    if (!date) return 'N/A';
     return format(date, 'MMM d, yyyy');
   }, []);
 

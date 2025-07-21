@@ -25,3 +25,18 @@ export function parseEventDate(date: any): Date | null {
   if (date instanceof Date) return date;
   return null;
 }
+
+/**
+ * Converts a Firestore Timestamp, ISO string, number, or Date to a Date object.
+ * Returns null if the value is invalid or missing.
+ */
+export function toDateSafe(value: any): Date | null {
+  if (!value) return null;
+  if (typeof value === 'string' || typeof value === 'number' || value instanceof Date) {
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  if (typeof value.toDate === 'function') return value.toDate();
+  if (value.seconds) return new Date(value.seconds * 1000);
+  return null;
+}
