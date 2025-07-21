@@ -5,7 +5,10 @@ import { useUserApartment } from '@/hooks/useUserApartment';
 import { useAvailabilityManagement } from '@/hooks/useAvailabilityManagement';
 import { useAuth } from '@/lib/useAuth';
 import AvailabilityForm from '@/components/AvailabilityForm';
+import ApartmentForm from '@/components/admin/ApartmentManagement/ApartmentForm';
 import type { AvailabilityFormData } from '@/types/apartment';
+import { updateDoc } from '@/lib/firestore';
+import type { ApartmentFormData } from '@/types/apartment';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -32,7 +35,7 @@ import { joinHangout } from '@/lib/firestore';
 
 export default function ApartmentsPage() {
   const { user } = useAuth();
-  const { userApartment, loading: userLoading } = useUserApartment();
+  const { userApartment, loading: userLoading, refetch } = useUserApartment();
   const {
     slots,
     createAvailabilitySlot,
@@ -43,6 +46,9 @@ export default function ApartmentsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const [optimisticSlots, setOptimisticSlots] = useState<any[]>([]);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isEditLoading, setIsEditLoading] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
 
   const handleCreateAvailability = async (availabilityData: AvailabilityFormData) => {
     if (!user || !userApartment) return;
@@ -64,6 +70,32 @@ export default function ApartmentsPage() {
   const handleDeleteAvailability = async (slotId: string) => {
     if (confirm('Are you sure you want to delete this availability slot?')) {
       await deleteAvailabilitySlot(slotId);
+    }
+  };
+
+  const handleEditApartment = async (formData: ApartmentFormData) => {
+    if (!userApartment) return;
+    setIsEditLoading(true);
+    setEditError(null);
+    try {
+      await updateDoc(`apartments/${userApartment.id}`, {
+        ...formData,
+        updatedAt: new Date().toISOString(),
+      });
+      setIsEditModalOpen(false);
+      if (typeof window !== 'undefined') {
+        // Optionally show a toast here
+      }
+      // Refetch user apartment data
+      if (typeof refetch === 'function') {
+        refetch();
+      } else if (typeof window !== 'undefined') {
+        window.location.reload(); // fallback
+      }
+    } catch (err: any) {
+      setEditError(err.message || 'Failed to update apartment');
+    } finally {
+      setIsEditLoading(false);
     }
   };
 
@@ -155,9 +187,37 @@ export default function ApartmentsPage() {
                   <Button
                     variant="outline"
                     className="h-10 px-4 text-sm font-semibold border-2 border-slate-300 hover:bg-slate-100 bg-white text-slate-700 flex items-center gap-2 shadow-sm"
+                    onClick={() => setIsEditModalOpen(true)}
                   >
                     <span className="text-base">✏️</span> Edit
                   </Button>
+                  {/* Edit Apartment Modal */}
+                  {isEditModalOpen && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                      <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+                        <div className="p-6">
+                          <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold text-gray-900">Edit Apartment</h3>
+                            <button
+                              onClick={() => setIsEditModalOpen(false)}
+                              className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                          {editError && (
+                            <div className="mb-2 text-sm text-red-600">{editError}</div>
+                          )}
+                          <ApartmentForm
+                            onSubmit={handleEditApartment}
+                            loading={isEditLoading}
+                            initialData={userApartment}
+                            mode="edit"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   <Dialog open={isPostModalOpen} onOpenChange={setIsPostModalOpen}>
                     <DialogTrigger asChild>
                       <Button

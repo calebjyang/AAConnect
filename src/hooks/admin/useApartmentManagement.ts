@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { getCollection, addDocToCollection, updateDoc } from '@/lib/firestore';
+import { getCollection, addDocToCollection, updateDoc, setDoc } from '@/lib/firestore';
 import { Timestamp } from 'firebase/firestore';
 import type { 
   ApartmentFormData,
@@ -143,13 +143,13 @@ export function useApartmentManagement() {
       const members = await getCollection('apartmentMembers');
       const existingMember = members.find((m: any) => m.userId === userId && m.isActive);
       if (existingMember) {
-        // Remove existing membership
-        await updateDoc(`apartmentMembers/${existingMember.id}`, {
+        // Remove existing membership (deactivate by composite ID)
+        await updateDoc(`apartmentMembers/${existingMember.apartmentId}_${userId}`, {
           isActive: false,
           updatedAt: Timestamp.now(),
         });
       }
-      // Create new membership
+      // Create new membership with composite ID
       const memberDoc = {
         apartmentId,
         userId, // <-- This is the UID
@@ -159,7 +159,7 @@ export function useApartmentManagement() {
         joinedAt: Timestamp.now(),
         isActive: true,
       };
-      await addDocToCollection('apartmentMembers', memberDoc);
+      await setDoc(`apartmentMembers/${apartmentId}_${userId}`, memberDoc);
       setState(prev => ({ 
         ...prev, 
         loading: false, 
