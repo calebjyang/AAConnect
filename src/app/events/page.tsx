@@ -102,48 +102,40 @@ function EventDetailModal({ event, onClose }: { event: Event; onClose: () => voi
           </div>
         </div>
 
+        {/* Event Description */}
         {event.description && (
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <p className="text-gray-700 leading-relaxed">{event.description}</p>
+          <div className="mb-8">
+            <p className="text-gray-800 whitespace-pre-line text-base">{event.description}</p>
           </div>
         )}
 
-        <div className="flex flex-col gap-3">
-          <button
-            onClick={createGoogleCalendarEvent}
-            className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition shadow-md"
-          >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
-            </svg>
-            Add to Google Calendar
-          </button>
-
-          {(hasRSVP || hasRides) && (
-            <div className="flex gap-3">
-              {hasRSVP && (
-                <a
-                  href={event.rsvpUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 px-4 py-3 bg-aacf-blue text-white rounded-lg font-semibold hover:bg-blue-700 transition shadow-md text-center"
-                >
-                  RSVP to Event
-                </a>
-              )}
-              {hasRides && (
-                <a
-                  href={event.ridesUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition shadow-md text-center"
-                >
-                  Sign Up for Rides
-                </a>
-              )}
-            </div>
-          )}
-        </div>
+        {/* RSVP and Rides Buttons - side by side on desktop, stacked on mobile */}
+        {(hasRSVP || hasRides) && (
+          <div className="flex flex-col sm:flex-row gap-4 mt-2">
+            {hasRSVP && (
+              <a
+                href={event.rsvpUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 inline-flex items-center justify-center px-5 py-2 rounded-lg bg-aacf-blue text-white font-semibold shadow hover:bg-aacf-blue/90 focus:outline-none focus:ring-2 focus:ring-aacf-blue focus:ring-offset-2 transition text-center"
+                aria-label="RSVP for this event"
+              >
+                RSVP
+              </a>
+            )}
+            {hasRides && (
+              <a
+                href={event.ridesUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 inline-flex items-center justify-center px-5 py-2 rounded-lg bg-emerald-600 text-white font-semibold shadow hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2 transition text-center"
+                aria-label="Sign up for rides for this event"
+              >
+                Rides Signup
+              </a>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -231,7 +223,7 @@ function CalendarView({ events }: { events: Event[] }) {
   );
 }
 
-function ListView({ events, onEventClick }: { events: Event[]; onEventClick: () => void }) {
+function ListView({ events, onEventClick }: { events: Event[]; onEventClick: (event: Event) => void }) {
   const now = new Date();
   const upcomingEvents = events.filter(e => (parseEventDate(e.date) ?? new Date()) >= now);
   const pastEvents = events.filter(e => (parseEventDate(e.date) ?? new Date()) < now);
@@ -243,7 +235,7 @@ function ListView({ events, onEventClick }: { events: Event[]; onEventClick: () 
           <h3 className="text-xl font-semibold text-gray-800 mb-4">Upcoming Events</h3>
           <div className="space-y-4">
             {upcomingEvents.map(event => (
-              <EventCard key={event.id} event={event} onClick={() => onEventClick()} />
+              <EventCard key={event.id} event={event} onClick={() => onEventClick(event)} />
             ))}
           </div>
         </div>
@@ -254,7 +246,7 @@ function ListView({ events, onEventClick }: { events: Event[]; onEventClick: () 
           <h3 className="text-xl font-semibold text-gray-800 mb-4">Past Events</h3>
           <div className="space-y-4">
             {pastEvents.map(event => (
-              <EventCard key={event.id} event={event} onClick={() => onEventClick()} isPast />
+              <EventCard key={event.id} event={event} onClick={() => onEventClick(event)} isPast />
             ))}
           </div>
         </div>
@@ -426,7 +418,7 @@ export default function EventsPage() {
         ) : (
           <div>
             {viewMode === 'list' ? (
-              <ListView events={events} onEventClick={() => setSelectedEvent(null)} />
+              <ListView events={events} onEventClick={setSelectedEvent} />
             ) : (
               <CalendarView events={events} />
             )}

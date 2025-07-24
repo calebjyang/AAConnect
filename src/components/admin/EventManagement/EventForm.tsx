@@ -1,21 +1,34 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { EventData } from '@/hooks/admin/useEventManagement';
 
 interface EventFormProps {
-  onSubmit: (_formData: EventData) => Promise<void>;
+  onSubmit: (formData: EventData, id?: string) => Promise<void>;
   loading?: boolean;
+  initialValues?: Partial<EventData> & { id?: string };
+  onCancel?: () => void;
 }
 
-export default function EventForm({ onSubmit, loading = false }: EventFormProps) {
+export default function EventForm({ onSubmit, loading = false, initialValues, onCancel }: EventFormProps) {
   const [formData, setFormData] = useState({
-    title: "",
-    date: "",
-    location: "",
-    description: "",
-    rsvpUrl: "",
-    ridesUrl: "",
+    title: initialValues?.title || "",
+    date: initialValues?.date ? (typeof initialValues.date === 'string' ? initialValues.date : new Date(initialValues.date).toISOString().slice(0,16)) : "",
+    location: initialValues?.location || "",
+    description: initialValues?.description || "",
+    rsvpUrl: initialValues?.rsvpUrl || "",
+    ridesUrl: initialValues?.ridesUrl || "",
   });
+
+  useEffect(() => {
+    setFormData({
+      title: initialValues?.title || "",
+      date: initialValues?.date ? (typeof initialValues.date === 'string' ? initialValues.date : new Date(initialValues.date).toISOString().slice(0,16)) : "",
+      location: initialValues?.location || "",
+      description: initialValues?.description || "",
+      rsvpUrl: initialValues?.rsvpUrl || "",
+      ridesUrl: initialValues?.ridesUrl || "",
+    });
+  }, [initialValues]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,17 +49,19 @@ export default function EventForm({ onSubmit, loading = false }: EventFormProps)
       }).filter(([_, v]) => v !== undefined && v !== "")
     ) as unknown as EventData;
 
-    await onSubmit(eventData);
+    await onSubmit(eventData, initialValues?.id);
     
     // Reset form on successful submission
-    setFormData({
-      title: "",
-      date: "",
-      location: "",
-      description: "",
-      rsvpUrl: "",
-      ridesUrl: "",
-    });
+    if (!initialValues?.id) {
+      setFormData({
+        title: "",
+        date: "",
+        location: "",
+        description: "",
+        rsvpUrl: "",
+        ridesUrl: "",
+      });
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -55,7 +70,7 @@ export default function EventForm({ onSubmit, loading = false }: EventFormProps)
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-8 flex flex-col gap-6 max-w-xl border border-gray-100">
-      <h3 className="text-xl font-semibold text-gray-800 mb-2">Create New Event</h3>
+      <h3 className="text-xl font-semibold text-gray-800 mb-2">{initialValues?.id ? 'Edit Event' : 'Create New Event'}</h3>
       
       <div className="flex flex-col gap-1">
         <label className="block font-semibold text-gray-800 mb-1" htmlFor="event-title">
@@ -141,13 +156,25 @@ export default function EventForm({ onSubmit, loading = false }: EventFormProps)
         <span className="text-xs text-gray-400">Leave blank if no rides form is needed</span>
       </div>
 
-      <button 
-        type="submit" 
-        className="mt-2 py-2 px-4 rounded-md bg-aacf-blue hover:bg-aacf-blue-700 text-white font-semibold shadow transition disabled:opacity-60 disabled:cursor-not-allowed" 
-        disabled={loading}
-      >
-        {loading ? "Creating..." : "Create Event"}
-      </button>
+      <div className="flex gap-4 mt-2">
+        <button 
+          type="submit" 
+          className="py-2 px-4 rounded-md bg-aacf-blue hover:bg-aacf-blue-700 text-white font-semibold shadow transition disabled:opacity-60 disabled:cursor-not-allowed" 
+          disabled={loading}
+        >
+          {loading ? (initialValues?.id ? 'Updating...' : 'Creating...') : (initialValues?.id ? 'Update Event' : 'Create Event')}
+        </button>
+        {initialValues?.id && onCancel && (
+          <button
+            type="button"
+            className="py-2 px-4 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold shadow transition"
+            onClick={onCancel}
+            disabled={loading}
+          >
+            Cancel
+          </button>
+        )}
+      </div>
     </form>
   );
 } 

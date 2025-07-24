@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { getCollection, addDocToCollection, deleteDoc } from '@/lib/firestore';
+import { getCollection, addDocToCollection, deleteDoc, updateDoc } from '@/lib/firestore';
 
 export interface EventData {
   title: string;
@@ -152,6 +152,25 @@ export function useEventManagement() {
   }, [fetchEvents]);
 
   /**
+   * Updates an event in Firestore
+   */
+  const updateEvent = useCallback(async (id: string, eventData: EventData) => {
+    setState(prev => ({ ...prev, loading: true, error: null, success: null }));
+    try {
+      await updateDoc(`events/${id}`, eventData);
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        success: 'Event updated successfully!'
+      }));
+      await fetchEvents();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update event';
+      setState(prev => ({ ...prev, error: errorMessage, loading: false }));
+    }
+  }, [fetchEvents]);
+
+  /**
    * Clears error and success messages from the state
    */
   const clearMessages = useCallback(() => {
@@ -167,6 +186,7 @@ export function useEventManagement() {
     ...state,
     createEvent,
     deleteEvent,
+    updateEvent,
     clearMessages,
     fetchEvents,
   };

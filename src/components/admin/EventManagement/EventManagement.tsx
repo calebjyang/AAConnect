@@ -1,8 +1,10 @@
 "use client";
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useEventManagement } from '@/hooks/admin/useEventManagement';
 import EventForm from './EventForm';
 import EventList from './EventList';
+import type { Event } from '@/hooks/admin/useEventManagement';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export default function EventManagement() {
   const {
@@ -12,8 +14,11 @@ export default function EventManagement() {
     success,
     createEvent,
     deleteEvent,
+    updateEvent,
     clearMessages,
   } = useEventManagement();
+
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
 
   // Clear messages after 5 seconds
   useEffect(() => {
@@ -22,6 +27,15 @@ export default function EventManagement() {
       return () => clearTimeout(timer);
     }
   }, [error, success, clearMessages]);
+
+  const handleFormSubmit = async (data: any, id?: string) => {
+    if (id) {
+      await updateEvent(id, data);
+      setEditingEvent(null);
+    } else {
+      await createEvent(data);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -66,7 +80,10 @@ export default function EventManagement() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Event Form */}
         <div>
-          <EventForm onSubmit={createEvent} loading={loading} />
+          <EventForm 
+            onSubmit={handleFormSubmit} 
+            loading={loading} 
+          />
         </div>
 
         {/* Event List */}
@@ -74,10 +91,36 @@ export default function EventManagement() {
           <EventList 
             events={events} 
             onDelete={deleteEvent} 
+            onEdit={(event: Event) => setEditingEvent(event)}
             loading={loading} 
           />
         </div>
       </div>
+
+      {/* Edit Event Modal */}
+      <Dialog open={!!editingEvent} onOpenChange={open => { if (!open) setEditingEvent(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Event</DialogTitle>
+          </DialogHeader>
+          {editingEvent && (
+            <EventForm
+              onSubmit={handleFormSubmit}
+              loading={loading}
+              initialValues={{
+                id: editingEvent.id,
+                title: editingEvent.title,
+                date: editingEvent.date instanceof Date ? editingEvent.date.toISOString().slice(0,16) : editingEvent.date,
+                location: editingEvent.location,
+                description: editingEvent.description || "",
+                rsvpUrl: editingEvent.rsvpUrl || "",
+                ridesUrl: editingEvent.ridesUrl || "",
+              }}
+              onCancel={() => setEditingEvent(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 

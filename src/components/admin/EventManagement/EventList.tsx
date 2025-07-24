@@ -7,10 +7,11 @@ import { format } from 'date-fns';
 interface EventListProps {
   events: Event[];
   onDelete: (eventId: string) => Promise<void>;
+  onEdit: (event: Event) => void;
   loading?: boolean;
 }
 
-const EventList = React.memo(function EventList({ events, onDelete, loading = false }: EventListProps) {
+const EventList = React.memo(function EventList({ events, onDelete, onEdit, loading = false }: EventListProps) {
   const handleDelete = async (eventId: string) => {
     if (confirm('Are you sure you want to delete this event?')) {
       await onDelete(eventId);
@@ -49,6 +50,7 @@ const EventList = React.memo(function EventList({ events, onDelete, loading = fa
             key={event.id} 
             event={event} 
             onDelete={() => handleDelete(event.id)} 
+            onEdit={() => onEdit(event)}
           />
         ))}
       </div>
@@ -61,9 +63,10 @@ export default EventList;
 interface EventCardProps {
   event: Event;
   onDelete: () => void;
+  onEdit: () => void;
 }
 
-const EventCard = React.memo(function EventCard({ event, onDelete }: EventCardProps) {
+const EventCard = React.memo(function EventCard({ event, onDelete, onEdit }: EventCardProps) {
   const eventDate = parseEventDate(event.date) ?? new Date();
 
   return (
@@ -120,15 +123,22 @@ const EventCard = React.memo(function EventCard({ event, onDelete }: EventCardPr
           </div>
         </div>
         
-        <button
-          onClick={onDelete}
-          className="ml-4 px-3 py-1 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
-          title="Delete event"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-        </button>
+        <div className="flex flex-col gap-2 ml-4">
+          <button
+            onClick={onEdit}
+            className="px-3 py-1 text-sm text-aacf-blue hover:text-white hover:bg-aacf-blue border border-aacf-blue rounded-md transition-colors"
+            title="Edit event"
+          >
+            Edit
+          </button>
+          <button
+            onClick={onDelete}
+            className="px-3 py-1 text-sm text-red-600 hover:text-white hover:bg-red-600 border border-red-600 rounded-md transition-colors"
+            title="Delete event"
+          >
+            Delete
+          </button>
+        </div>
       </div>
     </div>
   );
