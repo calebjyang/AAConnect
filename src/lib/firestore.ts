@@ -173,12 +173,7 @@ class FirestoreManager {
         return;
       } catch (error) {
         console.error('Firebase Web SDK not available for updateDocument:', error);
-        // Log the actual error details for debugging
-        if (error instanceof Error) {
-          console.error('Actual error message:', error.message);
-          console.error('Error name:', error.name);
-        }
-        throw new Error(`Firestore update failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        throw new Error('Firestore update failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
       }
     }
 
@@ -228,20 +223,30 @@ class FirestoreManager {
     if (!isNative) {
       try {
         const { getFirestore, collection, query, getDocs: getDocsWeb } = await import('firebase/firestore');
+        
         const app = getFirebaseApp();
         if (!app) throw new Error('Firebase app is not initialized. Please check your Firebase config.');
+        
         const db = getFirestore(app);
-        const colRef = collection(db, path);
-        const q = constraints.length ? query(colRef, ...constraints) : colRef;
-        const snapshot = await getDocsWeb(q);
-        const result = snapshot.docs.map((doc: any) => {
-          const data = { ...doc.data(), id: doc.id };
-          if (typeof data.date === 'string') {
-            data.date = new Date(data.date);
+        const collectionRef = collection(db, path);
+        
+        let q: any = collectionRef;
+        if (constraints.length > 0) {
+          // Filter out any invalid constraints and apply them
+          const validConstraints = constraints.filter(c => c && typeof c === 'object');
+          if (validConstraints.length > 0) {
+            q = query(collectionRef, ...validConstraints);
           }
-          return data;
+        }
+        
+        const snapshot = await getDocsWeb(q);
+        return snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...(data as Record<string, any>)
+          };
         });
-        return result;
       } catch (error) {
         console.error('Firebase Web SDK not available for getCollection:', error);
         throw new Error('Firebase Web SDK not available. Please check your configuration.');
@@ -400,11 +405,47 @@ export const whereQuery = async (fieldPath: string, opStr: any, value: any) => {
 }; 
 
 /**
- * Adds a user to the joinedUsers array for a given slot (hangout).
+ * Adds a user to the joinedUsers array for a given slot (hangout) and notifies all apartment members.
  */
 export async function joinHangout(slotId: string, userId: string) {
-  // Use the exported updateDoc helper, which handles both web and native
+  // Add user to joinedUsers
   await updateDoc(`availabilitySlots/${slotId}`, {
     joinedUsers: { arrayUnion: [userId] },
   });
+
+  // Fetch the slot to get apartmentId and joining user info
+  const slot = await getDoc(`availabilitySlots/${slotId}`);
+  if (!slot || !slot.apartmentId) return;
+
+  // Fetch all active members for the apartment
+  const members = await getCollection('apartmentMembers');
+  const activeMembers = members.filter((m: any) => m.apartmentId === slot.apartmentId && m.isActive);
+
+  // Fetch joining user info
+  const joiningUser = await getDoc(`users/${userId}`);
+  const joiningUserName = joiningUser?.displayName || joiningUser?.email || 'Someone';
+
+  // Create a notification for each member except the joining user
+  const now = new Date().toISOString();
+  await Promise.all(
+    activeMembers
+      .filter((m: any) => m.userId !== userId)
+      .map((member: any) =>
+        addDocToCollection('notifications', {
+          recipientId: member.userId,
+          apartmentId: slot.apartmentId,
+          slotId,
+          type: 'join_hangout',
+          message: `${joiningUserName} joined your apartment hangout!`,
+          createdAt: now,
+          read: false,
+          joiningUser: {
+            userId,
+            displayName: joiningUser?.displayName || '',
+            email: joiningUser?.email || '',
+            photoURL: joiningUser?.photoURL || '',
+          },
+        })
+      )
+  );
 } 

@@ -381,3 +381,71 @@ The apartment availability system enables members to post and discover open time
 - **Code Quality**: Comprehensive linting and type safety
 - **Cross-Platform Testing**: Comprehensive testing across web, iOS, and Android
 - **Deployment**: Vercel (web) with automatic Git integration and Capacitor (native) deployment
+
+## 📱 In-App Notifications
+
+### Overview
+AAConnect now includes a robust in-app notification system that provides real-time updates about events, carpools, and apartment hangouts.
+
+### User Stories
+
+**As a** apartment host  
+**I want to** receive notifications when someone joins my hangout  
+**So that** I can stay updated on who's coming to my apartment
+
+**As a** user  
+**I want to** see a notification count in the navigation  
+**So that** I know when I have new notifications to check
+
+**As a** user  
+**I want to** view my notifications in a beautiful dropdown  
+**So that** I can easily see what's happening with my hangouts
+
+### Technical Requirements
+
+**Frontend**: React components with Tailwind CSS styling
+**Backend**: Firestore `notifications` collection
+**Real-time**: Automatic notification creation on hangout joins
+**UI Components**: Notification bell, dropdown, badge counter
+**Data Structure**: 
+  ```typescript
+  interface Notification {
+    id: string;
+    recipientId: string;
+    apartmentId: string;
+    slotId: string;
+    type: 'join_hangout';
+    message: string;
+    createdAt: string;
+    read: boolean;
+    joiningUser: {
+      userId: string;
+      displayName: string;
+      email: string;
+      photoURL: string;
+    };
+  }
+  ```
+
+**Security Implementation**:
+- **Firestore Rules**: Updated `availabilitySlots` collection for authenticated-only access
+- **Route Protection**: `ProtectedRoute` component wrapper for apartments page
+- **Navigation Logic**: Conditional rendering based on authentication state
+- **Redirect Handling**: Automatic login redirects for unauthenticated users
+
+**Performance Requirements**:
+- **Notification Loading**: Optimized queries with Firestore indexes
+- **Real-time Updates**: Efficient notification fetching and state management
+- **Mobile Responsiveness**: Smooth animations and touch-friendly interactions
+
+**Success Metrics**:
+- **User Engagement**: Increased hangout participation through notifications
+- **Security**: Zero unauthorized access to apartment availability data
+- **User Experience**: Smooth authentication flow and intuitive notification system
+- **Performance**: Fast notification loading and responsive UI interactions
+
+**Future Enhancements**:
+- Push notifications for mobile apps
+- Email notification preferences
+- Notification categories and filtering
+- Advanced notification settings and privacy controls

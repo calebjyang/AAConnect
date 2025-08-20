@@ -32,8 +32,17 @@ import {
 } from "lucide-react";
 import { toDateSafe } from '@/lib/utils';
 import { joinHangout } from '@/lib/firestore';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function ApartmentsPage() {
+  return (
+    <ProtectedRoute>
+      <ApartmentsPageContent />
+    </ProtectedRoute>
+  );
+}
+
+function ApartmentsPageContent() {
   const { user } = useAuth();
   const { userApartment, loading: userLoading, refetch } = useUserApartment();
   const {

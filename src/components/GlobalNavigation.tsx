@@ -7,10 +7,14 @@ import { useAuth } from '@/lib/useAuth';
 import { useMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Bell, Menu, Home, Calendar, Car, Users, Settings, LogOut } from 'lucide-react';
+import { Bell, Home, Calendar, Car, Users, Settings, Menu, LogOut } from 'lucide-react';
 import Image from 'next/image';
 import { useIsCapacitorIOS } from "@/hooks/use-is-capacitor-ios";
 import UserProfile from '@/components/UserProfile';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { useEffect } from 'react';
+import { updateDoc } from '@/lib/firestore';
+import { getFirebaseApp } from '@/lib/firebaseClient';
 
 interface GlobalNavigationProps {
   safeAreaStyle?: React.CSSProperties;
@@ -22,13 +26,79 @@ export default function GlobalNavigation({ safeAreaStyle }: GlobalNavigationProp
   const isMobile = useMobile();
   const isCapacitorIOS = useIsCapacitorIOS();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  // Fetch notifications for the logged-in user
+  useEffect(() => {
+    if (!user || loading) {
+      setNotifications([]);
+      setUnreadCount(0);
+      return;
+    }
+    let ignore = false;
+    const fetchNotifications = async () => {
+      try {
+        // Use a proper Firestore query with where clause instead of fetching all
+        const { getFirestore, collection, query, where, orderBy, getDocs } = await import('firebase/firestore');
+        const app = getFirebaseApp();
+        if (!app) return;
+        
+        const db = getFirestore(app);
+        const notificationsRef = collection(db, 'notifications');
+        const userNotificationsQuery = query(
+          notificationsRef,
+          where('recipientId', '==', user.uid),
+          orderBy('createdAt', 'desc')
+        );
+        
+        const snapshot = await getDocs(userNotificationsQuery);
+        const userNotifs = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        if (!ignore) {
+          setNotifications(userNotifs);
+          setUnreadCount(userNotifs.filter((n: any) => !n.read).length);
+        }
+      } catch (error) {
+        console.warn('Failed to fetch notifications:', error);
+        // Don't crash the component if notifications fail to load
+        if (!ignore) {
+          setNotifications([]);
+          setUnreadCount(0);
+        }
+      }
+    };
+    fetchNotifications();
+    // Optionally, poll for new notifications every 30s
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => { ignore = true; clearInterval(interval); };
+  }, [user, loading]);
+
+  // Mark all as read when dropdown is opened
+  useEffect(() => {
+    if (dropdownOpen && notifications.some(n => !n.read)) {
+      notifications.filter(n => !n.read).forEach(async (notif) => {
+        await updateDoc(`notifications/${notif.id}`, { read: true });
+      });
+      setNotifications((prev) => prev.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
+    }
+  }, [dropdownOpen, notifications]);
 
   const navigationItems = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/events', label: 'Events', icon: Calendar },
     { href: '/events/rides', label: 'Rides', icon: Car },
-    { href: '/apartments', label: 'Hosting', icon: Users },
   ];
+
+  // Add Hosting link only for authenticated users
+  if (user && !loading) {
+    navigationItems.push({ href: '/apartments', label: 'Hosting', icon: Users });
+  }
 
   // Add admin link if user is admin
   if (user && !loading) {
@@ -133,8 +203,101 @@ export default function GlobalNavigation({ safeAreaStyle }: GlobalNavigationProp
         </div>
 
         <div className="flex items-center space-x-4">
-          {/* Notifications - removed for now */}
+          {/* Notification Bell */}
+          {user && (
+            <DropdownMenu onOpenChange={setDropdownOpen}>
+              <DropdownMenuTrigger asChild>
+                <button className="relative p-2 rounded-full hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 hover:scale-105">
+                  <Bell className="h-6 w-6 text-slate-700" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[18px] text-center font-semibold animate-pulse">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-96 max-w-sm p-0 border-0 shadow-2xl bg-white/95 backdrop-blur-sm">
+                {/* Header */}
+                <div className="px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-slate-800">Notifications</h3>
+                    {unreadCount > 0 && (
+                      <span className="bg-blue-100 text-blue-700 text-xs font-medium px-2.5 py-1 rounded-full">
+                        {unreadCount} new
+                      </span>
+                    )}
+                  </div>
+                </div>
 
+                {/* Notifications List */}
+                <div className="max-h-96 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="px-6 py-12 text-center">
+                      <div className="mx-auto w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                        <Bell className="h-8 w-8 text-slate-400" />
+                      </div>
+                      <p className="text-slate-500 text-sm font-medium">No notifications yet</p>
+                      <p className="text-slate-400 text-xs mt-1">You&apos;ll see notifications here when someone joins your hangouts</p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-slate-100">
+                      {notifications.slice(0, 10).map((notif) => (
+                        <DropdownMenuItem 
+                          key={notif.id} 
+                          className={`p-0 focus:bg-transparent focus:outline-none ${!notif.read ? 'bg-blue-50/50' : ''}`}
+                        >
+                          <div className={`w-full px-6 py-4 hover:bg-slate-50 transition-colors duration-150 ${!notif.read ? 'border-l-4 border-l-blue-500' : 'border-l-4 border-l-transparent'}`}>
+                            <div className="flex items-start gap-3">
+                              {/* Avatar/Icon */}
+                              <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+                                !notif.read ? 'bg-blue-100' : 'bg-slate-100'
+                              }`}>
+                                <Users className={`h-5 w-5 ${!notif.read ? 'text-blue-600' : 'text-slate-500'}`} />
+                              </div>
+                              
+                              {/* Content */}
+                              <div className="flex-1 min-w-0">
+                                <p className={`text-sm font-medium leading-relaxed ${
+                                  !notif.read ? 'text-slate-900' : 'text-slate-700'
+                                }`}>
+                                  {notif.message}
+                                </p>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <span className="text-xs text-slate-400">
+                                    {notif.createdAt ? new Date(notif.createdAt).toLocaleDateString('en-US', {
+                                      month: 'short',
+                                      day: 'numeric',
+                                      hour: 'numeric',
+                                      minute: '2-digit',
+                                      hour12: true
+                                    }) : ''}
+                                  </span>
+                                  {!notif.read && (
+                                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </DropdownMenuItem>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer */}
+                {notifications.length > 10 && (
+                  <div className="px-6 py-3 border-t border-slate-100 bg-slate-50/50">
+                    <div className="text-center">
+                      <p className="text-xs text-slate-500">
+                        Showing latest 10 of {notifications.length} notifications
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
           {/* User Profile / Auth */}
           {user ? (
             <UserProfile />

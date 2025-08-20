@@ -1,5 +1,4 @@
 "use client";
-import { useEffect, useState } from "react";
 import GlobalNavigation from "@/components/GlobalNavigation";
 import PwaServiceWorker from "@/components/PwaServiceWorker";
 import { useIsCapacitorIOS } from "@/hooks/use-is-capacitor-ios";
