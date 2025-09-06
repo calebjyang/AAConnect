@@ -34,15 +34,7 @@ function EventDetailModal({ event, onClose }: { event: Event; onClose: () => voi
   const hasRides = !!event.ridesUrl;
   const eventDate = parseEventDate(event.date) ?? new Date(); // Use Date object directly
 
-  // Google Calendar integration
-  const _createGoogleCalendarEvent = () => {
-    const startDate = eventDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    const endDate = new Date(eventDate.getTime() + 2 * 60 * 60 * 1000).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'; // 2 hours later
-    
-    const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${startDate}/${endDate}&details=${encodeURIComponent(event.description || '')}&location=${encodeURIComponent(event.location)}`;
-    
-    window.open(googleCalendarUrl, '_blank');
-  };
+  // TODO: Add Google Calendar integration button
 
   return (
     <div
@@ -331,7 +323,7 @@ function EventCard({ event, onClick, isPast = false }: { event: Event; onClick: 
 }
 
 export default function EventsPage() {
-  const { user: _user, loading: _loading } = useAuth();
+  // const { user, loading } = useAuth(); // Not needed for public events page
   const [events, setEvents] = useState<Event[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
