@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { getCollection, orderByQuery } from "@/lib/firestore";
 import React from "react";
-import { useAuth } from "@/lib/useAuth";
 import { parseEventDate } from '@/lib/utils';
 
 type Event = {
