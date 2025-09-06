@@ -47,7 +47,7 @@ export class FirebaseErrorBoundary extends Component<Props, State> {
     };
   }
 
-  public componentDidCatch() {
+  public componentDidCatch(_error: Error, _errorInfo: ErrorInfo) {
     // FirebaseErrorBoundary caught an error
   }
 

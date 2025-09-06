@@ -74,7 +74,7 @@ export class ErrorBoundary extends Component<Props, State> {
    * @param {Error} error - The error that was thrown
    * @param {ErrorInfo} errorInfo - Additional error information
    */
-  public componentDidCatch() {
+  public componentDidCatch(_error: Error, _errorInfo: ErrorInfo) {
     // ErrorBoundary caught an error
   }
 

@@ -16,7 +16,6 @@ export default function CarpoolManagement() {
     testAssignment,
     assignments,
     showAssignments,
-    setShowAssignments,
     editingAssignments,
     isEditing,
     startEditing,
@@ -31,7 +30,6 @@ export default function CarpoolManagement() {
     handleDragEnd,
     getAssignmentStats,
     signups,
-    deleteAssignments,
     deleteSignup,
     updateSignup,
   } = useCarpoolManagement();

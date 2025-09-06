@@ -466,7 +466,7 @@ function ApartmentsPageContent() {
                                       if (!hasJoined && user) {
                                         await joinHangout(slot.id, user.uid);
                                         // Optimistically update the slot in state
-                                        setOptimisticSlots((_prev) =>
+                                        setOptimisticSlots(() =>
                                           slots.map((s) =>
                                             s.id === slot.id
                                               ? { ...s, joinedUsers: [...(s.joinedUsers || []), user.uid] }
