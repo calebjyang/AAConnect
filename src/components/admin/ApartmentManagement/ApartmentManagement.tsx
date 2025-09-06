@@ -30,14 +30,25 @@ export default function ApartmentManagement() {
 
   const handleCreateApartment = async (apartmentData: ApartmentFormData) => {
     if (!user?.email) return;
-    await createApartment(apartmentData, user.email);
-    setShowForm(false);
+    try {
+      await createApartment(apartmentData, user.email);
+      // Only close modal on successful creation
+      setShowForm(false);
+    } catch (error) {
+      // Error is already handled in the hook, modal stays open
+    }
   };
 
   const handleUpdateApartment = async (apartmentData: ApartmentFormData) => {
     if (!editingApartment) return;
-    await updateApartment(editingApartment.id, apartmentData);
-    setEditingApartment(null);
+    try {
+      await updateApartment(editingApartment.id, apartmentData);
+      // Only close modal on successful update
+      setEditingApartment(null);
+      setShowForm(false);
+    } catch (error) {
+      // Error is already handled in the hook, modal stays open
+    }
   };
 
   const handleEditApartment = (apartment: Apartment) => {

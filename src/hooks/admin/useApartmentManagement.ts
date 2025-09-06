@@ -71,6 +71,7 @@ export function useApartmentManagement() {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create apartment';
       setState(prev => ({ ...prev, error: errorMessage, loading: false }));
+      throw error; // Re-throw to allow parent component to handle
     }
   }, [fetchApartments]);
 
@@ -94,6 +95,7 @@ export function useApartmentManagement() {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to update apartment';
       setState(prev => ({ ...prev, error: errorMessage, loading: false }));
+      throw error; // Re-throw to allow parent component to handle
     }
   }, [fetchApartments]);
 
