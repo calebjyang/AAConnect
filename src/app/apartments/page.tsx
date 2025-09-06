@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useUserApartment } from '@/hooks/useUserApartment';
 import { useAvailabilityManagement } from '@/hooks/useAvailabilityManagement';
 import { useAuth } from '@/lib/useAuth';
@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { toDateSafe } from '@/lib/utils';
 import { joinHangout } from '@/lib/firestore';
+import { getEventStatus, getStatusBadgeProps } from '@/lib/getEventStatus';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function ApartmentsPage() {
@@ -58,6 +59,13 @@ function ApartmentsPageContent() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isEditLoading, setIsEditLoading] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Periodically refresh to update status badges as time passes
+  useEffect(() => {
+    const id = setInterval(() => setRefreshTrigger((v) => v + 1), 60_000); // every minute
+    return () => clearInterval(id);
+  }, []);
 
   const handleCreateAvailability = async (availabilityData: AvailabilityFormData) => {
     if (!user || !userApartment) return;
@@ -127,7 +135,38 @@ function ApartmentsPageContent() {
   }
 
   // Use optimisticSlots if set, otherwise slots from useAvailabilityManagement
-  const displayedSlots = optimisticSlots.length > 0 ? optimisticSlots : slots;
+  const allSlots = optimisticSlots.length > 0 ? optimisticSlots : slots;
+  
+  // Sort slots by status priority: live first, then upcoming, then ended
+  const displayedSlots = [...allSlots].sort((a, b) => {
+    const statusA = getEventStatus(a.startTime, a.endTime);
+    const statusB = getEventStatus(b.startTime, b.endTime);
+    
+    // Define priority order
+    const statusPriority = { live: 0, upcoming: 1, ended: 2 };
+    const priorityDiff = statusPriority[statusA] - statusPriority[statusB];
+    
+    if (priorityDiff !== 0) {
+      return priorityDiff; // Sort by status priority first
+    }
+    
+    // Within same status, sort by start time (earliest first for upcoming/live, latest first for ended)
+    const startA = a.startTime?.toDate ? a.startTime.toDate() : 
+                   a.startTime?.seconds ? new Date(a.startTime.seconds * 1000) : 
+                   new Date(a.startTime as any || 0);
+    const startB = b.startTime?.toDate ? b.startTime.toDate() : 
+                   b.startTime?.seconds ? new Date(b.startTime.seconds * 1000) : 
+                   new Date(b.startTime as any || 0);
+    
+    if (statusA === 'ended') {
+      return startB.getTime() - startA.getTime(); // Most recent ended events first
+    } else {
+      return startA.getTime() - startB.getTime(); // Earliest upcoming/live events first
+    }
+  });
+  
+  // reference refreshTrigger to cause re-render
+  void refreshTrigger;
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -310,6 +349,8 @@ function ApartmentsPageContent() {
                     {displayedSlots.map((slot) => {
                       const hasJoined = slot.joinedUsers && user && slot.joinedUsers.includes(user.uid);
                       const attendeeCount = slot.joinedUsers ? slot.joinedUsers.length : 0;
+                      const eventStatus = getEventStatus(slot.startTime, slot.endTime);
+                      const badgeProps = getStatusBadgeProps(eventStatus);
                       return (
                         <Card
                           key={slot.id}
@@ -325,8 +366,8 @@ function ApartmentsPageContent() {
                                 <div className="flex-1">
                                   <div className="flex items-center space-x-2 mb-1">
                                     <h3 className="font-bold text-lg text-slate-900">{slot.apartmentName}</h3>
-                                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
-                                      Upcoming
+                                    <Badge className={badgeProps.className}>
+                                      {badgeProps.text}
                                     </Badge>
                                   </div>
 
@@ -425,7 +466,7 @@ function ApartmentsPageContent() {
                                       if (!hasJoined && user) {
                                         await joinHangout(slot.id, user.uid);
                                         // Optimistically update the slot in state
-                                        setOptimisticSlots((prev) =>
+                                        setOptimisticSlots((_prev) =>
                                           slots.map((s) =>
                                             s.id === slot.id
                                               ? { ...s, joinedUsers: [...(s.joinedUsers || []), user.uid] }
@@ -472,23 +513,52 @@ function ApartmentsPageContent() {
                 <div className="space-y-4">
                   {slots
                     .filter((slot) => slot.postedBy === user?.uid)
-                    .map((slot) => (
-                      <Card
-                        key={slot.id}
-                        className="border-slate-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white"
-                      >
-                        <CardContent className="p-6">
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-2 mb-2">
-                                <h3 className="font-bold text-lg text-slate-900">{slot.apartmentName}</h3>
-                                <Badge className="bg-blue-100 text-blue-800 border-0">
-                                  😌 chill
-                                </Badge>
-                                <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
-                                  Live
-                                </Badge>
-                              </div>
+                    .sort((a, b) => {
+                      const statusA = getEventStatus(a.startTime, a.endTime);
+                      const statusB = getEventStatus(b.startTime, b.endTime);
+                      
+                      // Define priority order
+                      const statusPriority = { live: 0, upcoming: 1, ended: 2 };
+                      const priorityDiff = statusPriority[statusA] - statusPriority[statusB];
+                      
+                      if (priorityDiff !== 0) {
+                        return priorityDiff; // Sort by status priority first
+                      }
+                      
+                      // Within same status, sort by start time
+                      const startA = a.startTime?.toDate ? a.startTime.toDate() : 
+                                     a.startTime?.seconds ? new Date(a.startTime.seconds * 1000) : 
+                                     new Date(a.startTime as any || 0);
+                      const startB = b.startTime?.toDate ? b.startTime.toDate() : 
+                                     b.startTime?.seconds ? new Date(b.startTime.seconds * 1000) : 
+                                     new Date(b.startTime as any || 0);
+                      
+                      if (statusA === 'ended') {
+                        return startB.getTime() - startA.getTime(); // Most recent ended events first
+                      } else {
+                        return startA.getTime() - startB.getTime(); // Earliest upcoming/live events first
+                      }
+                    })
+                    .map((slot) => {
+                      const eventStatus = getEventStatus(slot.startTime, slot.endTime);
+                      const badgeProps = getStatusBadgeProps(eventStatus);
+                      return (
+                        <Card
+                          key={slot.id}
+                          className="border-slate-200 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white"
+                        >
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-2 mb-2">
+                                  <h3 className="font-bold text-lg text-slate-900">{slot.apartmentName}</h3>
+                                  <Badge className="bg-blue-100 text-blue-800 border-0">
+                                    😌 chill
+                                  </Badge>
+                                  <Badge className={badgeProps.className}>
+                                    {badgeProps.text}
+                                  </Badge>
+                                </div>
 
                               <p className="text-slate-700 mb-3">{slot.description || "Come hang out and enjoy snacks and play games! 🎮🍕"}</p>
 
@@ -529,7 +599,8 @@ function ApartmentsPageContent() {
                           </div>
                         </CardContent>
                       </Card>
-                    ))}
+                    );
+                  })}
                 </div>
               </TabsContent>
 

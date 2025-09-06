@@ -3,9 +3,6 @@ import { useEffect, useState } from "react";
 import { getCollection, orderByQuery } from "@/lib/firestore";
 import React from "react";
 import { useAuth } from "@/lib/useAuth";
-import UserProfile from "@/components/UserProfile";
-import Image from "next/image";
-import Link from "next/link";
 import { parseEventDate } from '@/lib/utils';
 
 type Event = {
@@ -38,7 +35,7 @@ function EventDetailModal({ event, onClose }: { event: Event; onClose: () => voi
   const eventDate = parseEventDate(event.date) ?? new Date(); // Use Date object directly
 
   // Google Calendar integration
-  const createGoogleCalendarEvent = () => {
+  const _createGoogleCalendarEvent = () => {
     const startDate = eventDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
     const endDate = new Date(eventDate.getTime() + 2 * 60 * 60 * 1000).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'; // 2 hours later
     
@@ -334,7 +331,7 @@ function EventCard({ event, onClick, isPast = false }: { event: Event; onClick: 
 }
 
 export default function EventsPage() {
-  const { user, loading } = useAuth();
+  const { user: _user, loading: _loading } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);

@@ -1,5 +1,4 @@
 import { Capacitor } from '@capacitor/core';
-import { getFirestore, doc } from 'firebase/firestore';
 import { getFirebaseApp } from './firebaseClient';
 
 const isNative = Capacitor.isNativePlatform();

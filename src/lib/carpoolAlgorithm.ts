@@ -150,7 +150,7 @@ export function assignCarpools(signups: RideSignup[], week: string): AssignmentR
 /**
  * Optimize assignments for better grade distribution
  */
-function optimizeAssignments(assignments: CarpoolAssignment[], availableRiders: RideSignup[]) {
+function optimizeAssignments(assignments: CarpoolAssignment[], _availableRiders: RideSignup[]) {
   // Try to improve grade distribution
   for (let i = 0; i < assignments.length; i++) {
     const car1 = assignments[i];
@@ -168,7 +168,7 @@ function optimizeAssignments(assignments: CarpoolAssignment[], availableRiders: 
           if (i === j) continue;
           
           const car2 = assignments[j];
-          const grades2 = car2.riders.map(r => r.grade).filter(Boolean);
+          const _grades2 = car2.riders.map(r => r.grade).filter(Boolean);
           
           // Find a rider in car1 with the most common grade
           const riderToSwap = car1.riders.find(r => r.grade === mostCommonGrade);

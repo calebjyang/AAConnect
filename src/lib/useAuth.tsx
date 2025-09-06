@@ -2,7 +2,6 @@
 import { useEffect, useState, useCallback, useRef, createContext, useContext } from "react";
 import { signOutUser, addAuthStateListener } from "./auth";
 import { setDoc, getDoc } from "@/lib/firestore";
-import { Capacitor } from '@capacitor/core';
 
 interface AuthState {
   user: any | null;
@@ -135,7 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         listenerInitialized.current = false;
       }
     };
-  }, []); // Empty dependency array to ensure this only runs once
+  }, [signOut]); // Include signOut as dependency since it's used inside
 
   return (
     <AuthContext.Provider value={authState}>
