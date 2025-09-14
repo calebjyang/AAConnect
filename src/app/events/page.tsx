@@ -221,7 +221,7 @@ function ListView({ events, onEventClick }: { events: Event[]; onEventClick: (ev
       {upcomingEvents.length > 0 && (
         <div>
           <h3 className="text-xl font-semibold text-gray-800 mb-4">Upcoming Events</h3>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {upcomingEvents.map(event => (
               <EventCard key={event.id} event={event} onClick={() => onEventClick(event)} />
             ))}
@@ -232,7 +232,7 @@ function ListView({ events, onEventClick }: { events: Event[]; onEventClick: (ev
       {pastEvents.length > 0 && (
         <div>
           <h3 className="text-xl font-semibold text-gray-800 mb-4">Past Events</h3>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {pastEvents.map(event => (
               <EventCard key={event.id} event={event} onClick={() => onEventClick(event)} isPast />
             ))}
