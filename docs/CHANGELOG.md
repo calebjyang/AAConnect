@@ -1,5 +1,32 @@
 # 🕘 Changelog
 
+## v1.0.14 – September 2025
+- **Code Quality & Security** 🧹
+  - Comprehensive ESLint cleanup (71 → 59 warnings, 17% improvement)
+  - Updated Next.js to 15.5.2 for security patches
+  - Resolved @eslint/plugin-kit vulnerability (RegExp DoS protection)
+  - Fixed apartment edit modal dismissal on iOS after successful updates
+  - Removed unused imports and variables across components
+  - All tests passing, build verified ✅
+
+## v1.0.13 – August 2025
+- **Apartment Hangout Notifications** 🔔
+  - Added notification bell with unread count badge
+  - Created notifications collection in Firestore
+  - Implemented joinHangout function with automatic notification creation
+  - Added ProtectedRoute wrapper for apartments page
+  - Restricted apartment availability to authenticated users only
+  - Updated Firestore security rules for notifications
+
+## v1.0.12 – July 2025
+- **Apartment Hosting & Event Management** 🏠
+  - Enhanced apartment member edit with Firestore composite IDs
+  - Fixed edit modal for hosting page
+  - Implemented RSVP join button with optimistic updates
+  - Added robust toast styling for better UX
+  - Improved event management UI and functionality
+  - Enhanced Firestore schema changes and lessons learned
+
 ## v1.0.11 – July 2025
 - **Carpool Management Restoration** 🔧
   - Restored working carpool management from commit 01f1d3d
