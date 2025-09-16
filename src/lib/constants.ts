@@ -124,7 +124,7 @@ export const SOCIAL_LINKS = {
 export const ROUTES = {
   HOME: '/',
   EVENTS: '/events',
-  RIDES: '/events/rides',
+  RIDES: '/rides',
   APARTMENTS: '/apartments',
   LOGIN: '/login',
   ADMIN: '/admin',
