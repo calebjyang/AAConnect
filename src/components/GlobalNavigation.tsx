@@ -92,7 +92,7 @@ export default function GlobalNavigation({ safeAreaStyle }: GlobalNavigationProp
   const navigationItems = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/events', label: 'Events', icon: Calendar },
-    { href: '/events/rides', label: 'Rides', icon: Car },
+    { href: '/rides', label: 'Rides', icon: Car },
   ];
 
   // Add Hosting link only for authenticated users
@@ -111,7 +111,7 @@ export default function GlobalNavigation({ safeAreaStyle }: GlobalNavigationProp
     if (href === '/') {
       return pathname === '/';
     }
-    return pathname.startsWith(href);
+    return pathname === href || pathname.startsWith(href + '/');
   };
 
   const handleSignOut = async () => {

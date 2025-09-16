@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { addDocToCollection, getDoc } from "@/lib/firestore";
 
 // Define RideSignup type
@@ -15,6 +16,7 @@ interface RideSignup {
 }
 
 export default function RidesFormPage() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [canDrive, setCanDrive] = useState("");
@@ -23,7 +25,6 @@ export default function RidesFormPage() {
   const [otherLocation, setOtherLocation] = useState("");
   const [grade, setGrade] = useState("");
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [aftereventWeek, setAftereventWeek] = useState<string | null>(null);
   const [weekLoading, setWeekLoading] = useState(true);
@@ -78,7 +79,6 @@ export default function RidesFormPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    setSuccess("");
     const finalLocation = location === "Other" ? otherLocation : location;
     if (!name || !phone || !canDrive || !finalLocation || !grade) {
       setError("Please fill out all required fields.");
@@ -102,21 +102,15 @@ export default function RidesFormPage() {
       };
       if (canDrive === "Yes" && capacity) data.capacity = capacity;
       await addDocToCollection("rides", data);
-      setSuccess("Thanks for signing up! We'll be in touch soon.");
-      setName("");
-      setPhone("");
-      setCanDrive("");
-      setCapacity("");
-      setLocation("");
-      setOtherLocation("");
-      setGrade("");
+      
+      // Redirect to success page
+      router.push("/rides/success");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError("Failed to submit. " + err.message);
       } else {
         setError("Failed to submit.");
       }
-    } finally {
       setLoading(false);
     }
   }
@@ -201,7 +195,6 @@ export default function RidesFormPage() {
             </div>
           </div>
           {error && <div className="text-red-600 font-medium text-sm text-center">{error}</div>}
-          {success && <div className="text-green-600 font-medium text-sm text-center">{success}</div>}
           <button type="submit" className="mt-2 py-2 px-4 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow transition disabled:opacity-60 disabled:cursor-not-allowed" disabled={loading}>{loading ? "Submitting..." : "Submit"}</button>
         </form>
       </div>

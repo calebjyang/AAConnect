@@ -75,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     displayName: user.displayName,
                     email: user.email,
                     photoURL: user.photoURL,
-                    createdAt: new Date(),
+                    createdAt: new Date().toISOString(),
                   });
                 }
               } catch (err) {

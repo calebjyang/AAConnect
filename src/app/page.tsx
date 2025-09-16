@@ -71,7 +71,7 @@ export default function Home() {
                 View Events
               </Link>
               <Link
-                href="/events/rides"
+                href="/rides"
                 className="px-8 py-4 bg-white text-aacf-blue border-2 border-aacf-blue rounded-lg font-semibold hover:bg-blue-50 transition shadow-lg text-lg"
               >
                 Find Rides
@@ -162,7 +162,7 @@ export default function Home() {
             </Link>
 
             <Link
-              href="/events/rides"
+              href="/rides"
               className="group bg-white rounded-xl p-8 text-center shadow-md border border-emerald-100 hover:shadow-xl hover:ring-2 hover:ring-emerald-300 transition-all duration-200"
             >
               <div className="w-16 h-16 bg-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-md">
