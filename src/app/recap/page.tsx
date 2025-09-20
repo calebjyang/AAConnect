@@ -9,8 +9,8 @@ type Recap = {
     title: string;
     date?: Date;
     location: string;
-    sermonTopic: string;
-    summary: string;
+    sermonTopic?: string;
+    summary?: string;
 }
 
 function RecapDetailModal({ recap, onClose }:  {recap: Recap; onClose: () => void}) {
@@ -100,5 +100,46 @@ function ListView({ recaps, onRecapClick }: { recaps: Recap[]; onRecapClick: (re
                 </div>
             ))}
         </div>
-    )
+    );
+}
+
+export default function RecapPage() {
+    const [recaps, setRecaps] = useState<Recap[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedRecap, setSelectedRecap] = useState<Recap | null>(null);
+
+    useEffect(() => {
+        async function fetchRecaps() {
+            try {
+                const orderByConstraint = await orderByQuery("date", "desc");
+                // Currently recaps doesn't exist in the firebase
+                const data = await getCollection("recaps", [orderByConstraint]) as Recap[];
+                setRecaps(data.map(e => ({ ...e, date: parseEventDate(e.date) ?? new Date() })));
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchRecaps();
+    }, []);
+    
+    return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-5xl mx-auto py-8 px-4">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Recap</h1>
+        <p className="text-gray-600 mb-8">Here’s what happened at our recent gatherings.</p>
+
+        {loading ? (
+          <p className="text-gray-600">Loading recaps...</p>
+        ) : recaps.length === 0 ? (
+          <p className="text-gray-500">No recaps yet. Check back later!</p>
+        ) : (
+          <ListView recaps={recaps} onRecapClick={setSelectedRecap} />
+        )}
+      </div>
+
+      {selectedRecap && (
+        <RecapDetailModal recap={selectedRecap} onClose={() => setSelectedRecap(null)} />
+      )}
+    </div>
+  );
 }
