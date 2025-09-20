@@ -55,7 +55,6 @@ function RecapDetailModal({ recap, onClose }:  {recap: Recap; onClose: () => voi
                 </p>
                 </div>
 
-                {/* Recap Sections */}
                 {recap.sermonTopic && (
                 <div className="mb-4">
                     <h3 className="text-lg font-semibold text-gray-900">Sermon Topic</h3>
@@ -75,6 +74,31 @@ function RecapDetailModal({ recap, onClose }:  {recap: Recap; onClose: () => voi
                 </div>
                 )} */}
             </div>
+        </div>
+    )
+}
+
+function ListView({ recaps, onRecapClick }: { recaps: Recap[]; onRecapClick: (recap: Recap) => void }) {
+    return (
+        <div className="space-y-8">
+            {recaps.map(recap => (
+                <div
+                    key={recap.id}
+                    onClick={()=>onRecapClick(recap)}
+                    className="bg-white rounded-xl shadow-md p-6 border border-gray-200 hover:shadow-lg transition cursor-pointer"
+                >
+                    <h3>{recap.title}</h3>
+                    <p>
+                        {recap.date ? (parseEventDate(recap.date) ?? new Date()).toLocaleDateString() : "Unknown Date"}
+                    </p>
+                    {recap.sermonTopic && (
+                        <p className="text-gray-700">{recap.sermonTopic}</p>
+                    )}
+                    {recap.summary && (
+                        <p className="text-gray-700">{recap.summary}</p>
+                    )}
+                </div>
+            ))}
         </div>
     )
 }
