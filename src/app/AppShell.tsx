@@ -15,11 +15,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     ? 'calc(64px + max(env(safe-area-inset-top), 44px))'
     : 'calc(64px + env(safe-area-inset-top, 0px))';
 
+  // On mobile, content should avoid the bottom tab bar and bottom safe area
+  const mainPaddingBottom = isCapacitorIOS
+    ? 'calc(64px + max(env(safe-area-inset-bottom), 16px))'
+    : 'calc(64px + env(safe-area-inset-bottom, 0px))';
+
   return (
     <>
       <PwaServiceWorker />
       <GlobalNavigation safeAreaStyle={{ paddingTop: safeAreaTop }} />
-      <main style={{ marginTop: mainMarginTop }}>
+      <main style={{ marginTop: mainMarginTop, paddingBottom: mainPaddingBottom }}>
         {children}
       </main>
     </>

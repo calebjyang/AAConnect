@@ -148,7 +148,7 @@ export default function GlobalNavigation({ safeAreaStyle }: GlobalNavigationProp
     </>
   );
 
-  if (loading) {
+  if (loading && !isMobile) {
     return (
       <header className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200/60">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -174,9 +174,10 @@ export default function GlobalNavigation({ safeAreaStyle }: GlobalNavigationProp
     );
   }
 
-  return (
+  // Desktop header (hidden on mobile)
+  const DesktopHeader = () => (
     <header
-      className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200/60"
+      className="hidden md:block fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200/60"
       style={safeAreaStyle}
     >
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -384,5 +385,47 @@ export default function GlobalNavigation({ safeAreaStyle }: GlobalNavigationProp
         </div>
       </div>
     </header>
+  );
+
+  // Mobile bottom tab bar
+  const MobileTabBar = () => {
+    // Hide Admin on mobile; keep up to 5 items for ergonomics
+    const tabs = navigationItems
+      .filter((item) => item.href !== '/admin')
+      .slice(0, 5);
+    return (
+      <nav
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-slate-200/60"
+        style={{ paddingBottom: isCapacitorIOS ? 'max(env(safe-area-inset-bottom), 16px)' : 'env(safe-area-inset-bottom, 0px)' }}
+        aria-label="Bottom Navigation"
+      >
+        <ul className="flex items-stretch justify-around">
+          {tabs.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.href);
+            return (
+              <li key={item.href} className="flex flex-1">
+                <Link
+                  href={item.href}
+                  className={`flex-1 flex flex-col items-center justify-center py-2 text-xs font-medium transition-colors ${
+                    active ? 'text-slate-900' : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Icon className={`h-5 w-5 ${active ? 'text-slate-900' : 'text-slate-500'}`} />
+                  <span className="mt-1">{item.label}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    );
+  };
+
+  return (
+    <>
+      {!isMobile && <DesktopHeader />}
+      {isMobile && <MobileTabBar />}
+    </>
   );
 } 
