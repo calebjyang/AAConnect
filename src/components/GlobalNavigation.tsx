@@ -126,20 +126,22 @@ export default function GlobalNavigation({ safeAreaStyle }: GlobalNavigationProp
   const NavLinks = () => (
     <>
       {navigationItems.map((item) => {
-        const Icon = item.icon;
+        const active = isActive(item.href);
         return (
           <Link
             key={item.href}
             href={item.href}
-            className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-              isActive(item.href)
-                ? 'bg-blue-100 text-blue-700'
-                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+            className={`relative px-4 py-2 text-sm font-medium transition-all duration-200 ${
+              active
+                ? 'text-slate-900'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
             onClick={() => setIsMenuOpen(false)}
           >
-            <Icon className="h-4 w-4" />
             {item.label}
+            {active && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900 rounded-full"></div>
+            )}
           </Link>
         );
       })}
@@ -148,25 +150,25 @@ export default function GlobalNavigation({ safeAreaStyle }: GlobalNavigationProp
 
   if (loading) {
     return (
-      <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-slate-200/50 shadow-sm">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <header className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200/60">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center">
-            <div className="mr-4">
-              <Link href="/" className="flex items-center space-x-2">
+            <div className="mr-8">
+              <Link href="/" className="flex items-center space-x-3">
                 <Image 
                   src="/logo.png" 
                   alt="AAConnect Logo" 
-                  width={40} 
-                  height={40} 
-                  className="rounded-full bg-white p-1 shadow"
+                  width={32} 
+                  height={32} 
+                  className="rounded-lg"
                 />
-                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <span className="text-xl font-semibold text-slate-900">
                   AAConnect
                 </span>
               </Link>
             </div>
           </div>
-          <div className="animate-pulse bg-gray-200 h-8 w-24 rounded"></div>
+          <div className="animate-pulse bg-slate-200 h-8 w-24 rounded-lg"></div>
         </div>
       </header>
     );
@@ -174,21 +176,21 @@ export default function GlobalNavigation({ safeAreaStyle }: GlobalNavigationProp
 
   return (
     <header
-      className="fixed top-0 left-0 w-full z-50 bg-white border-b border-slate-200/50 shadow-sm"
+      className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200/60"
       style={safeAreaStyle}
     >
-      <div className="container mx-auto px-4 min-h-[64px] flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <div className="flex items-center">
-          <div className="mr-4">
-            <Link href="/" className="flex items-center space-x-2">
+          <div className="mr-8">
+            <Link href="/" className="flex items-center space-x-3 group">
               <Image 
                 src="/logo.png" 
                 alt="AAConnect Logo" 
-                width={40} 
-                height={40} 
-                className="rounded-full bg-white p-1 shadow"
+                width={32} 
+                height={32} 
+                className="rounded-lg"
               />
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="text-xl font-semibold text-slate-900 group-hover:text-slate-700 transition-colors">
                 AAConnect
               </span>
             </Link>
@@ -196,21 +198,21 @@ export default function GlobalNavigation({ safeAreaStyle }: GlobalNavigationProp
           
           {/* Desktop Navigation */}
           {!isMobile && (
-            <nav className="hidden md:flex space-x-1">
+            <nav className="hidden md:flex items-center space-x-8">
               <NavLinks />
             </nav>
           )}
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3">
           {/* Notification Bell */}
           {user && (
             <DropdownMenu onOpenChange={setDropdownOpen}>
               <DropdownMenuTrigger asChild>
-                <button className="relative p-2 rounded-full hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 hover:scale-105">
-                  <Bell className="h-6 w-6 text-slate-700" />
+                <button className="relative p-2 rounded-lg hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-300 transition-all duration-200">
+                  <Bell className="h-5 w-5 text-slate-600" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[18px] text-center font-semibold animate-pulse">
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[18px] text-center font-medium">
                       {unreadCount}
                     </span>
                   )}
@@ -304,7 +306,7 @@ export default function GlobalNavigation({ safeAreaStyle }: GlobalNavigationProp
           ) : (
             <Link href="/login">
               <Button 
-                className="bg-aacf-blue text-white border-aacf-blue hover:bg-blue-800 hover:border-blue-800 shadow-md"
+                className="bg-slate-900 text-white hover:bg-slate-800 border-0 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
                 size="sm"
               >
                 Sign In
@@ -316,62 +318,62 @@ export default function GlobalNavigation({ safeAreaStyle }: GlobalNavigationProp
           {isMobile && (
             <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-5 w-5" />
+                <Button variant="ghost" size="icon" className="rounded-lg">
+                  <Menu className="h-5 w-5 text-slate-600" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-72 max-w-full bg-white shadow-2xl border-l border-slate-200 p-0 flex flex-col">
+              <SheetContent side="right" className="w-80 max-w-full bg-white shadow-2xl border-l border-slate-200 p-0 flex flex-col">
                 {/* Branding and Close Button */}
                 <div
-                  className="flex items-center justify-between px-6 pb-4 border-b border-slate-100"
+                  className="flex items-center justify-between px-6 py-4 border-b border-slate-200"
                   style={{ paddingTop: isCapacitorIOS ? 'max(env(safe-area-inset-top), 44px)' : 'env(safe-area-inset-top, 0px)' }}
                 >
-                  <div className="flex items-center gap-2">
-                    <Image src="/logo.png" alt="AAConnect Logo" width={36} height={36} className="rounded-full bg-white p-1 shadow" />
-                    <span className="text-lg font-bold text-blue-700">AAConnect</span>
+                  <div className="flex items-center gap-3">
+                    <Image src="/logo.png" alt="AAConnect Logo" width={32} height={32} className="rounded-lg" />
+                    <span className="text-lg font-semibold text-slate-900">AAConnect</span>
                   </div>
                   <button
                     aria-label="Close menu"
                     onClick={() => setIsMenuOpen(false)}
-                    className="rounded-full p-2 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="rounded-lg p-2 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-300"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
                 </div>
                 {/* Menu Items */}
-                <nav className="flex flex-col gap-1 px-2 py-4 flex-1">
+                <nav className="flex flex-col px-6 py-6 flex-1">
                   {navigationItems.map((item) => {
-                    const Icon = item.icon;
                     const active = isActive(item.href);
                     return (
                       <Link
                         key={item.href}
                         href={item.href}
-                        className={`flex items-center gap-4 px-5 py-3 rounded-xl text-base font-medium transition-colors ${
+                        className={`relative px-4 py-3 text-base font-medium transition-colors ${
                           active
-                            ? 'bg-blue-100 text-blue-700 shadow-sm'
-                            : 'text-gray-900 hover:bg-blue-50 hover:text-blue-700'
+                            ? 'text-slate-900'
+                            : 'text-slate-600 hover:text-slate-900'
                         }`}
-                        style={{ minHeight: 56 }}
                         onClick={() => setIsMenuOpen(false)}
                       >
-                        <Icon className="h-6 w-6" />
                         {item.label}
+                        {active && (
+                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-slate-900 rounded-r-full"></div>
+                        )}
                       </Link>
                     );
                   })}
                 </nav>
                 {/* Optional: User Info and Sign Out */}
                 {user && (
-                  <div className="border-t border-slate-100 px-6 py-4">
-                    <div className="text-sm text-gray-500 mb-2">Signed in as {user.displayName || user.email}</div>
+                  <div className="border-t border-slate-200 px-6 py-4">
+                    <div className="text-sm text-slate-600 mb-3">Signed in as {user.displayName || user.email}</div>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={handleSignOut}
-                      className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="w-full justify-start text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg"
                     >
-                      <LogOut className="h-5 w-5 mr-2" />
+                      <LogOut className="h-4 w-4 mr-2" />
                       Sign Out
                     </Button>
                   </div>
