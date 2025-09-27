@@ -7,7 +7,7 @@ import { parseEventDate } from '@/lib/utils';
 type Recap = {
     id: string;
     title: string;
-    date?: Date;
+    date: Date;
     location: string;
     sermonTopic?: string;
     summary?: string;

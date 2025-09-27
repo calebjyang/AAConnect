@@ -9,3 +9,13 @@ export interface RecapData {
     sermonTopic: string;
     summary: string;
 }
+
+export interface Recap {
+    id: string;
+    title: string;
+    date: Date;
+    location: string;
+    sermonTopic?: string;
+    summary?: string;
+}
+
