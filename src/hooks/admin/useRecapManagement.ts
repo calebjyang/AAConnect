@@ -19,3 +19,16 @@ export interface Recap {
     summary?: string;
 }
 
+export interface RecapManagementState {
+  events: Recap[];
+  loading: boolean;
+  error: string | null;
+  success: string | null;
+}
+
+const initialState: RecapManagementState = {
+  events: [],
+  loading: false,
+  error: null,
+  success: null,
+};
