@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { getCollection, addDocToCollection, updateDoc, setDoc, deleteDoc } from '@/lib/firestore';
-import { Timestamp } from 'firebase/firestore';
+import { getCollection, addDocToCollection, updateDoc, deleteDoc } from '@/lib/firestore';
 
 export interface RecapData {
     title: string;
