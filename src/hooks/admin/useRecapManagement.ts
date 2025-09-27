@@ -19,21 +19,21 @@ export interface Recap {
 }
 
 export interface RecapManagementState {
-  events: Recap[];
+  recaps: Recap[];
   loading: boolean;
   error: string | null;
   success: string | null;
 }
 
 const initialState: RecapManagementState = {
-  events: [],
+  recaps: [],
   loading: false,
   error: null,
   success: null,
 };
 
 
-export function useEventManagement() {
+export function useRecapManagement() {
   const [state, setState] = useState<RecapManagementState>(initialState);
 
   /**
