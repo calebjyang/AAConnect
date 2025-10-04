@@ -35,7 +35,7 @@ const EventList = React.memo(function EventList({ recaps, onDelete, onEdit, load
       <div className="bg-white rounded-xl shadow-lg p-8">
         <h3 className="text-xl font-semibold text-gray-800 mb-4">Recap List</h3>
         <div className="text-center py-8">
-          <p className="text-gray-600">No events found. Create your first recap above!</p>
+          <p className="text-gray-600">No recaps found. Create your first recap above!</p>
         </div>
       </div>
     );

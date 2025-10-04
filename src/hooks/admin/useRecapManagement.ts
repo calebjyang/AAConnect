@@ -42,7 +42,7 @@ export function useRecapManagement() {
   const fetchRecaps = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      let events = await getCollection('events');
+      let events = await getCollection('recaps');
       // Sort by date ascending (if not already sorted by Firestore)
       events = events.sort((a, b) => {
         const aDate = a.date instanceof Date ? a.date : new Date(a.date);
