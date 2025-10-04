@@ -42,14 +42,14 @@ export function useRecapManagement() {
   const fetchRecaps = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      let events = await getCollection('recaps');
+      let recaps = await getCollection('recaps');
       // Sort by date ascending (if not already sorted by Firestore)
-      events = events.sort((a, b) => {
+      recaps = recaps.sort((a, b) => {
         const aDate = a.date instanceof Date ? a.date : new Date(a.date);
         const bDate = b.date instanceof Date ? b.date : new Date(b.date);
         return aDate.getTime() - bDate.getTime();
       });
-      setState(prev => ({ ...prev, events, loading: false }));
+      setState(prev => ({ ...prev, recaps, loading: false }));
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch events';
       setState(prev => ({ ...prev, error: errorMessage, loading: false }));
@@ -97,10 +97,10 @@ export function useRecapManagement() {
   /**
    * Updates a recap in Firestore
    */
-  const updateRecap = useCallback(async (id: string, eventData: RecapData) => {
+  const updateRecap = useCallback(async (id: string, recapData: RecapData) => {
     setState(prev => ({ ...prev, loading: true, error: null, success: null }));
     try {
-      await updateDoc(`events/${id}`, eventData);
+      await updateDoc(`recaps/${id}`, recapData);
       setState(prev => ({
         ...prev,
         loading: false,
@@ -108,7 +108,7 @@ export function useRecapManagement() {
       }));
       await fetchRecaps();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to update event';
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update recap';
       setState(prev => ({ ...prev, error: errorMessage, loading: false }));
     }
   }, [fetchRecaps]);
