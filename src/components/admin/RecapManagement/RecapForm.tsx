@@ -117,7 +117,7 @@ export default function EventForm({ onSubmit, loading = false, initialValues, on
         <textarea 
           id="event-description" 
           className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 min-h-[60px] focus:outline-none focus:ring-2 focus:ring-aacf-blue focus:border-aacf-blue transition" 
-          value={formData.summary} 
+          value={formData.sermonTopic} 
           onChange={e => handleInputChange('sermonTopic', e.target.value)} 
         />
       </div>
