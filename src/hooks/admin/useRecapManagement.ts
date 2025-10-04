@@ -51,7 +51,7 @@ export function useRecapManagement() {
       });
       setState(prev => ({ ...prev, recaps, loading: false }));
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch events';
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch recaps';
       setState(prev => ({ ...prev, error: errorMessage, loading: false }));
     }
   }, []);
@@ -85,7 +85,7 @@ export function useRecapManagement() {
       setState(prev => ({ 
         ...prev, 
         loading: false, 
-        success: 'Event deleted successfully!'
+        success: 'Recap deleted successfully!'
       }));
       await fetchRecaps();
     } catch (error) {
