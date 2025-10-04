@@ -112,25 +112,27 @@ export default function EventForm({ onSubmit, loading = false, initialValues, on
 
       <div className="flex flex-col gap-1">
         <label className="block font-semibold text-gray-800 mb-1" htmlFor="event-description">
-          Sermon Topic
+          Sermon Topic<span className="text-red-500 ml-1">*</span>
         </label>
         <textarea 
           id="event-description" 
           className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 min-h-[60px] focus:outline-none focus:ring-2 focus:ring-aacf-blue focus:border-aacf-blue transition" 
           value={formData.sermonTopic} 
           onChange={e => handleInputChange('sermonTopic', e.target.value)} 
+          required
         />
       </div>
 
       <div className="flex flex-col gap-1">
         <label className="block font-semibold text-gray-800 mb-1" htmlFor="event-description">
-          Summary
+          Summary<span className="text-red-500 ml-1">*</span>
         </label>
         <textarea 
           id="event-description" 
           className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 min-h-[60px] focus:outline-none focus:ring-2 focus:ring-aacf-blue focus:border-aacf-blue transition" 
           value={formData.summary} 
           onChange={e => handleInputChange('summary', e.target.value)} 
+          required
         />
       </div>
 

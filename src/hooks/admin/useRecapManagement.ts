@@ -14,7 +14,7 @@ export interface Recap {
     title: string;
     date: Date;
     location: string;
-    sermonTopic?: string;
+    sermonTopic: string;
     summary?: string;
 }
 

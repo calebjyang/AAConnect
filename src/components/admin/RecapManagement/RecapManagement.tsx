@@ -112,8 +112,8 @@ export default function RecapManagement() {
                 title: editingRecap.title,
                 date: editingRecap.date instanceof Date ? editingRecap.date.toISOString().slice(0,16) : editingRecap.date,
                 location: editingRecap.location,
-                sermonTopic: editingRecap.sermonTopic || "",
-                summary: editingRecap.summary || ""
+                sermonTopic: editingRecap.sermonTopic,
+                summary: editingRecap.summary
               }}
               onCancel={() => setEditingRecap(null)}
             />
