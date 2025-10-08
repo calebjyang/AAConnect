@@ -1,5 +1,12 @@
 # 🕘 Changelog
 
+## v1.0.15 – October 2025
+- **Recap Management Launch** 📝
+  - Added dedicated admin Recap Management dashboard with create, edit, and delete flows
+  - Introduced recap form validation for title, date, location, sermon topic, and summary fields
+  - Implemented reusable recap data hook that centralizes Firestore CRUD with success/error messaging
+  - Updated admin and public recap pages to surface the new management experience
+
 ## v1.0.14 – September 2025
 - **Code Quality & Security** 🧹
   - Comprehensive ESLint cleanup (71 → 59 warnings, 17% improvement)
