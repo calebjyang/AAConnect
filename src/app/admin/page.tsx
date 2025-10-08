@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import CarpoolManagement from '@/components/admin/CarpoolManagement/CarpoolManagement';
 import { EventManagement } from '@/components/admin/EventManagement';
 import ApartmentManagement from '@/components/admin/ApartmentManagement/ApartmentManagement';
+import RecapManagement from '@/components/admin/RecapManagement/RecapManagement';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -28,9 +29,10 @@ export default function AdminPage() {
             <span className="font-extrabold text-2xl text-white tracking-tight drop-shadow">Admin Dashboard</span>
           </div>
           <nav className="flex gap-8 items-center">
-            <a href="#events" className="text-white/90 hover:text-yellow-200 font-semibold text-lg transition">Events</a>
             <a href="#rides" className="text-white/90 hover:text-yellow-200 font-semibold text-lg transition">Rides</a>
             <a href="#apartments" className="text-white/90 hover:text-yellow-200 font-semibold text-lg transition">Apartments</a>
+            <a href="#events" className="text-white/90 hover:text-yellow-200 font-semibold text-lg transition">Events</a>
+            <a href="#recaps" className="text-white/90 hover:text-yellow-200 font-semibold text-lg transition">Recaps</a>
             <a href="#users" className="text-white/90 hover:text-yellow-200 font-semibold text-lg transition">Users</a>
             <a href="#analytics" className="text-white/90 hover:text-yellow-200 font-semibold text-lg transition">Analytics</a>
             <button
@@ -60,6 +62,10 @@ export default function AdminPage() {
           {/* Apartments Section */}
           <section id="apartments" className="mb-12">
             <ApartmentManagement />
+          </section>
+          {/* Recap Section */}
+          <section id="recaps" className="mb-12">
+            <RecapManagement />
           </section>
           {/* Users Section */}
           <section id="users" className="mb-12">
