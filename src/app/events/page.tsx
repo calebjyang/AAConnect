@@ -131,6 +131,7 @@ function EventDetailModal({ event, onClose }: { event: Event; onClose: () => voi
 
 function CalendarView({ events }: { events: Event[] }) {
   const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset to start of day for comparison
   const currentMonth = today.getMonth();
   const currentYear = today.getFullYear();
   
@@ -140,10 +141,18 @@ function CalendarView({ events }: { events: Event[] }) {
   const daysInMonth = lastDay.getDate();
   const startingDayOfWeek = firstDay.getDay();
 
-  // Group events by date
+  // Group events by date, filtering out past events
   const eventsByDate = events.reduce((acc, event) => {
-    const date = parseEventDate(event.date) ?? new Date(); // Use Date object directly
-    const dateKey = date.toDateString();
+    const eventDate = parseEventDate(event.date);
+    if (!eventDate) return acc;
+    
+    const eventDateOnly = new Date(eventDate);
+    eventDateOnly.setHours(0, 0, 0, 0);
+    
+    // Only include events from today onwards
+    if (eventDateOnly < today) return acc;
+    
+    const dateKey = eventDateOnly.toDateString();
     if (!acc[dateKey]) acc[dateKey] = [];
     acc[dateKey].push(event);
     return acc;
@@ -212,13 +221,21 @@ function CalendarView({ events }: { events: Event[] }) {
 }
 
 function ListView({ events, onEventClick }: { events: Event[]; onEventClick: (event: Event) => void }) {
-  const now = new Date();
-  const upcomingEvents = events.filter(e => (parseEventDate(e.date) ?? new Date()) >= now);
-  const pastEvents = events.filter(e => (parseEventDate(e.date) ?? new Date()) < now);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset to start of day for comparison
+  
+  // Filter out past events (events before today)
+  const upcomingEvents = events.filter(e => {
+    const eventDate = parseEventDate(e.date);
+    if (!eventDate) return false;
+    const eventDateOnly = new Date(eventDate);
+    eventDateOnly.setHours(0, 0, 0, 0);
+    return eventDateOnly >= today;
+  });
 
   return (
     <div className="space-y-6">
-      {upcomingEvents.length > 0 && (
+      {upcomingEvents.length > 0 ? (
         <div>
           <h3 className="text-xl font-semibold text-gray-800 mb-4">Upcoming Events</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -227,16 +244,15 @@ function ListView({ events, onEventClick }: { events: Event[]; onEventClick: (ev
             ))}
           </div>
         </div>
-      )}
-      
-      {pastEvents.length > 0 && (
-        <div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">Past Events</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {pastEvents.map(event => (
-              <EventCard key={event.id} event={event} onClick={() => onEventClick(event)} isPast />
-            ))}
+      ) : (
+        <div className="text-center py-12">
+          <div className="text-gray-400 mb-4">
+            <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
           </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No upcoming events</h3>
+          <p className="text-gray-500">Check back later for upcoming events!</p>
         </div>
       )}
     </div>
@@ -334,8 +350,21 @@ export default function EventsPage() {
         const orderByConstraint = await orderByQuery("date", "asc");
         const data = await getCollection("events", [orderByConstraint]) as Event[];
         console.log("Fetched events:", data);
-        // Parse event dates on load
-        setEvents(data.map(e => ({ ...e, date: parseEventDate(e.date) ?? new Date() })));
+        // Parse event dates on load and filter out past events
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const parsedEvents = data
+          .map(e => {
+            const parsedDate = parseEventDate(e.date);
+            return parsedDate ? { ...e, date: parsedDate } : null;
+          })
+          .filter((e): e is NonNullable<typeof e> => {
+            if (!e || !e.date) return false;
+            const eventDateOnly = new Date(e.date);
+            eventDateOnly.setHours(0, 0, 0, 0);
+            return eventDateOnly >= today;
+          });
+        setEvents(parsedEvents);
       } catch (error) {
         console.error("Error fetching events:", error instanceof Error ? error.message : error);
       } finally {
